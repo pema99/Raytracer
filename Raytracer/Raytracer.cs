@@ -19,6 +19,7 @@ namespace Raytracer
         public float InvHeight { get; set; }
         public float AspectRatio { get; set; }
         public float ViewAngle { get; set; }
+        public int MaxDepth = 10;
 
         System.Drawing.Bitmap Texture = new System.Drawing.Bitmap("Content/wood.jpg");
 
@@ -38,13 +39,13 @@ namespace Raytracer
             Lights = new List<Light>()
             {
                 new Light(new Vector3(-10, -10, 0), 200f, Color.White),
-                new Light(new Vector3(10, -10, 0), 200f, Color.White),
+                //new Light(new Vector3(10, -10, 0), 200f, Color.White),
                 //new Light(new Vector3(520, -150, 100)),
             };
             Shapes = new List<Shape>()
             {
-                new Sphere(new Material(128), new Vector3(-2, 5, 0), 1),
-                new Sphere(new Material(128), new Vector3(2, 5, 0), 1)
+                new Sphere(new Material(128, 0, 0), new Vector3(-2, 5, 0), 1),
+                new Sphere(new Material(128, 0, 0), new Vector3(2, 5, 0), 1)
             };
         }
 
@@ -88,42 +89,56 @@ namespace Raytracer
                     //Set backbuffer
                     SetPixel(x, y, Color.Black);
 
-                    foreach (Light Light in Lights)
-                    {
-                        //Raycast to nearest shape
-                        Vector3 RayDir = new Vector3((2f * ((x + 0.5f) * InvWidth) - 1) * ViewAngle * AspectRatio, 1, (1f - 2f * ((y + 0.5f) * InvHeight)) * ViewAngle);
-                        RayDir.Normalize();
-                        Shape FirstShape = null;
-                        Vector3 FirstShapeHit = Vector3.Zero;
-                        Vector3 FirstShapeNormal = Vector3.Zero;
-                        Raycast(new Ray(Vector3.Zero, RayDir), out FirstShape, out FirstShapeHit, out FirstShapeNormal);
+                    //Raycast to nearest shape
+                    Vector3 RayDir = new Vector3((2f * ((x + 0.5f) * InvWidth) - 1) * ViewAngle * AspectRatio, 1, (1f - 2f * ((y + 0.5f) * InvHeight)) * ViewAngle);
+                    RayDir.Normalize();
 
-                        if (FirstShape != null)
-                        {
-                            //Raycast from light to nearest shape, shadow check
-                            Vector3 ShadowRayDirection = FirstShapeHit - Light.Origin;
-                            ShadowRayDirection.Normalize();
-                            Ray ShadowRay = new Ray(Light.Origin, ShadowRayDirection);
-                            Shape FirstShadow;
-                            Vector3 FirstShadowHit;
-                            Vector3 FirstShadowNormal;
-                            Raycast(ShadowRay, out FirstShadow, out FirstShadowHit, out FirstShadowNormal);
-
-                            if (FirstShadow == null || FirstShadow == FirstShape)
-                            {
-                                //Do phong shading, additive
-                                AddPixel(x, y, Phong(FirstShape, FirstShapeHit, FirstShapeNormal, Light));
-                            }
-                        }
-                        /*else
-                        {
-                            SetPixel(x, y, Color.Black);
-                        }*/
-                    }
+                    SetPixel(x, y, new Color(Trace(new Ray(Vector3.Zero, RayDir), 0)));
                 }
             }
             Rendertarget.SetData<Color>(Framebuffer);
             spriteBatch.Draw(Rendertarget, new Rectangle(0, 0, Width, Height), Color.White);
+        }
+
+        public Vector3 Trace(Ray Ray, int Depth)
+        {
+            Vector3 Result = Vector3.Zero;
+
+            Shape FirstShape = null;
+            Vector3 FirstShapeHit = Vector3.Zero;
+            Vector3 FirstShapeNormal = Vector3.Zero;
+            Raycast(Ray, out FirstShape, out FirstShapeHit, out FirstShapeNormal);
+
+            if (FirstShape != null)
+            {
+                if (FirstShape.Material.Reflectivity > 0 && Depth < MaxDepth)
+                {
+                    //r=d−2(d⋅n)n
+                    Ray ReflectionRay = new Ray(FirstShapeHit, Ray.Direction - 2f * (Vector3.Dot(Ray.Direction, FirstShapeNormal)) * FirstShapeNormal);
+                    // recurse
+                    Vector3 ReflectionColor = Trace(ReflectionRay, Depth + 1);
+                }
+
+                foreach (Light Light in Lights)
+                {
+                    //Raycast from light to nearest shape, shadow check
+                    Vector3 ShadowRayDirection = FirstShapeHit - Light.Origin;
+                    ShadowRayDirection.Normalize();
+                    Ray ShadowRay = new Ray(Light.Origin, ShadowRayDirection);
+                    Shape FirstShadow;
+                    Vector3 FirstShadowHit;
+                    Vector3 FirstShadowNormal;
+                    Raycast(ShadowRay, out FirstShadow, out FirstShadowHit, out FirstShadowNormal);
+
+                    if (FirstShadow == null || FirstShadow == FirstShape)
+                    {
+                        //Do phong shading, additive
+                        Result += Phong(FirstShape, FirstShapeHit, FirstShapeNormal, Light);
+                    }
+                }
+            }
+
+            return Result;
         }
 
         public bool Raycast(Ray Ray, out Shape FirstShape, out Vector3 FirstShapeHit, out Vector3 FirstShapeNormal)
@@ -151,7 +166,7 @@ namespace Raytracer
             return FirstShape != null;
         }
 
-        public Color Phong(Shape Shape, Vector3 Hit, Vector3 Normal, Light Light)
+        public Vector3 Phong(Shape Shape, Vector3 Hit, Vector3 Normal, Light Light)
         {
             //TODO: No hardcoded texture
             //Texture mapping
@@ -188,7 +203,7 @@ namespace Raytracer
             //Gamma correction
             //Final = new Vector3((float)Math.Pow(Final.X, 1.0 / 2.2f), (float)Math.Pow(Final.Y, 1.0 / 2.2f), (float)Math.Pow(Final.Z, 1.0 / 2.2f));
 
-            return new Color(Final);
+            return Final;
         }
 
         public void AddPixel(int X, int Y, Color Color)
@@ -202,7 +217,7 @@ namespace Raytracer
             {
                 Framebuffer[X + Y * Width] = new Color(
                     (byte)MathHelper.Clamp(Pixel.R + Color.R, 0, 255),
-                    (byte)MathHelper.Clamp(Pixel.G + Color.G, 0, 255), 
+                    (byte)MathHelper.Clamp(Pixel.G + Color.G, 0, 255),
                     (byte)MathHelper.Clamp(Pixel.B + Color.B, 0, 255),
                     (byte)MathHelper.Clamp(Pixel.A + Color.A, 0, 255)
                 );

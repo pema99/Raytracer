@@ -475,13 +475,6 @@
             Describes a 32-bit packed color.
             </summary>
         </member>
-        <member name="M:Microsoft.Xna.Framework.Color.#ctor(System.UInt32)">
-            <summary>
-            Constructs an RGBA color from a packed value.
-            The value is a 32-bit unsigned integer, with R in the least significant octet.
-            </summary>
-            <param name="packedValue">The packed value.</param>
-        </member>
         <member name="M:Microsoft.Xna.Framework.Color.#ctor(Microsoft.Xna.Framework.Vector4)">
             <summary>
             Constructs an RGBA color from the XYZW unit length components of a vector.
@@ -510,24 +503,15 @@
         </member>
         <member name="M:Microsoft.Xna.Framework.Color.#ctor(System.Single,System.Single,System.Single)">
             <summary>
-            Constructs an RGBA color from scalars representing red, green and blue values. Alpha value will be opaque.
+            Constructs an RGBA color from scalars which representing red, green and blue values. Alpha value will be opaque.
             </summary>
             <param name="r">Red component value from 0.0f to 1.0f.</param>
             <param name="g">Green component value from 0.0f to 1.0f.</param>
             <param name="b">Blue component value from 0.0f to 1.0f.</param>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Color.#ctor(System.Single,System.Single,System.Single,System.Single)">
-            <summary>
-            Constructs an RGBA color from scalars representing red, green, blue and alpha values.
-            </summary>
-            <param name="r">Red component value from 0.0f to 1.0f.</param>
-            <param name="g">Green component value from 0.0f to 1.0f.</param>
-            <param name="b">Blue component value from 0.0f to 1.0f.</param>
-            <param name="alpha">Alpha component value from 0.0f to 1.0f.</param>
         </member>
         <member name="M:Microsoft.Xna.Framework.Color.#ctor(System.Int32,System.Int32,System.Int32)">
             <summary>
-            Constructs an RGBA color from scalars representing red, green and blue values. Alpha value will be opaque.
+            Constructs an RGBA color from scalars which representing red, green and blue values. Alpha value will be opaque.
             </summary>
             <param name="r">Red component value from 0 to 255.</param>
             <param name="g">Green component value from 0 to 255.</param>
@@ -535,24 +519,21 @@
         </member>
         <member name="M:Microsoft.Xna.Framework.Color.#ctor(System.Int32,System.Int32,System.Int32,System.Int32)">
             <summary>
-            Constructs an RGBA color from scalars representing red, green, blue and alpha values.
+            Constructs an RGBA color from scalars which representing red, green, blue and alpha values.
             </summary>
             <param name="r">Red component value from 0 to 255.</param>
             <param name="g">Green component value from 0 to 255.</param>
             <param name="b">Blue component value from 0 to 255.</param>
             <param name="alpha">Alpha component value from 0 to 255.</param>
         </member>
-        <member name="M:Microsoft.Xna.Framework.Color.#ctor(System.Byte,System.Byte,System.Byte,System.Byte)">
+        <member name="M:Microsoft.Xna.Framework.Color.#ctor(System.Single,System.Single,System.Single,System.Single)">
             <summary>
-            Constructs an RGBA color from scalars representing red, green, blue and alpha values.
+            Constructs an RGBA color from scalars which representing red, green, blue and alpha values.
             </summary>
-            <remarks>
-            This overload sets the values directly without clamping, and may therefore be faster than the other overloads.
-            </remarks>
-            <param name="r"></param>
-            <param name="g"></param>
-            <param name="b"></param>
-            <param name="alpha"></param>
+            <param name="r">Red component value from 0.0f to 1.0f.</param>
+            <param name="g">Green component value from 0.0f to 1.0f.</param>
+            <param name="b">Blue component value from 0.0f to 1.0f.</param>
+            <param name="alpha">Alpha component value from 0.0f to 1.0f.</param>
         </member>
         <member name="M:Microsoft.Xna.Framework.Color.op_Equality(Microsoft.Xna.Framework.Color,Microsoft.Xna.Framework.Color)">
             <summary>
@@ -594,8 +575,13 @@
         </member>
         <member name="M:Microsoft.Xna.Framework.Color.LerpPrecise(Microsoft.Xna.Framework.Color,Microsoft.Xna.Framework.Color,System.Single)">
             <summary>
-            <see cref="M:Microsoft.Xna.Framework.Color.Lerp(Microsoft.Xna.Framework.Color,Microsoft.Xna.Framework.Color,System.Single)"/> should be used instead of this function.
+            Performs linear interpolation of <see cref="T:Microsoft.Xna.Framework.Color"/> using <see cref="M:Microsoft.Xna.Framework.MathHelper.LerpPrecise(System.Single,System.Single,System.Single)"/> on MathHelper.
+            Less efficient but more precise compared to <see cref="M:Microsoft.Xna.Framework.Color.Lerp(Microsoft.Xna.Framework.Color,Microsoft.Xna.Framework.Color,System.Single)"/>.
+            See remarks section of <see cref="M:Microsoft.Xna.Framework.MathHelper.LerpPrecise(System.Single,System.Single,System.Single)"/> on MathHelper for more info.
             </summary>
+            <param name="value1">Source <see cref="T:Microsoft.Xna.Framework.Color"/>.</param>
+            <param name="value2">Destination <see cref="T:Microsoft.Xna.Framework.Color"/>.</param>
+            <param name="amount">Interpolation factor.</param>
             <returns>Interpolated <see cref="T:Microsoft.Xna.Framework.Color"/>.</returns>
         </member>
         <member name="M:Microsoft.Xna.Framework.Color.Multiply(Microsoft.Xna.Framework.Color,System.Single)">
@@ -1488,9 +1474,9 @@
             Returns <c>true</c> if this curve is constant (has zero or one points); <c>false</c> otherwise.
             </summary>
         </member>
-        <member name="P:Microsoft.Xna.Framework.Curve.PreLoop">
+        <member name="P:Microsoft.Xna.Framework.Curve.Keys">
             <summary>
-            Defines how to handle weighting values that are less than the first control point in the curve.
+            The collection of curve keys.
             </summary>
         </member>
         <member name="P:Microsoft.Xna.Framework.Curve.PostLoop">
@@ -1498,9 +1484,9 @@
             Defines how to handle weighting values that are greater than the last control point in the curve.
             </summary>
         </member>
-        <member name="P:Microsoft.Xna.Framework.Curve.Keys">
+        <member name="P:Microsoft.Xna.Framework.Curve.PreLoop">
             <summary>
-            The collection of curve keys.
+            Defines how to handle weighting values that are less than the first control point in the curve.
             </summary>
         </member>
         <member name="T:Microsoft.Xna.Framework.CurveKeyCollection">
@@ -1770,20 +1756,6 @@
             Shuts down the component.
             </summary>
         </member>
-        <member name="T:Microsoft.Xna.Framework.FrameworkDispatcher">
-            <summary>
-            Helper class for processing internal framework events.
-            </summary>
-            <remarks>
-            If you use <see cref="T:Microsoft.Xna.Framework.Game"/> class, <see cref="M:Microsoft.Xna.Framework.FrameworkDispatcher.Update"/> is called automatically.
-            Otherwise you must call it as part of your game loop.
-            </remarks>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.FrameworkDispatcher.Update">
-            <summary>
-            Processes framework events.
-            </summary>
-        </member>
         <member name="M:Microsoft.Xna.Framework.GameComponentCollection.ClearItems">
             <summary>
             Removes every <see cref="T:Microsoft.Xna.Framework.GameComponent"/> from this <see cref="T:Microsoft.Xna.Framework.GameComponentCollection"/>.
@@ -1928,12 +1900,6 @@
             rely on the Game class's functionality, this method and any overrides should be removed.
             </summary>
         </member>
-        <member name="M:Microsoft.Xna.Framework.GamePlatform.OnPresentationChanged">
-            <summary>
-            Used by the GraphicsDeviceManager to update the platform window
-            after the graphics device has changed the presentation.
-            </summary>
-        </member>
         <member name="M:Microsoft.Xna.Framework.GamePlatform.Dispose">
             <summary>
             Performs application-defined tasks associated with freeing,
@@ -2013,28 +1979,6 @@
             <remarks>
             This event is only supported on the Windows DirectX, Windows OpenGL and Linux platforms.
             </remarks>
-        </member>
-        <member name="T:Microsoft.Xna.Framework.IGraphicsDeviceManager">
-            <summary>
-            Used by the platform code to control the graphics device.
-            </summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.IGraphicsDeviceManager.BeginDraw">
-            <summary>
-            Called at the start of rendering a frame.
-            </summary>
-            <returns>Returns true if the frame should be rendered.</returns>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.IGraphicsDeviceManager.CreateDevice">
-            <summary>
-            Called to create the graphics device.
-            </summary>
-            <remarks>Does nothing if the graphics device is already created.</remarks>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.IGraphicsDeviceManager.EndDraw">
-            <summary>
-            Called after rendering to present the frame to the screen.
-            </summary>
         </member>
         <member name="T:Microsoft.Xna.Framework.MathHelper">
             <summary>
@@ -6200,10 +6144,171 @@
             <para>This value is only used to calculate Doppler values.</para>
             </remarks>
         </member>
-        <member name="T:Microsoft.Xna.Framework.Audio.DynamicSoundEffectInstance">
+        <member name="T:Microsoft.Xna.Framework.Audio.InstancePlayLimitException">
             <summary>
-            A <see cref="T:Microsoft.Xna.Framework.Audio.SoundEffectInstance"/> for which the audio buffer is provided by the game at run time.
+            The exception thrown when the system attempts to play more SoundEffectInstances than allotted.
             </summary>
+            <remarks>
+            Most platforms have a hard limit on how many sounds can be played simultaneously. This exception is thrown when that limit is exceeded.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.Xna.Framework.Audio.NoAudioHardwareException">
+            <summary>
+            The exception thrown when no audio hardware is present, or driver issues are detected.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.NoAudioHardwareException.#ctor(System.String)">
+            <param name="msg">A message describing the error.</param>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.NoAudioHardwareException.#ctor(System.String,System.Exception)">
+            <param name="msg">A message describing the error.</param>
+            <param name="innerException">The exception that is the underlying cause of the current exception. If not null, the current exception is raised in a try/catch block that handled the innerException.</param>
+        </member>
+        <member name="T:Microsoft.Xna.Framework.Audio.SoundEffect">
+            <summary>Represents a loaded sound resource.</summary>
+            <remarks>
+            <para>A SoundEffect represents the buffer used to hold audio data and metadata. SoundEffectInstances are used to play from SoundEffects. Multiple SoundEffectinstance objects can be created and played from the same SoundEffect object.</para>
+            <para>The only limit on the number of loaded SoundEffects is restricted by available memory. When a SoundEffect is disposed, all SoundEffectInstances created from it will become invalid.</para>
+            <para>SoundEffect.Play() can be used for 'fire and forget' sounds. If advanced playback controls like volume or pitch is required, use SoundEffect.CreateInstance().</para>
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.#ctor(System.Byte[],System.Int32,Microsoft.Xna.Framework.Audio.AudioChannels)">
+            <param name="buffer">Buffer containing PCM wave data.</param>
+            <param name="sampleRate">Sample rate, in Hertz (Hz)</param>
+            <param name="channels">Number of channels (mono or stereo).</param>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.#ctor(System.Byte[],System.Int32,System.Int32,System.Int32,Microsoft.Xna.Framework.Audio.AudioChannels,System.Int32,System.Int32)">
+            <param name="buffer">Buffer containing PCM wave data.</param>
+            <param name="offset">Offset, in bytes, to the starting position of the audio data.</param>
+            <param name="count">Amount, in bytes, of audio data.</param>
+            <param name="sampleRate">Sample rate, in Hertz (Hz)</param>
+            <param name="channels">Number of channels (mono or stereo).</param>
+            <param name="loopStart">The position, in samples, where the audio should begin looping.</param>
+            <param name="loopLength">The duration, in samples, that audio should loop over.</param>
+            <remarks>Use SoundEffect.GetSampleDuration() to convert time to samples.</remarks>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.Finalize">
+            <summary>
+            Releases unmanaged resources and performs other cleanup operations before the
+            <see cref="T:Microsoft.Xna.Framework.Audio.SoundEffect"/> is reclaimed by garbage collection.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.CreateInstance">
+            <summary>
+            Creates a new SoundEffectInstance for this SoundEffect.
+            </summary>
+            <returns>A new SoundEffectInstance for this SoundEffect.</returns>
+            <remarks>Creating a SoundEffectInstance before calling SoundEffectInstance.Play() allows you to access advanced playback features, such as volume, pitch, and 3D positioning.</remarks>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.FromStream(System.IO.Stream)">
+            <summary>
+            Creates a SoundEffect object based on the specified data stream.
+            </summary>
+            <param name="s">Stream object containing PCM wave data.</param>
+            <returns>A new SoundEffect object.</returns>
+            <remarks>The Stream object must point to the head of a valid PCM wave file. Also, this wave file must be in the RIFF bitstream format.</remarks>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.GetSampleDuration(System.Int32,System.Int32,Microsoft.Xna.Framework.Audio.AudioChannels)">
+            <summary>
+            Gets the TimeSpan representation of a single sample.
+            </summary>
+            <param name="sizeInBytes">Size, in bytes, of audio data.</param>
+            <param name="sampleRate">Sample rate, in Hertz (Hz). Must be between 8000 Hz and 48000 Hz</param>
+            <param name="channels">Number of channels in the audio data.</param>
+            <returns>TimeSpan object that represents the calculated sample duration.</returns>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.GetSampleSizeInBytes(System.TimeSpan,System.Int32,Microsoft.Xna.Framework.Audio.AudioChannels)">
+            <summary>
+            Gets the size of a sample from a TimeSpan.
+            </summary>
+            <param name="duration">TimeSpan object that contains the sample duration.</param>
+            <param name="sampleRate">Sample rate, in Hertz (Hz), of audio data. Must be between 8,000 and 48,000 Hz.</param>
+            <param name="channels">Number of channels in the audio data.</param>
+            <returns>Size of a single sample of audio data.</returns>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.Play">
+            <summary>Gets an internal SoundEffectInstance and plays it.</summary>
+            <returns>True if a SoundEffectInstance was successfully played, false if not.</returns>
+            <remarks>
+            <para>Play returns false if more SoundEffectInstances are currently playing then the platform allows.</para>
+            <para>To loop a sound or apply 3D effects, call SoundEffect.CreateInstance() and SoundEffectInstance.Play() instead.</para>
+            <para>SoundEffectInstances used by SoundEffect.Play() are pooled internally.</para>
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.Play(System.Single,System.Single,System.Single)">
+            <summary>Gets an internal SoundEffectInstance and plays it with the specified volume, pitch, and panning.</summary>
+            <returns>True if a SoundEffectInstance was successfully created and played, false if not.</returns>
+            <param name="volume">Volume, ranging from 0.0 (silence) to 1.0 (full volume). Volume during playback is scaled by SoundEffect.MasterVolume.</param>
+            <param name="pitch">Pitch adjustment, ranging from -1.0 (down an octave) to 0.0 (no change) to 1.0 (up an octave).</param>
+            <param name="pan">Panning, ranging from -1.0 (left speaker) to 0.0 (centered), 1.0 (right speaker).</param>
+            <remarks>
+            <para>Play returns false if more SoundEffectInstances are currently playing then the platform allows.</para>
+            <para>To apply looping or simulate 3D audio, call SoundEffect.CreateInstance() and SoundEffectInstance.Play() instead.</para>
+            <para>SoundEffectInstances used by SoundEffect.Play() are pooled internally.</para>
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.GetPooledInstance(System.Boolean)">
+            <summary>
+            Returns a sound effect instance from the pool or null if none are available.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.Dispose">
+            <summary>Releases the resources held by this <see cref="T:Microsoft.Xna.Framework.Audio.SoundEffect"/>.</summary>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.Dispose(System.Boolean)">
+            <summary>
+            Releases the resources held by this <see cref="T:Microsoft.Xna.Framework.Audio.SoundEffect"/>.
+            </summary>
+            <param name="disposing">If set to <c>true</c>, Dispose was called explicitly.</param>
+            <remarks>If the disposing parameter is true, the Dispose method was called explicitly. This
+            means that managed objects referenced by this instance should be disposed or released as
+            required.  If the disposing parameter is false, Dispose was called by the finalizer and
+            no managed objects should be touched because we do not know if they are still valid or
+            not at that time.  Unmanaged resources should always be released.</remarks>
+        </member>
+        <member name="P:Microsoft.Xna.Framework.Audio.SoundEffect.Duration">
+            <summary>Gets the duration of the SoundEffect.</summary>
+        </member>
+        <member name="P:Microsoft.Xna.Framework.Audio.SoundEffect.Name">
+            <summary>Gets or sets the asset name of the SoundEffect.</summary>
+        </member>
+        <member name="P:Microsoft.Xna.Framework.Audio.SoundEffect.MasterVolume">
+            <summary>
+            Gets or sets the master volume scale applied to all SoundEffectInstances.
+            </summary>
+            <remarks>
+            <para>Each SoundEffectInstance has its own Volume property that is independent to SoundEffect.MasterVolume. During playback SoundEffectInstance.Volume is multiplied by SoundEffect.MasterVolume.</para>
+            <para>This property is used to adjust the volume on all current and newly created SoundEffectInstances. The volume of an individual SoundEffectInstance can be adjusted on its own.</para>
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Xna.Framework.Audio.SoundEffect.DistanceScale">
+            <summary>
+            Gets or sets the scale of distance calculations.
+            </summary>
+            <remarks> 
+            <para>DistanceScale defaults to 1.0 and must be greater than 0.0.</para>
+            <para>Higher values reduce the rate of falloff between the sound and listener.</para>
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Xna.Framework.Audio.SoundEffect.DopplerScale">
+            <summary>
+            Gets or sets the scale of Doppler calculations applied to sounds.
+            </summary>
+            <remarks>
+            <para>DopplerScale defaults to 1.0 and must be greater or equal to 0.0</para>
+            <para>Affects the relative velocity of emitters and listeners.</para>
+            <para>Higher values more dramatically shift the pitch for the given relative velocity of the emitter and listener.</para>
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Xna.Framework.Audio.SoundEffect.SpeedOfSound">
+            <summary>Returns the speed of sound used when calculating the Doppler effect..</summary>
+            <remarks>
+            <para>Defaults to 343.5. Value is measured in meters per second.</para>
+            <para>Has no effect on distance attenuation.</para>
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Xna.Framework.Audio.SoundEffect.IsDisposed">
+            <summary>Indicates whether the object is disposed.</summary>
         </member>
         <member name="T:Microsoft.Xna.Framework.Audio.SoundEffectInstance">
             <summary>Represents a single instance of a playing, paused, or stopped sound.</summary>
@@ -6284,287 +6389,6 @@
             <summary>Gets the SoundEffectInstance's current playback state.</summary>
         </member>
         <member name="P:Microsoft.Xna.Framework.Audio.SoundEffectInstance.IsDisposed">
-            <summary>Indicates whether the object is disposed.</summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.DynamicSoundEffectInstance.#ctor(System.Int32,Microsoft.Xna.Framework.Audio.AudioChannels)">
-            <param name="sampleRate">Sample rate, in Hertz (Hz).</param>
-            <param name="channels">Number of channels (mono or stereo).</param>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.DynamicSoundEffectInstance.GetSampleDuration(System.Int32)">
-            <summary>
-            Returns the duration of an audio buffer of the specified size, based on the settings of this instance.
-            </summary>
-            <param name="sizeInBytes">Size of the buffer, in bytes.</param>
-            <returns>The playback length of the buffer.</returns>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.DynamicSoundEffectInstance.GetSampleSizeInBytes(System.TimeSpan)">
-            <summary>
-            Returns the size, in bytes, of a buffer of the specified duration, based on the settings of this instance.
-            </summary>
-            <param name="duration">The playback length of the buffer.</param>
-            <returns>The data size of the buffer, in bytes.</returns>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.DynamicSoundEffectInstance.Play">
-            <summary>
-            Plays or resumes the DynamicSoundEffectInstance.
-            </summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.DynamicSoundEffectInstance.Pause">
-            <summary>
-            Pauses playback of the DynamicSoundEffectInstance.
-            </summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.DynamicSoundEffectInstance.Resume">
-            <summary>
-            Resumes playback of the DynamicSoundEffectInstance.
-            </summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.DynamicSoundEffectInstance.Stop">
-            <summary>
-            Immediately stops playing the DynamicSoundEffectInstance.
-            </summary>
-            <remarks>
-            Calling this also releases all queued buffers.
-            </remarks>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.DynamicSoundEffectInstance.Stop(System.Boolean)">
-            <summary>
-            Stops playing the DynamicSoundEffectInstance.
-            If the <paramref name="immediate"/> parameter is false, this call has no effect.
-            </summary>
-            <remarks>
-            Calling this also releases all queued buffers.
-            </remarks>
-            <param name="immediate">When set to false, this call has no effect.</param>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.DynamicSoundEffectInstance.SubmitBuffer(System.Byte[])">
-            <summary>
-            Queues an audio buffer for playback.
-            </summary>
-            <remarks>
-            The buffer length must conform to alignment requirements for the audio format.
-            </remarks>
-            <param name="buffer">The buffer containing PCM audio data.</param>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.DynamicSoundEffectInstance.SubmitBuffer(System.Byte[],System.Int32,System.Int32)">
-            <summary>
-            Queues an audio buffer for playback.
-            </summary>
-            <remarks>
-            The buffer length must conform to alignment requirements for the audio format.
-            </remarks>
-            <param name="buffer">The buffer containing PCM audio data.</param>
-            <param name="offset">The starting position of audio data.</param>
-            <param name="count">The amount of bytes to use.</param>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Audio.DynamicSoundEffectInstance.IsLooped">
-            <summary>
-            This value has no effect on DynamicSoundEffectInstance.
-            It may not be set.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Audio.DynamicSoundEffectInstance.PendingBufferCount">
-            <summary>
-            Returns the number of audio buffers queued for playback.
-            </summary>
-        </member>
-        <member name="E:Microsoft.Xna.Framework.Audio.DynamicSoundEffectInstance.BufferNeeded">
-            <summary>
-            The event that occurs when the number of queued audio buffers is less than or equal to 2.
-            </summary>
-            <remarks>
-            This event may occur when <see cref="M:Microsoft.Xna.Framework.Audio.DynamicSoundEffectInstance.Play"/> is called or during playback when a buffer is completed.
-            </remarks>
-        </member>
-        <member name="T:Microsoft.Xna.Framework.Audio.DynamicSoundEffectInstanceManager">
-            <summary>
-            Handles the buffer events of all DynamicSoundEffectInstance instances.
-            </summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.DynamicSoundEffectInstanceManager.UpdatePlayingInstances">
-            <summary>
-            Updates buffer queues of the currently playing instances.
-            </summary>
-            <remarks>
-            XNA posts <see cref="E:Microsoft.Xna.Framework.Audio.DynamicSoundEffectInstance.BufferNeeded"/> events always on the main thread.
-            </remarks>
-        </member>
-        <member name="T:Microsoft.Xna.Framework.Audio.InstancePlayLimitException">
-            <summary>
-            The exception thrown when the system attempts to play more SoundEffectInstances than allotted.
-            </summary>
-            <remarks>
-            Most platforms have a hard limit on how many sounds can be played simultaneously. This exception is thrown when that limit is exceeded.
-            </remarks>
-        </member>
-        <member name="T:Microsoft.Xna.Framework.Audio.NoAudioHardwareException">
-            <summary>
-            The exception thrown when no audio hardware is present, or driver issues are detected.
-            </summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.NoAudioHardwareException.#ctor(System.String)">
-            <param name="msg">A message describing the error.</param>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.NoAudioHardwareException.#ctor(System.String,System.Exception)">
-            <param name="msg">A message describing the error.</param>
-            <param name="innerException">The exception that is the underlying cause of the current exception. If not null, the current exception is raised in a try/catch block that handled the innerException.</param>
-        </member>
-        <member name="T:Microsoft.Xna.Framework.Audio.SoundEffect">
-            <summary>Represents a loaded sound resource.</summary>
-            <remarks>
-            <para>A SoundEffect represents the buffer used to hold audio data and metadata. SoundEffectInstances are used to play from SoundEffects. Multiple SoundEffectInstance objects can be created and played from the same SoundEffect object.</para>
-            <para>The only limit on the number of loaded SoundEffects is restricted by available memory. When a SoundEffect is disposed, all SoundEffectInstances created from it will become invalid.</para>
-            <para>SoundEffect.Play() can be used for 'fire and forget' sounds. If advanced playback controls like volume or pitch is required, use SoundEffect.CreateInstance().</para>
-            </remarks>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.#ctor(System.Byte[],System.Int32,Microsoft.Xna.Framework.Audio.AudioChannels)">
-            <summary>
-            Create a sound effect.
-            </summary>
-            <param name="buffer">The buffer with the sound data.</param>
-            <param name="sampleRate">The sound data sample rate in hertz.</param>
-            <param name="channels">The number of channels in the sound data.</param>
-            <remarks>This only supports uncompressed 16bit PCM wav data.</remarks>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.#ctor(System.Byte[],System.Int32,System.Int32,System.Int32,Microsoft.Xna.Framework.Audio.AudioChannels,System.Int32,System.Int32)">
-            <summary>
-            Create a sound effect.
-            </summary>
-            <param name="buffer">The buffer with the sound data.</param>
-            <param name="offset">The offset to the start of the sound data in bytes.</param>
-            <param name="count">The length of the sound data in bytes.</param>
-            <param name="sampleRate">The sound data sample rate in hertz.</param>
-            <param name="channels">The number of channels in the sound data.</param>
-            <param name="loopStart">The position where the sound should begin looping in samples.</param>
-            <param name="loopLength">The duration of the sound data loop in samples.</param>
-            <remarks>This only supports uncompressed 16bit PCM wav data.</remarks>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.Finalize">
-            <summary>
-            Releases unmanaged resources and performs other cleanup operations before the
-            <see cref="T:Microsoft.Xna.Framework.Audio.SoundEffect"/> is reclaimed by garbage collection.
-            </summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.CreateInstance">
-            <summary>
-            Creates a new SoundEffectInstance for this SoundEffect.
-            </summary>
-            <returns>A new SoundEffectInstance for this SoundEffect.</returns>
-            <remarks>Creating a SoundEffectInstance before calling SoundEffectInstance.Play() allows you to access advanced playback features, such as volume, pitch, and 3D positioning.</remarks>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.FromStream(System.IO.Stream)">
-            <summary>
-            Creates a new SoundEffect object based on the specified data stream.
-            </summary>
-            <param name="stream">A stream containing the PCM wave data.</param>
-            <returns>A new SoundEffect object.</returns>
-            <remarks>The stream must point to the head of a valid PCM wave file in the RIFF bitstream format.</remarks>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.GetSampleDuration(System.Int32,System.Int32,Microsoft.Xna.Framework.Audio.AudioChannels)">
-            <summary>
-            Returns the duration for 16bit PCM audio.
-            </summary>
-            <param name="sizeInBytes">The length of the audio data in bytes.</param>
-            <param name="sampleRate">Sample rate, in Hertz (Hz). Must be between 8000 Hz and 48000 Hz</param>
-            <param name="channels">Number of channels in the audio data.</param>
-            <returns>The duration of the audio data.</returns>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.GetSampleSizeInBytes(System.TimeSpan,System.Int32,Microsoft.Xna.Framework.Audio.AudioChannels)">
-            <summary>
-            Returns the data size in bytes for 16bit PCM audio.
-            </summary>
-            <param name="duration">The total duration of the audio data.</param>
-            <param name="sampleRate">Sample rate, in Hertz (Hz), of audio data. Must be between 8,000 and 48,000 Hz.</param>
-            <param name="channels">Number of channels in the audio data.</param>
-            <returns>The size in bytes of a single sample of audio data.</returns>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.Play">
-            <summary>Gets an internal SoundEffectInstance and plays it.</summary>
-            <returns>True if a SoundEffectInstance was successfully played, false if not.</returns>
-            <remarks>
-            <para>Play returns false if more SoundEffectInstances are currently playing then the platform allows.</para>
-            <para>To loop a sound or apply 3D effects, call SoundEffect.CreateInstance() and SoundEffectInstance.Play() instead.</para>
-            <para>SoundEffectInstances used by SoundEffect.Play() are pooled internally.</para>
-            </remarks>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.Play(System.Single,System.Single,System.Single)">
-            <summary>Gets an internal SoundEffectInstance and plays it with the specified volume, pitch, and panning.</summary>
-            <returns>True if a SoundEffectInstance was successfully created and played, false if not.</returns>
-            <param name="volume">Volume, ranging from 0.0 (silence) to 1.0 (full volume). Volume during playback is scaled by SoundEffect.MasterVolume.</param>
-            <param name="pitch">Pitch adjustment, ranging from -1.0 (down an octave) to 0.0 (no change) to 1.0 (up an octave).</param>
-            <param name="pan">Panning, ranging from -1.0 (left speaker) to 0.0 (centered), 1.0 (right speaker).</param>
-            <remarks>
-            <para>Play returns false if more SoundEffectInstances are currently playing then the platform allows.</para>
-            <para>To apply looping or simulate 3D audio, call SoundEffect.CreateInstance() and SoundEffectInstance.Play() instead.</para>
-            <para>SoundEffectInstances used by SoundEffect.Play() are pooled internally.</para>
-            </remarks>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.GetPooledInstance(System.Boolean)">
-            <summary>
-            Returns a sound effect instance from the pool or null if none are available.
-            </summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.Dispose">
-            <summary>Releases the resources held by this <see cref="T:Microsoft.Xna.Framework.Audio.SoundEffect"/>.</summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.Dispose(System.Boolean)">
-            <summary>
-            Releases the resources held by this <see cref="T:Microsoft.Xna.Framework.Audio.SoundEffect"/>.
-            </summary>
-            <param name="disposing">If set to <c>true</c>, Dispose was called explicitly.</param>
-            <remarks>If the disposing parameter is true, the Dispose method was called explicitly. This
-            means that managed objects referenced by this instance should be disposed or released as
-            required.  If the disposing parameter is false, Dispose was called by the finalizer and
-            no managed objects should be touched because we do not know if they are still valid or
-            not at that time.  Unmanaged resources should always be released.</remarks>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffect.InitializeSoundEffect">
-            <summary>
-            Initializes XAudio.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Audio.SoundEffect.Duration">
-            <summary>Gets the duration of the SoundEffect.</summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Audio.SoundEffect.Name">
-            <summary>Gets or sets the asset name of the SoundEffect.</summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Audio.SoundEffect.MasterVolume">
-            <summary>
-            Gets or sets the master volume scale applied to all SoundEffectInstances.
-            </summary>
-            <remarks>
-            <para>Each SoundEffectInstance has its own Volume property that is independent to SoundEffect.MasterVolume. During playback SoundEffectInstance.Volume is multiplied by SoundEffect.MasterVolume.</para>
-            <para>This property is used to adjust the volume on all current and newly created SoundEffectInstances. The volume of an individual SoundEffectInstance can be adjusted on its own.</para>
-            </remarks>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Audio.SoundEffect.DistanceScale">
-            <summary>
-            Gets or sets the scale of distance calculations.
-            </summary>
-            <remarks> 
-            <para>DistanceScale defaults to 1.0 and must be greater than 0.0.</para>
-            <para>Higher values reduce the rate of falloff between the sound and listener.</para>
-            </remarks>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Audio.SoundEffect.DopplerScale">
-            <summary>
-            Gets or sets the scale of Doppler calculations applied to sounds.
-            </summary>
-            <remarks>
-            <para>DopplerScale defaults to 1.0 and must be greater or equal to 0.0</para>
-            <para>Affects the relative velocity of emitters and listeners.</para>
-            <para>Higher values more dramatically shift the pitch for the given relative velocity of the emitter and listener.</para>
-            </remarks>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Audio.SoundEffect.SpeedOfSound">
-            <summary>Returns the speed of sound used when calculating the Doppler effect..</summary>
-            <remarks>
-            <para>Defaults to 343.5. Value is measured in meters per second.</para>
-            <para>Has no effect on distance attenuation.</para>
-            </remarks>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Audio.SoundEffect.IsDisposed">
             <summary>Indicates whether the object is disposed.</summary>
         </member>
         <member name="M:Microsoft.Xna.Framework.Audio.SoundEffectInstancePool.Add(Microsoft.Xna.Framework.Audio.SoundEffectInstance)">
@@ -6691,7 +6515,7 @@
         </member>
         <member name="F:Microsoft.Xna.Framework.Audio.AudioEngine.ContentVersion">
             <summary>
-            The current content version.
+            Specifies the current content version.
             </summary>
         </member>
         <member name="M:Microsoft.Xna.Framework.Audio.AudioEngine.#ctor(System.String)">
@@ -6704,9 +6528,7 @@
             <remarks>For the best results, use a lookAheadTime of 250 milliseconds or greater.</remarks>
         </member>
         <member name="M:Microsoft.Xna.Framework.Audio.AudioEngine.Update">
-            <summary>
-            Performs periodic work required by the audio engine.
-            </summary>
+            <summary>Performs periodic work required by the audio engine.</summary>
             <remarks>Must be called at least once per frame.</remarks>
         </member>
         <member name="M:Microsoft.Xna.Framework.Audio.AudioEngine.GetCategory(System.String)">
@@ -6724,21 +6546,6 @@
             <summary>Sets the value of a global variable.</summary>
             <param name="name">Friendly name of the variable.</param>
             <param name="value">Value of the global variable.</param>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.AudioEngine.Dispose">
-            <summary>
-            Disposes the AudioEngine.
-            </summary>
-        </member>
-        <member name="E:Microsoft.Xna.Framework.Audio.AudioEngine.Disposing">
-            <summary>
-            This event is triggered when the AudioEngine is disposed.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Audio.AudioEngine.IsDisposed">
-            <summary>
-            Is true if the AudioEngine has been disposed.
-            </summary>
         </member>
         <member name="T:Microsoft.Xna.Framework.Audio.AudioStopOptions">
             <summary>Controls how Cue objects should cease playback when told to stop.</summary>
@@ -6798,9 +6605,7 @@
             </remarks>
         </member>
         <member name="M:Microsoft.Xna.Framework.Audio.Cue.Dispose">
-            <summary>
-            Disposes the Cue.
-            </summary>
+            <summary>Immediately releases any unmanaged resources used by this object.</summary>
         </member>
         <member name="P:Microsoft.Xna.Framework.Audio.Cue.IsPaused">
             <summary>Indicates whether or not the cue is currently paused.</summary>
@@ -6817,15 +6622,8 @@
             <summary>Gets the friendly name of the cue.</summary>
             <remarks>The friendly name is a value set from the designer.</remarks>
         </member>
-        <member name="E:Microsoft.Xna.Framework.Audio.Cue.Disposing">
-            <summary>
-            This event is triggered when the Cue is disposed.
-            </summary>
-        </member>
         <member name="P:Microsoft.Xna.Framework.Audio.Cue.IsDisposed">
-            <summary>
-            Is true if the Cue has been disposed.
-            </summary>
+            <summary>Indicateds whether or not the object has been disposed.</summary>
         </member>
         <member name="T:Microsoft.Xna.Framework.Audio.SoundBank">
             <summary>Represents a collection of Cues.</summary>
@@ -6863,22 +6661,7 @@
         </member>
         <member name="M:Microsoft.Xna.Framework.Audio.SoundBank.Dispose">
             <summary>
-            Disposes the SoundBank.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Audio.SoundBank.IsInUse">
-            <summary>
-            Is true if the SoundBank has any live Cues in use.
-            </summary>
-        </member>
-        <member name="E:Microsoft.Xna.Framework.Audio.SoundBank.Disposing">
-            <summary>
-            This event is triggered when the SoundBank is disposed.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Audio.SoundBank.IsDisposed">
-            <summary>
-            Is true if the SoundBank has been disposed.
+            Immediately releases any unmanaged resources used by this object.
             </summary>
         </member>
         <member name="T:Microsoft.Xna.Framework.Audio.WaveBank">
@@ -6899,29 +6682,6 @@
             <para>Note that packetsize is in sectors, which is 2048 bytes.</para>
             <para>AudioEngine.Update() must be called at least once before using data from a streaming wave bank.</para>
             </remarks>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Audio.WaveBank.Dispose">
-            <summary>
-            Disposes the WaveBank.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Audio.WaveBank.IsInUse">
-            <summary>
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Audio.WaveBank.IsPrepared">
-            <summary>
-            </summary>
-        </member>
-        <member name="E:Microsoft.Xna.Framework.Audio.WaveBank.Disposing">
-            <summary>
-            This event is triggered when the WaveBank is disposed.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Audio.WaveBank.IsDisposed">
-            <summary>
-            Is true if the WaveBank has been disposed.
-            </summary>
         </member>
         <member name="M:Microsoft.Xna.Framework.Audio.XactClip.SetVolumeScale(System.Single)">
             <summary>
@@ -7035,7 +6795,7 @@
         </member>
         <member name="T:Microsoft.Xna.Framework.Graphics.ClearOptions">
             <summary>
-            Defines the buffers for clearing when calling <see cref="M:Microsoft.Xna.Framework.Graphics.GraphicsDevice.Clear(Microsoft.Xna.Framework.Graphics.ClearOptions,Microsoft.Xna.Framework.Color,System.Single,System.Int32)"/> operation.
+            Defines the buffers for clearing when calling <see cref="M:Microsoft.Xna.Framework.Graphics.GraphicsDevice.Clear(Microsoft.Xna.Framework.Color)"/> operation.
             </summary>
         </member>
         <member name="F:Microsoft.Xna.Framework.Graphics.ClearOptions.Target">
@@ -7148,139 +6908,27 @@
             The settings that define how graphics will be presented to the display.
             </summary>
         </member>
-        <member name="T:Microsoft.Xna.Framework.GraphicsDeviceManager">
-            <summary>
-            Used to initialize and control the presentation of the graphics device.
-            </summary>
-        </member>
-        <member name="F:Microsoft.Xna.Framework.GraphicsDeviceManager.DefaultBackBufferWidth">
-            <summary>
-            The default back buffer width.
-            </summary>
-        </member>
-        <member name="F:Microsoft.Xna.Framework.GraphicsDeviceManager.DefaultBackBufferHeight">
-            <summary>
-            The default back buffer height.
-            </summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.GraphicsDeviceManager.#ctor(Microsoft.Xna.Framework.Game)">
-            <summary>
-            Associates this graphics device manager to a game instances.
-            </summary>
-            <param name="game">The game instance to attach.</param>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.GraphicsDeviceManager.DoPreparingDeviceSettings">
-            <summary>
-            This populates a GraphicsDeviceInformation instance and invokes PreparingDeviceSettings to
-            allow users to change the settings. Then returns that GraphicsDeviceInformation.
-            Throws NullReferenceException if users set GraphicsDeviceInformation.PresentationParameters to null.
-            </summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.GraphicsDeviceManager.ApplyChanges">
-            <summary>
-            Applies any pending property changes to the graphics device.
-            </summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.GraphicsDeviceManager.ToggleFullScreen">
-            <summary>
-            Toggles between windowed and fullscreen modes.
-            </summary>
-            <remarks>
-            Note that on platforms that do not support windowed modes this has no affect.
-            </remarks>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.GraphicsDeviceManager.GraphicsProfile">
-            <summary>
-            The profile which determines the graphics feature level.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.GraphicsDeviceManager.GraphicsDevice">
-            <summary>
-            Returns the graphics device for this manager.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.GraphicsDeviceManager.IsFullScreen">
-            <summary>
-            Indicates the desire to switch into fullscreen mode.
-            </summary>
-            <remarks>
-            When called at startup this will automatically set fullscreen mode during initialization.  If
-            set after startup you must call ApplyChanges() for the fullscreen mode to be changed.
-            Note that for some platforms that do not support windowed modes this property has no affect.
-            </remarks>
+        <member name="M:Microsoft.Xna.Framework.GraphicsDeviceManager.ResetClientBounds">
+             <summary>
+             This method is used by MonoGame Android to adjust the game's drawn to area to fill
+             as much of the screen as possible whilst retaining the aspect ratio inferred from
+             aspectRatio = (PreferredBackBufferWidth / PreferredBackBufferHeight)
+            
+             NOTE: this is a hack that should be removed if proper back buffer to screen scaling
+             is implemented. To disable it's effect, in the game's constructor use:
+            
+                 graphics.IsFullScreen = true;
+                 graphics.PreferredBackBufferHeight = Window.ClientBounds.Height;
+                 graphics.PreferredBackBufferWidth = Window.ClientBounds.Width;
+            
+             </summary>
         </member>
         <member name="P:Microsoft.Xna.Framework.GraphicsDeviceManager.HardwareModeSwitch">
             <summary>
             Gets or sets the boolean which defines how window switches from windowed to fullscreen state.
             "Hard" mode(true) is slow to switch, but more effecient for performance, while "soft" mode(false) is vice versa.
-            The default value is <c>true</c>.
+            The default value is <c>true</c>. Can only be changed before graphics device is created (in game's constructor).
             </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.GraphicsDeviceManager.PreferMultiSampling">
-            <summary>
-            Indicates the desire for a multisampled back buffer.
-            </summary>
-            <remarks>
-            When called at startup this will automatically set the MSAA mode during initialization.  If
-            set after startup you must call ApplyChanges() for the MSAA mode to be changed.
-            </remarks>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.GraphicsDeviceManager.PreferredBackBufferFormat">
-            <summary>
-            Indicates the desired back buffer color format.
-            </summary>
-            <remarks>
-            When called at startup this will automatically set the format during initialization.  If
-            set after startup you must call ApplyChanges() for the format to be changed.
-            </remarks>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.GraphicsDeviceManager.PreferredBackBufferHeight">
-            <summary>
-            Indicates the desired back buffer height in pixels.
-            </summary>
-            <remarks>
-            When called at startup this will automatically set the height during initialization.  If
-            set after startup you must call ApplyChanges() for the height to be changed.
-            </remarks>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.GraphicsDeviceManager.PreferredBackBufferWidth">
-            <summary>
-            Indicates the desired back buffer width in pixels.
-            </summary>
-            <remarks>
-            When called at startup this will automatically set the width during initialization.  If
-            set after startup you must call ApplyChanges() for the width to be changed.
-            </remarks>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.GraphicsDeviceManager.PreferredDepthStencilFormat">
-            <summary>
-            Indicates the desired depth-stencil buffer format.
-            </summary>
-            <remarks>
-            The depth-stencil buffer format defines the scene depth precision and stencil bits available for effects during rendering.
-            When called at startup this will automatically set the format during initialization.  If
-            set after startup you must call ApplyChanges() for the format to be changed.
-            </remarks>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.GraphicsDeviceManager.SynchronizeWithVerticalRetrace">
-            <summary>
-            Indicates the desire for vsync when presenting the back buffer.
-            </summary>
-            <remarks>
-            Vsync limits the frame rate of the game to the monitor referesh rate to prevent screen tearing.
-            When called at startup this will automatically set the vsync mode during initialization.  If
-            set after startup you must call ApplyChanges() for the vsync mode to be changed.
-            </remarks>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.GraphicsDeviceManager.SupportedOrientations">
-            <summary>
-            Indicates the desired allowable display orientations when the device is rotated.
-            </summary>
-            <remarks>
-            This property only applies to mobile platforms with automatic display rotation.
-            When called at startup this will automatically apply the supported orientations during initialization.  If
-            set after startup you must call ApplyChanges() for the supported orientations to be changed.
-            </remarks>
         </member>
         <member name="T:Microsoft.Xna.Framework.Graphics.GraphicsMetrics">
             <summary>
@@ -8259,11 +7907,11 @@
         </member>
         <member name="P:Microsoft.Xna.Framework.Graphics.GraphicsAdapter.IsWideScreen">
             <summary>
-            Returns true if the <see cref="P:Microsoft.Xna.Framework.Graphics.GraphicsAdapter.CurrentDisplayMode"/> is widescreen.
-            </summary>
-            <remarks>
+            Gets a <see cref="T:System.Boolean"/> indicating whether
+            <see cref="P:Microsoft.Xna.Framework.Graphics.GraphicsAdapter.CurrentDisplayMode"/> has a
+            Width:Height ratio corresponding to a widescreen <see cref="T:Microsoft.Xna.Framework.Graphics.DisplayMode"/>.
             Common widescreen modes include 16:9, 16:10 and 2:1.
-            </remarks>
+            </summary>
         </member>
         <member name="T:Microsoft.Xna.Framework.Graphics.GraphicsAdapter.DriverType">
             <summary>
@@ -8385,140 +8033,6 @@
             <param name="primitiveCount">The number of primitives to render from the index buffer.</param>
             <remarks>Note that minVertexIndex and numVertices are unused in MonoGame and will be ignored.</remarks>
         </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.GraphicsDevice.DrawIndexedPrimitives(Microsoft.Xna.Framework.Graphics.PrimitiveType,System.Int32,System.Int32,System.Int32)">
-            <summary>
-            Draw geometry by indexing into the vertex buffer.
-            </summary>
-            <param name="primitiveType">The type of primitives in the index buffer.</param>
-            <param name="baseVertex">Used to offset the vertex range indexed from the vertex buffer.</param>
-            <param name="startIndex">The index within the index buffer to start drawing from.</param>
-            <param name="primitiveCount">The number of primitives to render from the index buffer.</param>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.GraphicsDevice.DrawUserPrimitives``1(Microsoft.Xna.Framework.Graphics.PrimitiveType,``0[],System.Int32,System.Int32)">
-            <summary>
-            Draw primitives of the specified type from the data in an array of vertices without indexing.
-            </summary>
-            <typeparam name="T">The type of the vertices.</typeparam>
-            <param name="primitiveType">The type of primitives to draw with the vertices.</param>
-            <param name="vertexData">An array of vertices to draw.</param>
-            <param name="vertexOffset">The index in the array of the first vertex that should be rendered.</param>
-            <param name="primitiveCount">The number of primitives to draw.</param>
-            <remarks>The <see cref="T:Microsoft.Xna.Framework.Graphics.VertexDeclaration"/> will be found by getting <see cref="P:Microsoft.Xna.Framework.Graphics.IVertexType.VertexDeclaration"/>
-            from an instance of <typeparamref name="T"/> and cached for subsequent calls.</remarks>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.GraphicsDevice.DrawUserPrimitives``1(Microsoft.Xna.Framework.Graphics.PrimitiveType,``0[],System.Int32,System.Int32,Microsoft.Xna.Framework.Graphics.VertexDeclaration)">
-            <summary>
-            Draw primitives of the specified type from the data in the given array of vertices without indexing.
-            </summary>
-            <typeparam name="T">The type of the vertices.</typeparam>
-            <param name="primitiveType">The type of primitives to draw with the vertices.</param>
-            <param name="vertexData">An array of vertices to draw.</param>
-            <param name="vertexOffset">The index in the array of the first vertex that should be rendered.</param>
-            <param name="primitiveCount">The number of primitives to draw.</param>
-            <param name="vertexDeclaration">The layout of the vertices.</param>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.GraphicsDevice.DrawPrimitives(Microsoft.Xna.Framework.Graphics.PrimitiveType,System.Int32,System.Int32)">
-            <summary>
-            Draw primitives of the specified type from the currently bound vertexbuffers without indexing.
-            </summary>
-            <param name="primitiveType">The type of primitives to draw.</param>
-            <param name="vertexStart">Index of the vertex to start at.</param>
-            <param name="primitiveCount">The number of primitives to draw.</param>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.GraphicsDevice.DrawUserIndexedPrimitives``1(Microsoft.Xna.Framework.Graphics.PrimitiveType,``0[],System.Int32,System.Int32,System.Int16[],System.Int32,System.Int32)">
-            <summary>
-            Draw primitives of the specified type by indexing into the given array of vertices with 16-bit indices.
-            </summary>
-            <typeparam name="T">The type of the vertices.</typeparam>
-            <param name="primitiveType">The type of primitives to draw with the vertices.</param>
-            <param name="vertexData">An array of vertices to draw.</param>
-            <param name="vertexOffset">The index in the array of the first vertex to draw.</param>
-            <param name="indexOffset">The index in the array of indices of the first index to use</param>
-            <param name="primitiveCount">The number of primitives to draw.</param>
-            <param name="numVertices">The number of vertices to draw.</param>
-            <param name="indexData">The index data.</param>
-            <remarks>The <see cref="T:Microsoft.Xna.Framework.Graphics.VertexDeclaration"/> will be found by getting <see cref="P:Microsoft.Xna.Framework.Graphics.IVertexType.VertexDeclaration"/>
-            from an instance of <typeparamref name="T"/> and cached for subsequent calls.</remarks>
-            <remarks>All indices in the vertex buffer are interpreted relative to the specified <paramref name="vertexOffset"/>.
-            For example a value of zero in the array of indices points to the vertex at index <paramref name="vertexOffset"/>
-            in the array of vertices.</remarks>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.GraphicsDevice.DrawUserIndexedPrimitives``1(Microsoft.Xna.Framework.Graphics.PrimitiveType,``0[],System.Int32,System.Int32,System.Int16[],System.Int32,System.Int32,Microsoft.Xna.Framework.Graphics.VertexDeclaration)">
-            <summary>
-            Draw primitives of the specified type by indexing into the given array of vertices with 16-bit indices.
-            </summary>
-            <typeparam name="T">The type of the vertices.</typeparam>
-            <param name="primitiveType">The type of primitives to draw with the vertices.</param>
-            <param name="vertexData">An array of vertices to draw.</param>
-            <param name="vertexOffset">The index in the array of the first vertex to draw.</param>
-            <param name="indexOffset">The index in the array of indices of the first index to use</param>
-            <param name="primitiveCount">The number of primitives to draw.</param>
-            <param name="numVertices">The number of vertices to draw.</param>
-            <param name="indexData">The index data.</param>
-            <param name="vertexDeclaration">The layout of the vertices.</param>
-            <remarks>All indices in the vertex buffer are interpreted relative to the specified <paramref name="vertexOffset"/>.
-            For example a value of zero in the array of indices points to the vertex at index <paramref name="vertexOffset"/>
-            in the array of vertices.</remarks>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.GraphicsDevice.DrawUserIndexedPrimitives``1(Microsoft.Xna.Framework.Graphics.PrimitiveType,``0[],System.Int32,System.Int32,System.Int32[],System.Int32,System.Int32)">
-            <summary>
-            Draw primitives of the specified type by indexing into the given array of vertices with 32-bit indices.
-            </summary>
-            <typeparam name="T">The type of the vertices.</typeparam>
-            <param name="primitiveType">The type of primitives to draw with the vertices.</param>
-            <param name="vertexData">An array of vertices to draw.</param>
-            <param name="vertexOffset">The index in the array of the first vertex to draw.</param>
-            <param name="indexOffset">The index in the array of indices of the first index to use</param>
-            <param name="primitiveCount">The number of primitives to draw.</param>
-            <param name="numVertices">The number of vertices to draw.</param>
-            <param name="indexData">The index data.</param>
-            <remarks>The <see cref="T:Microsoft.Xna.Framework.Graphics.VertexDeclaration"/> will be found by getting <see cref="P:Microsoft.Xna.Framework.Graphics.IVertexType.VertexDeclaration"/>
-            from an instance of <typeparamref name="T"/> and cached for subsequent calls.</remarks>
-            <remarks>All indices in the vertex buffer are interpreted relative to the specified <paramref name="vertexOffset"/>.
-            For example a value of zero in the array of indices points to the vertex at index <paramref name="vertexOffset"/>
-            in the array of vertices.</remarks>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.GraphicsDevice.DrawUserIndexedPrimitives``1(Microsoft.Xna.Framework.Graphics.PrimitiveType,``0[],System.Int32,System.Int32,System.Int32[],System.Int32,System.Int32,Microsoft.Xna.Framework.Graphics.VertexDeclaration)">
-            <summary>
-            Draw primitives of the specified type by indexing into the given array of vertices with 32-bit indices.
-            </summary>
-            <typeparam name="T">The type of the vertices.</typeparam>
-            <param name="primitiveType">The type of primitives to draw with the vertices.</param>
-            <param name="vertexData">An array of vertices to draw.</param>
-            <param name="vertexOffset">The index in the array of the first vertex to draw.</param>
-            <param name="indexOffset">The index in the array of indices of the first index to use</param>
-            <param name="primitiveCount">The number of primitives to draw.</param>
-            <param name="numVertices">The number of vertices to draw.</param>
-            <param name="indexData">The index data.</param>
-            <param name="vertexDeclaration">The layout of the vertices.</param>
-            <remarks>All indices in the vertex buffer are interpreted relative to the specified <paramref name="vertexOffset"/>.
-            For example value of zero in the array of indices points to the vertex at index <paramref name="vertexOffset"/>
-            in the array of vertices.</remarks>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.GraphicsDevice.DrawInstancedPrimitives(Microsoft.Xna.Framework.Graphics.PrimitiveType,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)">
-            <summary>
-            Draw instanced geometry from the bound vertex buffers and index buffer.
-            </summary>
-            <param name="primitiveType">The type of primitives in the index buffer.</param>
-            <param name="baseVertex">Used to offset the vertex range indexed from the vertex buffer.</param>
-            <param name="minVertexIndex">This is unused and remains here only for XNA API compatibility.</param>
-            <param name="numVertices">This is unused and remains here only for XNA API compatibility.</param>
-            <param name="startIndex">The index within the index buffer to start drawing from.</param>
-            <param name="primitiveCount">The number of primitives in a single instance.</param>
-            <param name="instanceCount">The number of instances to render.</param>
-            <remarks>Note that minVertexIndex and numVertices are unused in MonoGame and will be ignored.</remarks>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.GraphicsDevice.DrawInstancedPrimitives(Microsoft.Xna.Framework.Graphics.PrimitiveType,System.Int32,System.Int32,System.Int32,System.Int32)">
-            <summary>
-            Draw instanced geometry from the bound vertex buffers and index buffer.
-            </summary>
-            <param name="primitiveType">The type of primitives in the index buffer.</param>
-            <param name="baseVertex">Used to offset the vertex range indexed from the vertex buffer.</param>
-            <param name="startIndex">The index within the index buffer to start drawing from.</param>
-            <param name="primitiveCount">The number of primitives in a single instance.</param>
-            <param name="instanceCount">The number of instances to render.</param>
-            <remarks>Draw geometry with data from multiple bound vertex streams at different frequencies.</remarks>
-        </member>
         <member name="M:Microsoft.Xna.Framework.Graphics.GraphicsDevice.CreateDeviceResources">
             <summary>
             Create graphics device specific resources.
@@ -8534,15 +8048,6 @@
             The rendering information for debugging and profiling.
             The metrics are reset every frame after draw within <see cref="M:Microsoft.Xna.Framework.Graphics.GraphicsDevice.Present"/>. 
             </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Graphics.GraphicsDevice.BlendFactor">
-            <summary>
-            The color used as blend factor when alpha blending.
-            </summary>
-            <remarks>
-            When only changing BlendFactor, use this rather than <see cref="P:Microsoft.Xna.Framework.Graphics.BlendState.BlendFactor"/> to
-            only update BlendFactor so the whole BlendState does not have to be updated.
-            </remarks>
         </member>
         <member name="P:Microsoft.Xna.Framework.Graphics.GraphicsDevice.Handle">
             <summary>
@@ -8686,15 +8191,6 @@
             <param name="graphicsDevice">A valid reference to <see cref="T:Microsoft.Xna.Framework.Graphics.GraphicsDevice"/>.</param>
             <param name="bones">The collection of bones.</param>
             <param name="meshes">The collection of meshes.</param>
-            <exception cref="T:System.ArgumentNullException">
-            <paramref name="graphicsDevice"/> is null.
-            </exception>
-            <exception cref="T:System.ArgumentNullException">
-            <paramref name="bones"/> is null.
-            </exception>
-            <exception cref="T:System.ArgumentNullException">
-            <paramref name="meshes"/> is null.
-            </exception>
         </member>
         <member name="M:Microsoft.Xna.Framework.Graphics.Model.Draw(Microsoft.Xna.Framework.Matrix,Microsoft.Xna.Framework.Matrix,Microsoft.Xna.Framework.Matrix)">
             <summary>
@@ -8715,24 +8211,12 @@
             Copies bone transforms relative to <see cref="P:Microsoft.Xna.Framework.Graphics.Model.Root"/> bone from a given array to this model.
             </summary>
             <param name="sourceBoneTransforms">The array of prepared bone transform data.</param>
-            <exception cref="T:System.ArgumentNullException">
-            <paramref name="sourceBoneTransforms"/> is null.
-            </exception>
-            <exception cref="T:System.ArgumentOutOfRangeException">
-            <paramref name="sourceBoneTransforms"/> is invalid.
-            </exception>
         </member>
         <member name="M:Microsoft.Xna.Framework.Graphics.Model.CopyBoneTransformsTo(Microsoft.Xna.Framework.Matrix[])">
             <summary>
             Copies bone transforms relative to <see cref="P:Microsoft.Xna.Framework.Graphics.Model.Root"/> bone from this model to a given array.
             </summary>
             <param name="destinationBoneTransforms">The array receiving the transformed bones.</param>
-            <exception cref="T:System.ArgumentNullException">
-            <paramref name="destinationBoneTransforms"/> is null.
-            </exception>
-            <exception cref="T:System.ArgumentOutOfRangeException">
-            <paramref name="destinationBoneTransforms"/> is invalid.
-            </exception>
         </member>
         <member name="P:Microsoft.Xna.Framework.Graphics.Model.Bones">
             <summary>
@@ -9045,7 +8529,7 @@
         </member>
         <member name="T:Microsoft.Xna.Framework.Graphics.PackedVector.Bgra5551">
             <summary>
-            Packed vector type containing unsigned normalized values ranging from 0 to 1.
+            Packed vector type containing unsigned normalized values ranging from 0 to 1. 
             The x , y and z components use 5 bits, and the w component uses 1 bit.
             </summary>
         </member>
@@ -9419,7 +8903,7 @@
         </member>
         <member name="T:Microsoft.Xna.Framework.Graphics.PackedVector.Rgba1010102">
             <summary>
-            Packed vector type containing unsigned normalized values ranging from 0 to 1.
+            Packed vector type containing unsigned normalized values ranging from 0 to 1. 
             The x, y and z components use 10 bits, and the w component uses 2 bits.
             </summary>
         </member>
@@ -9941,11 +9425,6 @@
             The SetData operation will not overwrite existing data. This allows the driver to return immediately from a SetData operation and continue rendering.
             </summary>
         </member>
-        <member name="P:Microsoft.Xna.Framework.Graphics.Shader.Profile">
-            <summary>
-            Returns the platform specific shader profile identifier.
-            </summary>
-        </member>
         <member name="P:Microsoft.Xna.Framework.Graphics.Shader.HashKey">
             <summary>
             A hash value which can be used to compare shaders.
@@ -10438,12 +9917,12 @@
         </member>
         <member name="F:Microsoft.Xna.Framework.Graphics.Blend.BlendFactor">
             <summary>
-            Each component of the color is multiplied by a constant in the <see cref="P:Microsoft.Xna.Framework.Graphics.GraphicsDevice.BlendFactor"/>.
+            Each component of the color is multiplied by a constant in the <see cref="!:GraphicsDevice.BlendFactor"/>.
             </summary>
         </member>
         <member name="F:Microsoft.Xna.Framework.Graphics.Blend.InverseBlendFactor">
             <summary>
-            Each component of the color is multiplied by a inversed constant in the <see cref="P:Microsoft.Xna.Framework.Graphics.GraphicsDevice.BlendFactor"/>.
+            Each component of the color is multiplied by a inversed constant in the <see cref="!:GraphicsDevice.BlendFactor"/>.
             </summary>
         </member>
         <member name="F:Microsoft.Xna.Framework.Graphics.Blend.SourceAlphaSaturation">
@@ -10488,15 +9967,6 @@
             </summary>
             <param name="index">The 0 to 3 target blend state index.</param>
             <returns>A target blend state.</returns>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Graphics.BlendState.BlendFactor">
-            <summary>
-            The color used as blend factor when alpha blending.
-            </summary>
-            <remarks>
-            <see cref="P:Microsoft.Xna.Framework.Graphics.GraphicsDevice.BlendFactor"/> is set to this value when this <see cref="T:Microsoft.Xna.Framework.Graphics.BlendState"/>
-            is bound to a GraphicsDevice.
-            </remarks>
         </member>
         <member name="P:Microsoft.Xna.Framework.Graphics.BlendState.IndependentBlendEnable">
             <summary>
@@ -10606,11 +10076,6 @@
         <member name="F:Microsoft.Xna.Framework.Graphics.FillMode.WireFrame">
             <summary>
             Draw lines for each primitive.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Graphics.SamplerState.ComparisonFunction">
-            <summary>
-            When using comparison sampling, also set <see cref="P:Microsoft.Xna.Framework.Graphics.SamplerState.FilterMode"/> to <see cref="F:Microsoft.Xna.Framework.Graphics.TextureFilterMode.Comparison"/>.
             </summary>
         </member>
         <member name="T:Microsoft.Xna.Framework.Graphics.StencilOperation">
@@ -10731,11 +10196,6 @@
         <member name="F:Microsoft.Xna.Framework.Graphics.TextureFilter.MinPointMagLinearMipPoint">
             <summary>
             Use point filtering to shrink, linear filtering to expand, and point filtering between mipmap levels.
-            </summary>
-        </member>
-        <member name="T:Microsoft.Xna.Framework.Graphics.TextureFilterMode">
-            <summary>
-            Filtering modes for texture samplers.
             </summary>
         </member>
         <member name="T:Microsoft.Xna.Framework.Graphics.SurfaceFormat">
@@ -10980,7 +10440,6 @@
             The GraphicsDevice is resetting, so GPU resources must be recreated.
             </summary>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:Microsoft.Xna.Framework.Graphics.VertexBuffer.GetData``1(System.Int32,``0[],System.Int32,System.Int32,System.Int32)" -->
         <member name="M:Microsoft.Xna.Framework.Graphics.VertexBuffer.SetData``1(System.Int32,``0[],System.Int32,System.Int32,System.Int32)">
             <summary>
             Sets the vertex buffer data, specifying the index at which to start copying from the source data array,
@@ -11004,7 +10463,7 @@
             into the vertex buffer with padding between each element.
             If you specify <c>0</c> for this parameter, it will be treated as if you had specified <c>sizeof(T)</c>.
             With the exception of <c>0</c>, you must specify a value greater than or equal to <c>sizeof(T)</c>.</param>
-            <remarks>
+            <example>
             If <c>T</c> is <c>VertexPositionTexture</c>, but you want to set only the position component of the vertex data,
             you would call this method as follows:
             <code>
@@ -11018,7 +10477,7 @@
             Vector2[] texCoords = new Vector2[numVertices];
             vertexBuffer.SetData(12, texCoords, 0, numVertices, vertexBuffer.VertexDeclaration.VertexStride);
             </code>
-            </remarks>
+            </example>
             <remarks>
             If you provide a <c>byte[]</c> in the <paramref name="data"/> parameter, then you should almost certainly
             set <paramref name="vertexStride"/> to <c>1</c>, to avoid leaving any padding between the <c>byte</c> values
@@ -12369,13 +11828,11 @@
             Holds the state of keystrokes by a keyboard.
             </summary>
         </member>
-        <member name="M:Microsoft.Xna.Framework.Input.KeyboardState.#ctor(Microsoft.Xna.Framework.Input.Keys[],System.Boolean,System.Boolean)">
+        <member name="M:Microsoft.Xna.Framework.Input.KeyboardState.#ctor(System.Collections.Generic.List{Microsoft.Xna.Framework.Input.Keys})">
             <summary>
             Initializes a new instance of the <see cref="T:Microsoft.Xna.Framework.Input.KeyboardState"/> class.
             </summary>
             <param name="keys">List of keys to be flagged as pressed on initialization.</param>
-            <param name="capsLock">Caps Lock state.</param>
-            <param name="numLock">Num Lock state.</param>
         </member>
         <member name="M:Microsoft.Xna.Framework.Input.KeyboardState.#ctor(Microsoft.Xna.Framework.Input.Keys[])">
             <summary>
@@ -12431,16 +11888,6 @@
             </summary>
             <param name="obj">The <see cref="T:Microsoft.Xna.Framework.Input.KeyboardState"/> to compare.</param>
             <returns>true if the provided <see cref="T:Microsoft.Xna.Framework.Input.KeyboardState"/> instance is same with current; false otherwise.</returns>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Input.KeyboardState.CapsLock">
-            <summary>
-            Gets the current state of the Caps Lock key.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Input.KeyboardState.NumLock">
-            <summary>
-            Gets the current state of the Num Lock key.
-            </summary>
         </member>
         <member name="P:Microsoft.Xna.Framework.Input.KeyboardState.Item(Microsoft.Xna.Framework.Input.Keys)">
             <summary>
@@ -13296,88 +12743,15 @@
             <param name="x">Relative horizontal position of the cursor.</param>
             <param name="y">Relative vertical position of the cursor.</param>
         </member>
-        <member name="M:Microsoft.Xna.Framework.Input.Mouse.SetCursor(Microsoft.Xna.Framework.Input.MouseCursor)">
-            <summary>
-            Sets the cursor image to the specified MouseCursor.
-            </summary>
-            <param name="cursor">Mouse cursor to use for the cursor image.</param>
-        </member>
         <member name="P:Microsoft.Xna.Framework.Input.Mouse.WindowHandle">
             <summary>
             Gets or sets the window handle for current mouse processing.
             </summary> 
         </member>
-        <member name="T:Microsoft.Xna.Framework.Input.MouseCursor">
+        <member name="T:Microsoft.Xna.Framework.Input.Mouse.POINT">
             <summary>
-            Describes a mouse cursor.
-            </summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Input.MouseCursor.FromTexture2D(Microsoft.Xna.Framework.Graphics.Texture2D,System.Int32,System.Int32)">
-            <summary>
-            Creates a mouse cursor from the specified texture.
-            </summary>
-            <param name="texture">Texture to use as the cursor image.</param>
-            <param name="originx">X cordinate of the image that will be used for mouse position.</param>
-            <param name="originy">Y cordinate of the image that will be used for mouse position.</param>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Input.MouseCursor.Arrow">
-            <summary>
-            Gets the default arrow cursor.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Input.MouseCursor.IBeam">
-            <summary>
-            Gets the cursor that appears when the mouse is over text editing regions.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Input.MouseCursor.Wait">
-            <summary>
-            Gets the waiting cursor that appears while the application/system is busy.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Input.MouseCursor.Crosshair">
-            <summary>
-            Gets the crosshair ("+") cursor.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Input.MouseCursor.WaitArrow">
-            <summary>
-            Gets the cross between Arrow and Wait cursors.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Input.MouseCursor.SizeNWSE">
-            <summary>
-            Gets the northwest/southeast ("\") cursor.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Input.MouseCursor.SizeNESW">
-            <summary>
-            Gets the northeast/southwest ("/") cursor.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Input.MouseCursor.SizeWE">
-            <summary>
-            Gets the horizontal west/east ("-") cursor.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Input.MouseCursor.SizeNS">
-            <summary>
-            Gets the vertical north/south ("|") cursor.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Input.MouseCursor.SizeAll">
-            <summary>
-            Gets the size all cursor which points in all directions.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Input.MouseCursor.No">
-            <summary>
-            Gets the cursor that points that something is invalid, usually a cross.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Input.MouseCursor.Hand">
-            <summary>
-            Gets the hand cursor, usually used for web links.
+            Struct representing a point. 
+            (Suggestion : Make another class for mouse extensions)
             </summary>
         </member>
         <member name="T:Microsoft.Xna.Framework.Input.MouseState">
@@ -13389,8 +12763,8 @@
             <summary>
             Initializes a new instance of the MouseState.
             </summary>
-            <param name="x">Horizontal position of the mouse in relation to the window.</param>
-            <param name="y">Vertical position of the mouse in relation to the window.</param>
+            <param name="x">Horizontal position of the mouse.</param>
+            <param name="y">Vertical position of the mouse.</param>
             <param name="scrollWheel">Mouse scroll wheel's value.</param>
             <param name="leftButton">Left mouse button's state.</param>
             <param name="middleButton">Middle mouse button's state.</param>
@@ -13430,12 +12804,12 @@
         </member>
         <member name="P:Microsoft.Xna.Framework.Input.MouseState.X">
             <summary>
-            Gets horizontal position of the cursor in relation to the window.
+            Gets horizontal position of the cursor.
             </summary>
         </member>
         <member name="P:Microsoft.Xna.Framework.Input.MouseState.Y">
             <summary>
-            Gets vertical position of the cursor in relation to the window.
+            Gets vertical position of the cursor.
             </summary>
         </member>
         <member name="P:Microsoft.Xna.Framework.Input.MouseState.Position">
@@ -14280,6 +13654,175 @@
             Video player volume, from 0.0f (silence) to 1.0f (full volume relative to the current device volume).
             </summary>
         </member>
+        <member name="T:Microsoft.Xna.Framework.Storage.StorageContainer">
+            <summary>
+            Contains a logical collection of files used for user-data storage.
+            </summary>			
+            <remarks>MSDN documentation contains related conceptual article: http://msdn.microsoft.com/en-us/library/bb200105.aspx#ID4EDB</remarks>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Storage.StorageContainer.#ctor(Microsoft.Xna.Framework.Storage.StorageDevice,System.String,System.Nullable{Microsoft.Xna.Framework.PlayerIndex})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Xna.Framework.Storage.StorageContainer"/> class.
+            </summary>
+            <param name="device">The attached storage-device.</param>
+            <param name="name"> name.</param>
+            <param name="playerIndex">The player index of the player to save the data.</param>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Storage.StorageContainer.CreateDirectory(System.String)">
+            <summary>
+            Creates a new directory in the storage-container.
+            </summary>
+            <param name="directory">Relative path of the directory to be created.</param>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Storage.StorageContainer.CreateFile(System.String)">
+            <summary>
+            Creates a file in the storage-container.
+            </summary>
+            <param name="file">Relative path of the file to be created.</param>
+            <returns>Returns <see cref="T:System.IO.Stream"/> for the created file.</returns>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Storage.StorageContainer.DeleteDirectory(System.String)">
+            <summary>
+            Deletes specified directory for the storage-container.
+            </summary>
+            <param name="directory">The relative path of the directory to be deleted.</param>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Storage.StorageContainer.DeleteFile(System.String)">
+            <summary>
+            Deletes a file from the storage-container.
+            </summary>
+            <param name="file">The relative path of the file to be deleted.</param>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Storage.StorageContainer.DirectoryExists(System.String)">
+            <summary>
+            Returns true if specified path exists in the storage-container, false otherwise.
+            </summary>
+            <param name="directory">The relative path of directory to query for.</param>
+            <returns>True if queried directory exists, false otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Storage.StorageContainer.Dispose">
+            <summary>
+            Disposes un-managed objects referenced by this object.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Storage.StorageContainer.FileExists(System.String)">
+            <summary>
+            Returns true if the specified file exists in the storage-container, false otherwise.
+            </summary>
+            <param name="file">The relative path of file to query for.</param>
+            <returns>True if queried file exists, false otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Storage.StorageContainer.GetDirectoryNames">
+            <summary>
+            Returns list of directory names in the storage-container.
+            </summary>
+            <returns>List of directory names.</returns>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Storage.StorageContainer.GetFileNames">
+            <summary>
+            Returns list of file names in the storage-container.
+            </summary>
+            <returns>List of file names.</returns>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Storage.StorageContainer.GetFileNames(System.String)">
+            <summary>
+            Returns list of file names with given search pattern.
+            </summary>
+            <param name="searchPattern">A search pattern that supports single-character ("?") and multicharacter ("*") wildcards.</param>
+            <returns>List of matched file names.</returns>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Storage.StorageContainer.OpenFile(System.String,System.IO.FileMode)">
+            <summary>
+            Opens a file contained in storage-container.
+            </summary>
+            <param name="file">Relative path of the file.</param>
+            <param name="fileMode"><see cref="T:System.IO.FileMode"/> that specifies how the file is opened.</param>
+            <returns><see cref="T:System.IO.Stream"/> object for the opened file.</returns>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Storage.StorageContainer.OpenFile(System.String,System.IO.FileMode,System.IO.FileAccess)">
+            <summary>
+            Opens a file contained in storage-container.
+            </summary>
+            <param name="file">Relative path of the file.</param>
+            <param name="fileMode"><see cref="T:System.IO.FileMode"/> that specifies how the file is opened.</param>
+            <param name="fileAccess"><see cref="T:System.IO.FileAccess"/> that specifies access mode.</param>
+            <returns><see cref="T:System.IO.Stream"/> object for the opened file.</returns>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Storage.StorageContainer.OpenFile(System.String,System.IO.FileMode,System.IO.FileAccess,System.IO.FileShare)">
+            <summary>
+            Opens a file contained in storage-container.
+            </summary>
+            <param name="file">Relative path of the file.</param>
+            <param name="fileMode"><see cref="T:System.IO.FileMode"/> that specifies how the file is opened.</param>
+            <param name="fileAccess"><see cref="T:System.IO.FileAccess"/> that specifies access mode.</param>
+            <param name="fileShare">A bitwise combination of <see cref="T:System.IO.FileShare"/> enumeration values that specifies access modes for other stream objects.</param>
+            <returns><see cref="T:System.IO.Stream"/> object for the opened file.</returns>
+        </member>
+        <member name="P:Microsoft.Xna.Framework.Storage.StorageContainer.DisplayName">
+            <summary>
+            Returns display name of the title.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Xna.Framework.Storage.StorageContainer.IsDisposed">
+            <summary>
+            Gets a bool value indicating whether the instance has been disposed.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Xna.Framework.Storage.StorageContainer.StorageDevice">
+            <summary>
+            Returns the <see cref="P:Microsoft.Xna.Framework.Storage.StorageContainer.StorageDevice"/> that holds logical files for the container.
+            </summary>
+        </member>
+        <member name="E:Microsoft.Xna.Framework.Storage.StorageContainer.Disposing">
+            <summary>
+            Fired when <see cref="M:Microsoft.Xna.Framework.Storage.StorageContainer.Dispose"/> is called or object if finalized or collected by the garbage collector.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Xna.Framework.Storage.StorageDevice">
+            <summary>
+            Exposes a storage device for storing user data.
+            </summary>
+            <remarks>MSDN documentation contains related conceptual article: http://msdn.microsoft.com/en-us/library/bb200105.aspx</remarks>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Storage.StorageDevice.#ctor(System.Nullable{Microsoft.Xna.Framework.PlayerIndex},System.Int32,System.Int32)">
+            <summary>
+            Creates a new <see cref="T:Microsoft.Xna.Framework.Storage.StorageDevice"/> instance.
+            </summary>
+            <param name="player">The playerIndex of the player.</param>
+            <param name="sizeInBytes">Size of the storage device.</param>
+            <param name="directoryCount"></param>
+        </member>
+        <member name="P:Microsoft.Xna.Framework.Storage.StorageDevice.FreeSpace">
+            <summary>
+            Returns the amount of free space.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Xna.Framework.Storage.StorageDevice.IsConnected">
+            <summary>
+            Returns true if device is connected, false otherwise.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Xna.Framework.Storage.StorageDevice.TotalSpace">
+            <summary>
+            Returns the total size of device.
+            </summary>
+        </member>
+        <member name="E:Microsoft.Xna.Framework.Storage.StorageDevice.DeviceChanged">
+            <summary>
+            Fired when a device is removed or inserted.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Xna.Framework.Storage.StorageDeviceHelper">
+            <summary>
+            This is a helper class to obtain the native file system information.
+            </summary>
+            <remarks>Look at the Mac implementation.</remarks>
+        </member>
+        <member name="P:Microsoft.Xna.Framework.Storage.StorageDeviceHelper.Path">
+            <summary>
+            Gets or sets path for root of the <see cref="T:Microsoft.Xna.Framework.Storage.StorageDevice"/>.
+            </summary>
+        </member>
         <member name="M:MonoGame.Utilities.Hash.ComputeHash(System.Byte[])">
             <summary>
             Compute a hash from a byte array.
@@ -14330,16 +13873,6 @@
             Returns true if the given type can be assigned a value with the given object type
             </summary>
         </member>
-        <member name="M:Microsoft.Xna.Framework.Utilities.ReflectionHelpers.ManagedSizeOf(System.Type)">
-            <summary>
-            Fallback handler for Marshal.SizeOf(type)
-            </summary>
-        </member>
-        <member name="T:Microsoft.Xna.Framework.Utilities.ReflectionHelpers.SizeOf`1">
-            <summary>
-            Generics handler for Marshal.SizeOf
-            </summary>
-        </member>
         <member name="T:MonoGame.Utilities.ZlibStream">
              <summary>
              Represents a Zlib stream for compression or decompression.
@@ -14352,7 +13885,7 @@
              </para>
             
              <para> Using this stream, applications can compress or decompress data via
-             stream <c>Read()</c> and <c>Write()</c> operations.  Either compression or
+             stream <c>Read()</c> and <c>Write()</c> operations.  Either compresssion or
              decompression can occur through either reading or writing. The compression
              format used is ZLIB, which is documented in <see href="http://www.ietf.org/rfc/rfc1950.txt">IETF RFC 1950</see>, "ZLIB Compressed
              Data Format Specification version 3.3". This implementation of ZLIB always uses
@@ -16583,7 +16116,7 @@
             </summary>
             <remarks>
               <para>
-                Set this at any point before calling <see cref="M:System.IO.Stream.Close"/>.
+                Set this at any point before calling <see cref="!:Close()"/>.
               </para>
             </remarks>
         </member>
@@ -16662,7 +16195,7 @@
             </summary>
             <returns>
             The number of bytes produced by encoding the specified characters. This class
-            always returns the value of <paramref name="count"/>.
+            alwas returns the value of <paramref name="count"/>.
             </returns>
         </member>
         <member name="M:MonoGame.Utilities.Iso88591Encoding.GetCharCount(System.Byte[],System.Int32,System.Int32)">
@@ -16672,7 +16205,7 @@
             </summary>
             <returns>
             The number of characters produced by decoding the specified sequence of bytes. This class
-            always returns the value of <paramref name="count"/>. 
+            alwas returns the value of <paramref name="count"/>. 
             </returns>
         </member>
         <member name="M:MonoGame.Utilities.Iso88591Encoding.GetMaxByteCount(System.Int32)">
@@ -16681,7 +16214,7 @@
             </summary>
             <returns>
             The maximum number of bytes produced by encoding the specified number of characters. This
-            class always returns the value of <paramref name="charCount"/>.
+            class alwas returns the value of <paramref name="charCount"/>.
             </returns>
             <param name="charCount">The number of characters to encode. 
             </param>
@@ -16692,7 +16225,7 @@
             </summary>
             <returns>
             The maximum number of characters produced by decoding the specified number of bytes. This class
-            always returns the value of <paramref name="byteCount"/>.
+            alwas returns the value of <paramref name="byteCount"/>.
             </returns>
             <param name="byteCount">The number of bytes to decode.</param> 
         </member>
@@ -16772,17 +16305,6 @@
             </summary>
             <param name="input"></param>
             <returns></returns>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Utilities.ByteBufferPool.Get(System.Int32)">
-            <summary>
-            Get a buffer that is at least as big as size.
-            </summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Utilities.ByteBufferPool.Return(System.Byte[])">
-            <summary>
-            Return the given buffer to the pool.
-            </summary>
-            <param name="buffer"></param>
         </member>
     </members>
 </doc>
