@@ -38,13 +38,13 @@ namespace Raytracer
 
             Lights = new List<Light>()
             {
-                new Light(new Vector3(0, 4, 2), 15f, Color.White),
+                new Light(new Vector3(0, 4, 2), 15f, Color.White.ToVector3()),
                 //new Light(new Vector3(-2, 4, 2), 15f, Color.White),
                 //new Light(new Vector3(2, 4, 2), 15f, Color.White),
             };
             Shapes = new List<Shape>()
             {
-                new Sphere(new Material(Color.Red.ToVector3(), 128, 0, 1, 1.1f), new Vector3(-2.5f, 5, -1), 1),
+                new Sphere(new Material(Color.LightCyan.ToVector3(), 128, 0, 1f, 1.1f), new Vector3(-2.5f, 5, -1), 1),
                 new Sphere(new Material(Color.Green.ToVector3(), 128, 0, 0, 0), new Vector3(0, 6, -1), 1),
                 new Sphere(new Material(Color.Blue.ToVector3(), 128, 1, 0, 0), new Vector3(2.5f, 5, -1), 1),
 
@@ -155,12 +155,12 @@ namespace Raytracer
                         Vector3 ShadowRayDirection = FirstShapeHit - Light.Origin;
                         ShadowRayDirection.Normalize();
                         Ray ShadowRay = new Ray(Light.Origin, ShadowRayDirection);
-                        Raycast(ShadowRay, out Shape FirstShadow, out Vector3 FirstShadowHit, out Vector3 FirstShadowNormal);
+                        Raycast(ShadowRay, out Shape FirstShadow, out Vector3 FirstShadowHit, out Vector3 FirstShadowNormal, out Vector3 FirstShadowColor);
 
                         if (FirstShadow == null || FirstShadow == FirstShape)
                         {
                             //Do phong shading, additive
-                            Result += Phong(FirstShape, FirstShapeHit, FirstShapeNormal, Light);
+                            Result += Phong(FirstShape, FirstShapeHit, FirstShapeNormal, Light) * FirstShadowColor;
                             Result = new Vector3(MathHelper.Clamp(Result.X, 0, 1), MathHelper.Clamp(Result.Y, 0, 1), MathHelper.Clamp(Result.Z, 0, 1));
                             //Result += Phong(FirstShape, FirstShapeHit, FirstShapeNormal, Light);
                         }
@@ -171,6 +171,7 @@ namespace Raytracer
             return Result;
         }
 
+        //For everything
         public bool Raycast(Ray Ray, out Shape FirstShape, out Vector3 FirstShapeHit, out Vector3 FirstShapeNormal)
         {
             float MinDistance = float.MaxValue;
@@ -181,6 +182,37 @@ namespace Raytracer
             {
                 if (Shape.Intersect(Ray, out Vector3 Hit, out Vector3 Normal))
                 {
+                    float Distance = (Hit - Ray.Origin).Length();
+                    if (Distance < MinDistance)
+                    {
+                        MinDistance = Distance;
+                        FirstShape = Shape;
+                        FirstShapeHit = Hit;
+                        FirstShapeNormal = Normal;
+                    }
+                }
+            }
+            return FirstShape != null;
+        }
+
+        //For shadows
+        public bool Raycast(Ray Ray, out Shape FirstShape, out Vector3 FirstShapeHit, out Vector3 FirstShapeNormal, out Vector3 LightColor)
+        {
+            float MinDistance = float.MaxValue;
+            FirstShape = null;
+            FirstShapeHit = Vector3.Zero;
+            FirstShapeNormal = Vector3.Zero;
+            LightColor = Vector3.One;
+            foreach (Shape Shape in Shapes)
+            {
+                if (Shape.Intersect(Ray, out Vector3 Hit, out Vector3 Normal))
+                {
+                    if (Shape.Material.Transparency > 0)
+                    {
+                        LightColor *= Shape.Material.Color * Shape.Material.Transparency;
+                        continue;
+                    }
+
                     float Distance = (Hit - Ray.Origin).Length();
                     if (Distance < MinDistance)
                     {
@@ -233,24 +265,6 @@ namespace Raytracer
             //Final = new Vector3((float)Math.Pow(Final.X, 1.0 / 2.2f), (float)Math.Pow(Final.Y, 1.0 / 2.2f), (float)Math.Pow(Final.Z, 1.0 / 2.2f));
 
             return Final;
-        }
-
-        public void AddPixel(int X, int Y, Color Color)
-        {
-            Color Pixel = GetPixel(X, Y);
-            if (Pixel == null)
-            {
-                SetPixel(X, Y, Color);
-            }
-            else
-            {
-                Framebuffer[X + Y * Width] = new Color(
-                    (byte)MathHelper.Clamp(Pixel.R + Color.R, 0, 255),
-                    (byte)MathHelper.Clamp(Pixel.G + Color.G, 0, 255),
-                    (byte)MathHelper.Clamp(Pixel.B + Color.B, 0, 255),
-                    (byte)MathHelper.Clamp(Pixel.A + Color.A, 0, 255)
-                );
-            }
         }
 
         public void SetPixel(int X, int Y, Color Data)

@@ -19,12 +19,5 @@ namespace Raytracer
             this.Intensity = Intensity;
             this.Color = Color;
         }
-
-        public Light(Vector3 Origin, float Intensity, Color Color)
-        {
-            this.Origin = Origin;
-            this.Intensity = Intensity;
-            this.Color = Color.ToVector3();
-        }
     }
 }
