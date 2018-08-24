@@ -39,8 +39,8 @@ namespace Raytracer
             Lights = new List<Light>()
             {
                 new Light(new Vector3(0, 4, 2), 15f, Color.White),
-                //new Light(new Vector3(0, 0, 0), 20f, Color.White),
-                //new Light(new Vector3(520, -150, 100)),
+                //new Light(new Vector3(-2, 4, 2), 15f, Color.White),
+                //new Light(new Vector3(2, 4, 2), 15f, Color.White),
             };
             Shapes = new List<Shape>()
             {
