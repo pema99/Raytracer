@@ -1,19 +1,12 @@
-﻿using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Raytracer
+﻿namespace Raytracer
 {
     public class Sphere : Shape
     {
         public Vector3 Origin { get; set; }
-        public float Radius { get; set; }
+        public double Radius { get; set; }
         public override Material Material { get; set; }
 
-        public Sphere(Material Material, Vector3 Origin, float Radius)
+        public Sphere(Material Material, Vector3 Origin, double Radius)
         {
             this.Material = Material;
             this.Origin = Origin;
@@ -25,11 +18,11 @@ namespace Raytracer
             Hit = Vector3.Zero;
             Normal = Vector3.Zero;
 
-            float A = 1;
-            float B = 2 * Vector3.Dot(Ray.Direction, (Ray.Origin - Origin));
-            float C = (Ray.Origin - Origin).LengthSquared() - (Radius * Radius);
+            double A = 1.0;
+            double B = 2.0 * Vector3.Dot(Ray.Direction, (Ray.Origin - Origin));
+            double C = (Ray.Origin - Origin).LengthSquared() - (Radius * Radius);
 
-            float T0, T1;
+            double T0, T1;
             if (!Util.SolveQuadratic(A, B, C, out T0, out T1))
             {
                 return false;
@@ -37,7 +30,7 @@ namespace Raytracer
 
             if (T0 > T1)
             {
-                float Temp = T1;
+                double Temp = T1;
                 T1 = T0;
                 T0 = Temp;
             }

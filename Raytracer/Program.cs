@@ -1,22 +1,11 @@
-﻿using System;
-
-namespace Raytracer
+﻿namespace Raytracer
 {
-#if WINDOWS || LINUX
-    /// <summary>
-    /// The main class.
-    /// </summary>
     public static class Program
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        [STAThread]
-        static void Main()
+        public static void Main()
         {
-            using (var game = new Game1())
-                game.Run();
+            Raytracer Raytracer = new Raytracer(600, 400, 75);
+            Raytracer.RenderToFile("Render.png");
         }
     }
-#endif
 }
