@@ -32,20 +32,20 @@ namespace Raytracer
 
             Lights = new List<Light>()
             {
-                new Light(new Vector3(0, 4, 2), 15, Color.White.ToVector3()),
+                new Light(new Vector3(0, 4, 2), 20, Color.White.ToVector3()),
             };
             Shapes = new List<Shape>()
             {
                 new Sphere(new Material(Color.LightCyan.ToVector3(), 128, 0, 1, 1.1), new Vector3(-2.5, 5, -1), 1),
                 new Sphere(new Material(Color.Green.ToVector3(), 128, 0, 0, 0), new Vector3(0, 6, -1), 1),
-                new Sphere(new Material(Color.Blue.ToVector3(), 128, 1, 0, 0), new Vector3(2.5, 5, -1), 1),
+                new Sphere(new Material(Color.LightCyan.ToVector3(), 128, 1, 0, 0), new Vector3(2.5, 5, -1), 1),
 
-                new Plane(new Material(Color.LightGray.ToVector3(), 128, 0, 0, 0), new Vector3(0, 5, -2), new Vector3(0, 0, 1)),
-                new Plane(new Material(Color.LightBlue.ToVector3(), 128, 0, 0, 0), new Vector3(0, 5, 5), new Vector3(0, 0, -1)),
-                new Plane(new Material(Color.Pink.ToVector3(), 128, 0, 0, 0), new Vector3(0, 10, 0), new Vector3(0, -1, 0)),
-                new Plane(new Material(Color.Green.ToVector3(), 128, 0, 0, 0), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
-                new Plane(new Material(Color.Green.ToVector3(), 128, 0, 0, 0), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
-                new Plane(new Material(Color.LightSalmon.ToVector3(), 128, 0, 0, 0), new Vector3(0, -1, 0), new Vector3(0, 1, 0))
+                new Plane(new Material(Color.LightGray.ToVector3(), 4, 0, 0, 0), new Vector3(0, 5, -2), new Vector3(0, 0, 1)),
+                new Plane(new Material(Color.LightBlue.ToVector3(), 4, 0, 0, 0), new Vector3(0, 5, 5), new Vector3(0, 0, -1)),
+                new Plane(new Material(Color.Green.ToVector3(), 4, 0, 0, 0), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
+                new Plane(new Material(Color.Green.ToVector3(), 4, 0, 0, 0), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
+                new Plane(new Material(Color.Pink.ToVector3(), 4, 0, 0, 0), new Vector3(0, 10, 0), new Vector3(0, -1, 0)),
+                new Plane(new Material(Color.LightSalmon.ToVector3(), 4, 0, 0, 0), new Vector3(0, -1, 0), new Vector3(0, 1, 0))
             };
         }
 
@@ -200,30 +200,29 @@ namespace Raytracer
             //var TexColor = new Vector3(TexData.R / 255f, TexData.G / 255f, TexData.B / 255f);
             var TexColor = Shape.Material.Color;
 
-            //Gamma correction
-            //TexColor = new Vector3((double)Math.Pow(TexColor.X, 2.2), (double)Math.Pow(TexColor.Y, 2.2), (double)Math.Pow(TexColor.Z, 2.2));
+            Vector3 LightDirection = Light.Origin - Hit;
+            double Distance = LightDirection.LengthSquared();
+            LightDirection.Normalize();
 
             //Diffuse
-            Vector3 LightVector = Light.Origin - Hit;
-            Vector3 Temp = Light.Origin - Hit;
-            LightVector.Normalize();
-            double CosTheta = Vector3.Dot(Normal, LightVector);
-            if (CosTheta < 0.0)
-            {
-                CosTheta = 0.0;
-            }
-            Vector3 Diffuse = TexColor * CosTheta * Light.Intensity * Light.Color;
+            double Lambertian = Math.Max(Vector3.Dot(Normal, LightDirection), 0);
 
             //Specular
-            Vector3 Halfway = (LightVector + new Vector3(0, -1, 0));
-            Halfway.Normalize();
-            double NdotH = Vector3.Dot(Normal, Halfway);
-            double Intensity = Math.Pow(MathHelper.Clamp(NdotH, 0, 1), Shape.Material.Shininess);
-            Vector3 Specular = Light.Color * Intensity * Light.Intensity;
+            double Specular = 0.0;
+            if (Lambertian > 0.0)
+            {
+                Vector3 ViewDirection = Vector3.Zero - Hit;
+                ViewDirection.Normalize();
+                Vector3 Halfway = (LightDirection + ViewDirection);
+                Halfway.Normalize();
+
+                double SpecularAngle = Math.Max(Vector3.Dot(Normal, Halfway), 0.0);
+                Specular = Math.Pow(SpecularAngle, Shape.Material.Shininess);
+            }
 
             //Final luminance
-            Vector3 Final = (Diffuse + Specular) * (1 / Temp.LengthSquared());
-            Final = new Vector3(MathHelper.Clamp(Final.X, 0, 1), MathHelper.Clamp(Final.Y, 0, 1), MathHelper.Clamp(Final.Z, 0, 1));
+            Vector3 Final = TexColor * Lambertian * Light.Color * Light.Intensity / Distance +
+                            Specular * Light.Color * Light.Intensity / Distance;
 
             //Gamma correction
             //Final = new Vector3((double)Math.Pow(Final.X, 1.0 / 2.2), (double)Math.Pow(Final.Y, 1.0 / 2.2), (double)Math.Pow(Final.Z, 1.0 / 2.2));
