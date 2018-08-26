@@ -15,9 +15,6 @@
 
         public override bool Intersect(Ray Ray, out Vector3 Hit, out Vector3 Normal)
         {
-            Hit = Vector3.Zero;
-            Normal = Vector3.Zero;
-
             double Denom = Vector3.Dot(-this.Normal, Ray.Direction);
             if (Denom > 1e-6)
             {
@@ -29,11 +26,10 @@
                     Normal = this.Normal;
                     return true;
                 }
-                else
-                {
-                    return false;
-                }
             }
+
+            Hit = Vector3.Zero;
+            Normal = Vector3.Zero;
 
             return false;
         }
