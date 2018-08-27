@@ -53,7 +53,9 @@ namespace Raytracer
                 new Plane(new Material(Color.Green.ToVector3(), Vector3.Zero), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
                 new Plane(new Material(Color.Green.ToVector3(), Vector3.Zero), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
                 new Plane(new Material(Color.Pink.ToVector3(),  Vector3.Zero), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
-                new Plane(new Material(Color.LightSalmon.ToVector3(), Vector3.Zero), new Vector3(0, 0, -1), new Vector3(0, 0, 1))
+                new Plane(new Material(Color.LightSalmon.ToVector3(), Vector3.Zero), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
+
+                new Triangle(new Material(Color.Red.ToVector3(), Vector3.Zero), new Vector3(-2.5, 1, 5), new Vector3(2.5, 1, 5), new Vector3(0, 5, 5))
             };
         }
 
