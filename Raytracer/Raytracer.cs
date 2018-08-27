@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Threading;
 
 namespace Raytracer
 {
@@ -11,6 +12,7 @@ namespace Raytracer
         public double FOV { get; private set; }
         public int MaxBounces { get; private set; }
         public int Samples { get; private set; }
+        public int Threads { get; private set; }
 
         private Vector3[,] Framebuffer { get; set; }
         private List<Light> Lights { get; set; }
@@ -21,13 +23,14 @@ namespace Raytracer
         private double AspectRatio { get; set; }
         private double ViewAngle { get; set; }
 
-        public Raytracer(int Width, int Height, double FOV, int MaxBounces, int Samples)
+        public Raytracer(int Width, int Height, double FOV, int MaxBounces, int Samples, int Threads)
         {
             this.Width = Width;
             this.Height = Height;
             this.FOV = FOV;
             this.MaxBounces = MaxBounces;
             this.Samples = Samples;
+            this.Threads = Threads;
             this.Framebuffer = new Vector3[Width, Height];
 
             this.InvWidth = 1.0 / Width;
@@ -56,10 +59,27 @@ namespace Raytracer
 
         public void Render()
         {
-            //For each pixel
-            for (int x = 0; x < Width; x++)
+            //TODO: Allow thread numbers that the width isn't divisble with
+            Thread[] ThreadPool = new Thread[Threads];
+            for (int i = 0; i < Threads; i++)
             {
-                Console.WriteLine("Progress: " + Math.Round((double)x / (double)Width * 100.0) + "%");
+                int j = i;
+                ThreadPool[i] = new Thread(() => {
+                    RenderLines(j, Width / Threads);
+                });
+                ThreadPool[i].Start();
+            }
+            foreach (Thread T in ThreadPool)
+            {
+                T.Join();
+            }
+        }
+
+        private void RenderLines(int Start, int Amount)
+        {
+            for (int x = Start * Amount; x < Start * Amount + Amount; x++)
+            {
+                Console.WriteLine("Processed line " + x);
                 for (int y = 0; y < Height; y++)
                 {
                     //Raycast to nearest shape
@@ -92,15 +112,17 @@ namespace Raytracer
         {
             Vector3 Result = Vector3.Zero;
 
+            //Raycast to nearest geometry, if any
             Raycast(Ray, out Shape FirstShape, out Vector3 FirstShapeHit, out Vector3 FirstShapeNormal);
-
             if (FirstShape != null)
             {
+                //Area lights
                 if (FirstShape.Material.Emission != Vector3.Zero)
                 {
                     return FirstShape.Material.Emission;
                 }
 
+                //Direct lighting, phong
                 Vector3 Direct = Vector3.Zero;
                 foreach (Light Light in Lights)
                 {
@@ -118,20 +140,17 @@ namespace Raytracer
                     }
                 }
 
+                //If we are about to hit max depth, no need to calculate indirect lighting
                 if (Bounces >= MaxBounces)
                 {
                     return (Direct * FirstShape.Material.Color) / Math.PI;
                 }
 
-                CreateCartesian(FirstShapeNormal, out Vector3 NT, out Vector3 NB);
-
+                //Indirect lighting using monte carlo path tracing
                 Vector3 Indirect = Vector3.Zero;
-                double PDF = 1.0 / (2.0 * Math.PI);
+                CreateCartesian(FirstShapeNormal, out Vector3 NT, out Vector3 NB);
                 for (int i = 0; i < Samples; i++)
                 {
-                    double R1 = Util.Rand.NextDouble();
-                    double R2 = Util.Rand.NextDouble();
-
                     Vector3 Sample = SampleHemisphere();
                     Vector3 SampleWorld = new Vector3(
                         Sample.X * NB.X + Sample.Y * FirstShapeNormal.X + Sample.Z * NT.X,
@@ -139,7 +158,7 @@ namespace Raytracer
                         Sample.X * NB.Z + Sample.Y * FirstShapeNormal.Z + Sample.Z * NT.Z);
                     Indirect += Math.Max(Vector3.Dot(SampleWorld, FirstShapeNormal), 0) * Trace(new Ray(FirstShapeHit + SampleWorld * 0.001, SampleWorld), Bounces + 1);
                 }
-                Indirect /= (float)Samples * PDF;
+                Indirect /= (float)Samples * (1.0 / (2.0 * Math.PI));
 
                 Result = (Direct + Indirect) * FirstShape.Material.Color / Math.PI;
             }
@@ -185,8 +204,8 @@ namespace Raytracer
 
         private Vector3 SampleHemisphere()
         {
-            double R1 = Util.Rand.NextDouble();
-            double R2 = Util.Rand.NextDouble();
+            double R1 = Util.Random.NextDouble();
+            double R2 = Util.Random.NextDouble();
             double SinTheta = Math.Sqrt(1 - R1 * R1);
             double Phi = 2 * Math.PI * R2;
             double X = SinTheta * Math.Cos(Phi);

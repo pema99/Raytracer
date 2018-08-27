@@ -5,11 +5,9 @@ namespace Raytracer
 {
     public static class Util
     {
-        public static Random Rand { get; set; }
-        static Util()
-        {
-            Rand = new Random();
-        }
+        [ThreadStatic]
+        private static Random __random;
+        public static Random Random => __random ?? (__random = new Random());
 
         public static bool SolveQuadratic(double A, double B, double C, out double T0, out double T1)
         {
