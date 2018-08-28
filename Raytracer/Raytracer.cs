@@ -44,18 +44,16 @@ namespace Raytracer
             };
             Shapes = new List<Shape>()
             {
-                new Sphere(new Material(Color.Red.ToVector3(), Vector3.Zero), new Vector3(-2.5, -1, 5), 1),
-                new Sphere(new Material(Color.Green.ToVector3(), Vector3.Zero), new Vector3(0, -1, 6), 1),
-                new Sphere(new Material(Color.Blue.ToVector3(), Vector3.Zero), new Vector3(2.5, -1, 5), 1),
+                new Sphere(new Material(Color.Red.ToVector3(), 1, 0.1, Vector3.Zero), new Vector3(-2.5, -1, 5), 1),
+                new Sphere(new Material(Color.Green.ToVector3(), 0.9, 0.1, Vector3.Zero), new Vector3(0, -1, 6), 1),
+                new Sphere(new Material(Color.Blue.ToVector3(), 1, 1, Vector3.Zero), new Vector3(2.5, -1, 5), 1),
 
-                new Plane(new Material(Color.LightGray.ToVector3(), Vector3.Zero), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
-                new Plane(new Material(Color.LightBlue.ToVector3(), Vector3.One), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
-                new Plane(new Material(Color.Green.ToVector3(), Vector3.Zero), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
-                new Plane(new Material(Color.Green.ToVector3(), Vector3.Zero), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
-                new Plane(new Material(Color.Pink.ToVector3(),  Vector3.Zero), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
-                new Plane(new Material(Color.LightSalmon.ToVector3(), Vector3.Zero), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
-
-                new Triangle(new Material(Color.Red.ToVector3(), Vector3.Zero), new Vector3(-2.5, 1, 5), new Vector3(2.5, 1, 5), new Vector3(0, 5, 5))
+                new Plane(new Material(Color.LightGray.ToVector3(), 0, 1, Vector3.Zero), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
+                new Plane(new Material(Color.LightBlue.ToVector3(), 0, 1, Vector3.One), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
+                new Plane(new Material(Color.Green.ToVector3(), 0, 1, Vector3.Zero), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
+                new Plane(new Material(Color.Green.ToVector3(), 0, 1, Vector3.Zero), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
+                new Plane(new Material(Color.Pink.ToVector3(),  0, 1, Vector3.Zero), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
+                new Plane(new Material(Color.LightSalmon.ToVector3(), 0, 1, Vector3.Zero), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
             };
         }
 
@@ -89,7 +87,7 @@ namespace Raytracer
                     RayDir.Normalize();
 
                     //Trace primary ray
-                    Framebuffer[x, y] = Trace(new Ray(Vector3.Zero, RayDir), 0);
+                    Framebuffer[x, y] = Trace(new Ray(Vector3.Zero, RayDir), Vector3.Zero, 0);
                 }
             }
         }
@@ -110,7 +108,7 @@ namespace Raytracer
             Render.Save(Path);
         }
 
-        private Vector3 Trace(Ray Ray, int Bounces)
+        private Vector3 Trace(Ray Ray, Vector3 ViewPosition, int Bounces)
         {
             Vector3 Result = Vector3.Zero;
 
@@ -151,6 +149,9 @@ namespace Raytracer
                 //Indirect lighting using monte carlo path tracing
                 Vector3 Indirect = Vector3.Zero;
                 CreateCartesian(FirstShapeNormal, out Vector3 NT, out Vector3 NB);
+
+                Vector3 ViewDirection = Vector3.Normalize(ViewPosition - FirstShapeHit);
+                Vector3 F0 = Vector3.Lerp(new Vector3(0.04), FirstShape.Material.Color, FirstShape.Material.Metalness);
                 for (int i = 0; i < Samples; i++)
                 {
                     Vector3 Sample = SampleHemisphere();
@@ -158,13 +159,30 @@ namespace Raytracer
                         Sample.X * NB.X + Sample.Y * FirstShapeNormal.X + Sample.Z * NT.X,
                         Sample.X * NB.Y + Sample.Y * FirstShapeNormal.Y + Sample.Z * NT.Y,
                         Sample.X * NB.Z + Sample.Y * FirstShapeNormal.Z + Sample.Z * NT.Z);
-                    Indirect += Math.Max(Vector3.Dot(SampleWorld, FirstShapeNormal), 0) * Trace(new Ray(FirstShapeHit + SampleWorld * 0.001, SampleWorld), Bounces + 1);
+                    SampleWorld.Normalize();
+
+                    Vector3 SampleRadiance = Trace(new Ray(FirstShapeHit + SampleWorld * 0.001, SampleWorld), FirstShapeHit, Bounces + 1);
+                    double CosTheta = Math.Max(Vector3.Dot(FirstShapeNormal, SampleWorld), 0);
+                    Vector3 Halfway = Vector3.Normalize(SampleWorld + ViewDirection);
+
+                    Vector3 Ks = FresnelSchlick(Math.Max(Vector3.Dot(Halfway, ViewDirection), 0.0), F0);
+                    Vector3 Kd = Vector3.One - Ks;
+
+                    Kd *= 1.0 - FirstShape.Material.Metalness;
+                    Vector3 Diffuse = Kd * FirstShape.Material.Color;
+
+                    double D = GGXDistribution(FirstShapeNormal, Halfway, FirstShape.Material.Roughness);
+                    double G = GeometrySmith(FirstShapeNormal, ViewDirection, SampleWorld, FirstShape.Material.Roughness);
+                    Vector3 SpecularNumerator = D * G * Ks;
+                    double SpecularDenominator = 4.0 * Math.Max(Vector3.Dot(FirstShapeNormal, ViewDirection), 0.0) * CosTheta + 0.001;
+                    Vector3 Specular = SpecularNumerator / SpecularDenominator;
+
+                    Indirect += (Diffuse / Math.PI + Specular) * SampleRadiance * CosTheta;
                 }
-                Indirect /= (float)Samples * (1.0 / (2.0 * Math.PI));
+                Indirect /= (double)Samples * (1.0 / (2.0 * Math.PI));
 
-                Result = (Direct + Indirect) * FirstShape.Material.Color / Math.PI;
+                Result = (Direct + Indirect);
             }
-
             return Result;
         }
 
@@ -191,15 +209,16 @@ namespace Raytracer
             return FirstShape != null;
         }
 
+        #region MonteCarlo
         private void CreateCartesian(Vector3 Normal, out Vector3 NT, out Vector3 NB)
         {
             if (Math.Abs(Normal.X) > Math.Abs(Normal.Y))
             {
-                NT = new Vector3(Normal.Z, 0, -Normal.X) / Math.Sqrt(Normal.X * Normal.X + Normal.Z * Normal.Z);
+                NT = Vector3.Normalize(new Vector3(Normal.Z, 0, -Normal.X));
             }
             else
             {
-                NT = new Vector3(0, -Normal.Z, Normal.Y) / Math.Sqrt(Normal.Y * Normal.Y + Normal.Z * Normal.Z);
+                NT = Vector3.Normalize(new Vector3(0, -Normal.Z, Normal.Y));
             }
             NB = Vector3.Cross(Normal, NT);
         }
@@ -214,5 +233,34 @@ namespace Raytracer
             double Z = SinTheta * Math.Sin(Phi);
             return new Vector3(X, R1, Z);
         }
+        #endregion
+
+        #region PBR
+        public double GGXDistribution(Vector3 Normal, Vector3 Halfway, double Roughness)
+        {
+            double Numerator = Math.Pow(Roughness, 2.0);
+            double Denominator = Math.Pow(Math.Max(Vector3.Dot(Normal, Halfway), 0), 2) * (Numerator - 1.0) + 1.0;
+            Denominator = Math.PI * Math.Pow(Denominator, 2.0);
+            return Numerator / Denominator;
+        }
+
+        public double GeometrySchlickGGX(Vector3 Normal, Vector3 View, double Roughness)
+        {
+            double Numerator = Math.Max(Vector3.Dot(Normal, View), 0);
+            double R = (Roughness * Roughness) / 8.0;
+            double Denominator = Numerator * (1.0 - R) + R;
+            return Numerator / Denominator;
+        }
+
+        public double GeometrySmith(Vector3 Normal, Vector3 View, Vector3 Light, double Roughness)
+        {
+            return GeometrySchlickGGX(Normal, View, Roughness) * GeometrySchlickGGX(Normal, Light, Roughness);
+        }
+
+        public Vector3 FresnelSchlick(double CosTheta, Vector3 F0)
+        {
+            return F0 + (Vector3.One - F0) * Math.Pow((1.0 - CosTheta), 5.0);
+        }
+        #endregion
     }
 }

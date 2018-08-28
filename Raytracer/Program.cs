@@ -6,9 +6,10 @@ namespace Raytracer
     {
         public static void Main(string[] Args)
         {
-            Raytracer Raytracer = new Raytracer(600, 400, 75, 1, 64, 8);
+            Raytracer Raytracer = new Raytracer(600, 400, 75, 2, 64, 12);
 
             Raytracer.Render();
+
             Raytracer.ExportToFile("Render.png");
 
             System.Diagnostics.Process.Start("Render.png");

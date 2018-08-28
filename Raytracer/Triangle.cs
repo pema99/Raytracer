@@ -48,6 +48,7 @@ namespace Raytracer
             //Triangle behind ray
             if (T < 0) return false;
 
+            //Find hit point
             Hit = Ray.Origin + T * Ray.Direction;
             Normal = this.Normal;
 
