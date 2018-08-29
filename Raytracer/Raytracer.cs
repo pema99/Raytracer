@@ -44,9 +44,9 @@ namespace Raytracer
             };
             Shapes = new List<Shape>()
             {
-                new Sphere(new Material(Color.Red.ToVector3(), 1, 0.1, Vector3.Zero), new Vector3(-2.5, -1, 5), 1),
-                new Sphere(new Material(Color.Green.ToVector3(), 0.9, 0.1, Vector3.Zero), new Vector3(0, -1, 6), 1),
-                new Sphere(new Material(Color.Blue.ToVector3(), 1, 1, Vector3.Zero), new Vector3(2.5, -1, 5), 1),
+                new Sphere(new Material(Color.White.ToVector3(), 0.99, 0.05, Vector3.Zero), new Vector3(-2.5, -1, 5), 1),
+                new Sphere(new Material(Color.Green.ToVector3(), 0.5, 0.3, Vector3.Zero), new Vector3(0, -1, 6), 1),
+                new Sphere(new Material(Color.Blue.ToVector3(), 0.1, 1, Vector3.Zero), new Vector3(2.5, -1, 5), 1),
 
                 new Plane(new Material(Color.LightGray.ToVector3(), 0, 1, Vector3.Zero), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
                 new Plane(new Material(Color.LightBlue.ToVector3(), 0, 1, Vector3.One), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
@@ -152,9 +152,14 @@ namespace Raytracer
 
                 Vector3 ViewDirection = Vector3.Normalize(ViewPosition - FirstShapeHit);
                 Vector3 F0 = Vector3.Lerp(new Vector3(0.04), FirstShape.Material.Color, FirstShape.Material.Metalness);
+
+                Vector3 TotalDiffuse = Vector3.Zero;
+                Vector3 TotalSpecular = Vector3.Zero;
                 for (int i = 0; i < Samples; i++)
                 {
-                    Vector3 Sample = SampleHemisphere();
+                    double R1 = Util.Random.NextDouble();
+                    double R2 = Util.Random.NextDouble();
+                    Vector3 Sample = SampleHemisphere(R1, R2);
                     Vector3 SampleWorld = new Vector3(
                         Sample.X * NB.X + Sample.Y * FirstShapeNormal.X + Sample.Z * NT.X,
                         Sample.X * NB.Y + Sample.Y * FirstShapeNormal.Y + Sample.Z * NT.Y,
@@ -169,7 +174,21 @@ namespace Raytracer
                     Vector3 Kd = Vector3.One - Ks;
 
                     Kd *= 1.0 - FirstShape.Material.Metalness;
-                    Vector3 Diffuse = Kd * FirstShape.Material.Color;
+                    Vector3 Diffuse = Kd * FirstShape.Material.Color / Math.PI;
+                    
+                    TotalDiffuse += Diffuse * SampleRadiance * CosTheta / (1.0 / (2.0 * Math.PI));
+                }
+                for (int i = 0; i < Samples; i++)
+                {
+                    double R1 = Util.Random.NextDouble();
+                    double R2 = Util.Random.NextDouble();
+                    Vector3 SampleWorld = ImportanceSampleGGX(R1, R2, Vector3.Reflect(-ViewDirection, FirstShapeNormal), FirstShape.Material.Roughness);
+
+                    Vector3 SampleRadiance = Trace(new Ray(FirstShapeHit + SampleWorld * 0.001, SampleWorld), FirstShapeHit, Bounces + 1);
+                    double CosTheta = Math.Max(Vector3.Dot(FirstShapeNormal, SampleWorld), 0);
+                    Vector3 Halfway = Vector3.Normalize(SampleWorld + ViewDirection);
+
+                    Vector3 Ks = FresnelSchlick(Math.Max(Vector3.Dot(Halfway, ViewDirection), 0.0), F0);
 
                     double D = GGXDistribution(FirstShapeNormal, Halfway, FirstShape.Material.Roughness);
                     double G = GeometrySmith(FirstShapeNormal, ViewDirection, SampleWorld, FirstShape.Material.Roughness);
@@ -177,13 +196,37 @@ namespace Raytracer
                     double SpecularDenominator = 4.0 * Math.Max(Vector3.Dot(FirstShapeNormal, ViewDirection), 0.0) * CosTheta + 0.001;
                     Vector3 Specular = SpecularNumerator / SpecularDenominator;
 
-                    Indirect += (Diffuse / Math.PI + Specular) * SampleRadiance * CosTheta;
+                    TotalSpecular += Specular * SampleRadiance * CosTheta / (1.0 / (2.0 * Math.PI));
                 }
-                Indirect /= (double)Samples * (1.0 / (2.0 * Math.PI));
+
+                TotalDiffuse /= (double)Samples;
+                TotalSpecular /= (double)Samples;
+                TotalDiffuse = Vector3.Zero;
+                Indirect = TotalDiffuse + TotalSpecular;
 
                 Result = (Direct + Indirect);
             }
             return Result;
+        }
+
+        Vector3 ImportanceSampleGGX(double R1, double R2, Vector3 N, double roughness)
+        {
+            double a = roughness * roughness;
+
+            double phi = 2.0 * Math.PI * R1;
+            double cosTheta = Math.Sqrt((1.0 - R2) / (1.0 + (a * a - 1.0) * R2));
+            double sinTheta = Math.Sqrt(1.0 - cosTheta * cosTheta);
+
+            // from spherical coordinates to cartesian coordinates
+            Vector3 H = new Vector3(Math.Cos(phi) * sinTheta, Math.Sin(phi) * sinTheta, cosTheta);
+
+            // from tangent-space vector to world-space sample vector
+            Vector3 up = Math.Abs(N.Z) < 0.999 ? new Vector3(0.0, 0.0, 1.0) : new Vector3(1.0, 0.0, 0.0);
+            Vector3 tangent = Vector3.Normalize(Vector3.Cross(up, N));
+            Vector3 bitangent = Vector3.Cross(N, tangent);
+
+            Vector3 sampleVec = tangent * H.X + bitangent * H.Y + N * H.Z;
+            return Vector3.Normalize(sampleVec);
         }
 
         private bool Raycast(Ray Ray, out Shape FirstShape, out Vector3 FirstShapeHit, out Vector3 FirstShapeNormal)
@@ -223,10 +266,8 @@ namespace Raytracer
             NB = Vector3.Cross(Normal, NT);
         }
 
-        private Vector3 SampleHemisphere()
+        private Vector3 SampleHemisphere(double R1, double R2)
         {
-            double R1 = Util.Random.NextDouble();
-            double R2 = Util.Random.NextDouble();
             double SinTheta = Math.Sqrt(1 - R1 * R1);
             double Phi = 2 * Math.PI * R2;
             double X = SinTheta * Math.Cos(Phi);
