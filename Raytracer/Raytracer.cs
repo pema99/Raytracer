@@ -44,7 +44,7 @@ namespace Raytracer
             };
             Shapes = new List<Shape>()
             {
-                new Sphere(new Material(Color.White.ToVector3(), 0.99, 0.05, Vector3.Zero), new Vector3(-2.5, -1, 5), 1),
+                new Sphere(new Material(Color.White.ToVector3(), 0.9, 0.2, Vector3.Zero), new Vector3(-2.5, -1, 5), 1),
                 new Sphere(new Material(Color.Green.ToVector3(), 0.5, 0.3, Vector3.Zero), new Vector3(0, -1, 6), 1),
                 new Sphere(new Material(Color.Blue.ToVector3(), 0.1, 1, Vector3.Zero), new Vector3(2.5, -1, 5), 1),
 
@@ -196,12 +196,12 @@ namespace Raytracer
                     double SpecularDenominator = 4.0 * Math.Max(Vector3.Dot(FirstShapeNormal, ViewDirection), 0.0) * CosTheta + 0.001;
                     Vector3 Specular = SpecularNumerator / SpecularDenominator;
 
-                    TotalSpecular += Specular * SampleRadiance * CosTheta / (1.0 / (2.0 * Math.PI));
+                    TotalSpecular += Specular * SampleRadiance * CosTheta;
                 }
 
                 TotalDiffuse /= (double)Samples;
                 TotalSpecular /= (double)Samples;
-                TotalDiffuse = Vector3.Zero;
+
                 Indirect = TotalDiffuse + TotalSpecular;
 
                 Result = (Direct + Indirect);
