@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{25F4160A-FA7F-42EC-BBBD-263E664D949F}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Raytracer</RootNamespace>
     <AssemblyName>Raytracer</AssemblyName>
@@ -53,6 +53,9 @@
     </ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup />
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="Disc.cs" />
     <Compile Include="Light.cs" />
@@ -66,6 +69,7 @@
     <Compile Include="Raytracer.cs" />
     <Compile Include="Shape.cs" />
     <Compile Include="Sphere.cs" />
+    <Compile Include="Triangle.cs" />
     <Compile Include="Util.cs" />
   </ItemGroup>
   <ItemGroup>
