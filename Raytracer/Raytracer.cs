@@ -44,9 +44,9 @@ namespace Raytracer
             };
             Shapes = new List<Shape>()
             {
-                new Sphere(new Material(Color.White.ToVector3(), 0.9, 0.2, Vector3.Zero), new Vector3(-2.5, -1, 5), 1),
-                new Sphere(new Material(Color.Green.ToVector3(), 0.5, 0.3, Vector3.Zero), new Vector3(0, -1, 6), 1),
-                new Sphere(new Material(Color.Blue.ToVector3(), 0.1, 1, Vector3.Zero), new Vector3(2.5, -1, 5), 1),
+                new Sphere(new Material(Color.White.ToVector3(), 1, 0.01, Vector3.Zero), new Vector3(-2.5, -1, 5), 1),
+                new Sphere(new Material(Color.Green.ToVector3(), 1, 0.3, Vector3.Zero), new Vector3(0, -1, 6), 1),
+                new Sphere(new Material(Color.Blue.ToVector3(), 0, 1, Vector3.Zero), new Vector3(2.5, -1, 5), 1),
 
                 new Plane(new Material(Color.LightGray.ToVector3(), 0, 1, Vector3.Zero), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
                 new Plane(new Material(Color.LightBlue.ToVector3(), 0, 1, Vector3.One), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
@@ -150,11 +150,13 @@ namespace Raytracer
                 Vector3 Indirect = Vector3.Zero;
                 CreateCartesian(FirstShapeNormal, out Vector3 NT, out Vector3 NB);
 
-                Vector3 ViewDirection = Vector3.Normalize(ViewPosition - FirstShapeHit);
-                Vector3 F0 = Vector3.Lerp(new Vector3(0.04), FirstShape.Material.Color, FirstShape.Material.Metalness);
-
                 Vector3 TotalDiffuse = Vector3.Zero;
                 Vector3 TotalSpecular = Vector3.Zero;
+
+                Vector3 ViewDirection = Vector3.Normalize(ViewPosition - FirstShapeHit);
+                Vector3 F0 = Vector3.Lerp(new Vector3(0.04), FirstShape.Material.Color, FirstShape.Material.Metalness);
+                Vector3 ReflectionDirection = Vector3.Reflect(-ViewDirection, FirstShapeNormal);
+
                 for (int i = 0; i < Samples; i++)
                 {
                     double R1 = Util.Random.NextDouble();
@@ -182,7 +184,7 @@ namespace Raytracer
                 {
                     double R1 = Util.Random.NextDouble();
                     double R2 = Util.Random.NextDouble();
-                    Vector3 SampleWorld = ImportanceSampleGGX(R1, R2, Vector3.Reflect(-ViewDirection, FirstShapeNormal), FirstShape.Material.Roughness);
+                    Vector3 SampleWorld = ImportanceSampleGGX(R1, R2, ReflectionDirection, FirstShape.Material.Roughness);
 
                     Vector3 SampleRadiance = Trace(new Ray(FirstShapeHit + SampleWorld * 0.001, SampleWorld), FirstShapeHit, Bounces + 1);
                     double CosTheta = Math.Max(Vector3.Dot(FirstShapeNormal, SampleWorld), 0);
@@ -196,7 +198,7 @@ namespace Raytracer
                     double SpecularDenominator = 4.0 * Math.Max(Vector3.Dot(FirstShapeNormal, ViewDirection), 0.0) * CosTheta + 0.001;
                     Vector3 Specular = SpecularNumerator / SpecularDenominator;
 
-                    TotalSpecular += Specular * SampleRadiance * CosTheta;
+                    TotalSpecular += Specular * SampleRadiance * CosTheta / (D * Vector3.Dot(FirstShapeNormal, Halfway) / (4 * Vector3.Dot(Halfway, ViewDirection))+0.0001);
                 }
 
                 TotalDiffuse /= (double)Samples;
@@ -207,26 +209,6 @@ namespace Raytracer
                 Result = (Direct + Indirect);
             }
             return Result;
-        }
-
-        Vector3 ImportanceSampleGGX(double R1, double R2, Vector3 N, double roughness)
-        {
-            double a = roughness * roughness;
-
-            double phi = 2.0 * Math.PI * R1;
-            double cosTheta = Math.Sqrt((1.0 - R2) / (1.0 + (a * a - 1.0) * R2));
-            double sinTheta = Math.Sqrt(1.0 - cosTheta * cosTheta);
-
-            // from spherical coordinates to cartesian coordinates
-            Vector3 H = new Vector3(Math.Cos(phi) * sinTheta, Math.Sin(phi) * sinTheta, cosTheta);
-
-            // from tangent-space vector to world-space sample vector
-            Vector3 up = Math.Abs(N.Z) < 0.999 ? new Vector3(0.0, 0.0, 1.0) : new Vector3(1.0, 0.0, 0.0);
-            Vector3 tangent = Vector3.Normalize(Vector3.Cross(up, N));
-            Vector3 bitangent = Vector3.Cross(N, tangent);
-
-            Vector3 sampleVec = tangent * H.X + bitangent * H.Y + N * H.Z;
-            return Vector3.Normalize(sampleVec);
         }
 
         private bool Raycast(Ray Ray, out Shape FirstShape, out Vector3 FirstShapeHit, out Vector3 FirstShapeNormal)
@@ -274,6 +256,26 @@ namespace Raytracer
             double Z = SinTheta * Math.Sin(Phi);
             return new Vector3(X, R1, Z);
         }
+
+        private Vector3 ImportanceSampleGGX(double R1, double R2, Vector3 ReflectionDirection, double Roughness)
+        {
+            double A = Math.Pow(Roughness, 2.0);
+
+            //Generate spherical
+            double Phi = 2.0 * Math.PI * R1;
+            double CosTheta = Math.Sqrt((1.0 - R2) / (1.0 + (A * A - 1.0) * R2));
+            double SinTheta = Math.Sqrt(1.0 - CosTheta * CosTheta);
+
+            //Spherical to cartesian
+            Vector3 H = new Vector3(Math.Cos(Phi) * SinTheta, Math.Sin(Phi) * SinTheta, CosTheta);
+
+            //Tangent-space to world-space
+            Vector3 Up = Math.Abs(ReflectionDirection.Z) < 0.999 ? new Vector3(0.0, 0.0, 1.0) : new Vector3(1.0, 0.0, 0.0);
+            Vector3 Tangent = Vector3.Normalize(Vector3.Cross(Up, ReflectionDirection));
+            Vector3 BiTangent = Vector3.Cross(ReflectionDirection, Tangent);
+
+            return Vector3.Normalize(Tangent * H.X + BiTangent * H.Y + ReflectionDirection * H.Z);
+        }
         #endregion
 
         #region PBR
@@ -281,7 +283,7 @@ namespace Raytracer
         {
             double Numerator = Math.Pow(Roughness, 2.0);
             double Denominator = Math.Pow(Math.Max(Vector3.Dot(Normal, Halfway), 0), 2) * (Numerator - 1.0) + 1.0;
-            Denominator = Math.PI * Math.Pow(Denominator, 2.0);
+            Denominator = Math.Max(Math.PI * Math.Pow(Denominator, 2.0), 1e-7);
             return Numerator / Denominator;
         }
 
