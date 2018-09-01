@@ -2,13 +2,13 @@
 A path tracer using monte carlo integration methods and physically based renderring.
 
 ### What can it do?
-Render simple scenes,
+Render simple scenes.
 
-Specular, diffuse controllable via roughness and metalness parameters,
+Specular, diffuse controllable via roughness and metalness parameters.
 
-Meshes, spheres, rectangles,
+Meshes, spheres, rectangles.
 
-Cool,
+Cool.
 
 ### Why?
 Because I am bored.
