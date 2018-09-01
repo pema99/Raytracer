@@ -44,17 +44,49 @@ namespace Raytracer
             };
             Shapes = new List<Shape>()
             {
-                new Sphere(new Material(Color.White.ToVector3(), 1, 0.01, Vector3.Zero), new Vector3(-2.5, -1, 5), 1),
-                new Sphere(new Material(Color.Green.ToVector3(), 1, 0.3, Vector3.Zero), new Vector3(0, -1, 6), 1),
-                new Sphere(new Material(Color.Blue.ToVector3(), 0, 1, Vector3.Zero), new Vector3(2.5, -1, 5), 1),
+                new TriangleMesh(new Material(Color.Red.ToVector3(), 0, 1, Vector3.Zero),
+                    new Vector3[] {
+                        new Vector3(-1.000000, -1.000000, 1.000000),
+                        new Vector3(-1.000000, 1.000000, 1.000000),
+                        new Vector3(-1.000000, 1.000000, -1.000000),
+                        new Vector3(1.000000, 1.000000, 1.000000),
+                        new Vector3(1.000000, 1.000000, -1.000000),
+                        new Vector3(1.000000, -1.000000, 1.000000),
+                        new Vector3(1.000000, -1.000000, -1.000000),
+                        new Vector3(-1.000000, -1.000000, -1.000000)
+                    },
+                    new int[] {
+                        0, 1, 2,
+                        1, 3, 4,
+                        3, 5, 6,
+                        0, 7, 5,
+                        7, 2, 4,
+                        5, 3, 1,
+                        7, 0, 2,
+                        2, 1, 4,
+                        4, 3, 6,
+                        5, 7, 6,
+                        6, 7, 4,
+                        0, 5, 1
+                    }),
 
-                new Plane(new Material(Color.LightGray.ToVector3(), 0, 1, Vector3.Zero), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
+                //new Sphere(new Material(Color.White.ToVector3(), 1, 0.01, Vector3.Zero), new Vector3(-2.5, -1, 5), 1),
+                //new Sphere(new Material(Color.Green.ToVector3(), 1, 0.3, Vector3.Zero), new Vector3(0, -1, 6), 1),
+                //new Sphere(new Material(Color.Blue.ToVector3(), 0, 1, Vector3.Zero), new Vector3(2.5, -1, 5), 1),
+
+                new Plane(new Material(Color.LightGray.ToVector3(), 1, 0.02, Vector3.Zero), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
                 new Plane(new Material(Color.LightBlue.ToVector3(), 0, 1, Vector3.One), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
                 new Plane(new Material(Color.Green.ToVector3(), 0, 1, Vector3.Zero), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
                 new Plane(new Material(Color.Green.ToVector3(), 0, 1, Vector3.Zero), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
                 new Plane(new Material(Color.Pink.ToVector3(),  0, 1, Vector3.Zero), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
                 new Plane(new Material(Color.LightSalmon.ToVector3(), 0, 1, Vector3.Zero), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
             };
+
+            Matrix M = Matrix.CreateTranslation(2, -1, 6);
+            for (int i = 0; i < (Shapes[0] as TriangleMesh).Vertices.Length; i++)
+            {
+                (Shapes[0] as TriangleMesh).Vertices[i] = Vector3.Transform((Shapes[0] as TriangleMesh).Vertices[i], M);
+            }
         }
 
         public void Render()
@@ -100,8 +132,11 @@ namespace Raytracer
             {
                 for (int y = 0; y < Height; y++)
                 {
+                    //Tone mapping
                     Mapped = Framebuffer[x, y] / (Framebuffer[x, y] + Vector3.One);
                     Mapped = new Vector3(Math.Pow(Mapped.X, 1.0 / Gamma), Math.Pow(Mapped.Y, 1.0 / Gamma), Math.Pow(Mapped.Z, 1.0 / Gamma));
+
+                    //Draw
                     Render.SetPixel(x, y, Mapped.ToColor());
                 }
             }

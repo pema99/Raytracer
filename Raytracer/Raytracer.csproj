@@ -61,7 +61,9 @@
     <Compile Include="Light.cs" />
     <Compile Include="Material.cs" />
     <Compile Include="Math\MathHelper.cs" />
+    <Compile Include="Math\Matrix.cs" />
     <Compile Include="Math\Vector3.cs" />
+    <Compile Include="TriangleMesh.cs" />
     <Compile Include="Plane.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -325,7 +325,6 @@ namespace Raytracer
             return sb.ToString();
         }
 
-        /*#region Transform
         public static Vector3 Transform(Vector3 position, Matrix matrix)
         {
             Transform(ref position, ref matrix, out position);
@@ -334,30 +333,13 @@ namespace Raytracer
 
         public static void Transform(ref Vector3 position, ref Matrix matrix, out Vector3 result)
         {
-            var x = (position.X * matrix.M11) + (position.Y * matrix.M21) + (position.Z * matrix.M31) + matrix.M41;
-            var y = (position.X * matrix.M12) + (position.Y * matrix.M22) + (position.Z * matrix.M32) + matrix.M42;
-            var z = (position.X * matrix.M13) + (position.Y * matrix.M23) + (position.Z * matrix.M33) + matrix.M43;
+            double x = (position.X * matrix.M11) + (position.Y * matrix.M21) + (position.Z * matrix.M31) + matrix.M41;
+            double y = (position.X * matrix.M12) + (position.Y * matrix.M22) + (position.Z * matrix.M32) + matrix.M42;
+            double z = (position.X * matrix.M13) + (position.Y * matrix.M23) + (position.Z * matrix.M33) + matrix.M43;
+            result = Vector3.Zero;
             result.X = x;
             result.Y = y;
             result.Z = z;
-        }
-
-        public static Vector3 Transform(Vector3 value, Quaternion rotation)
-        {
-            Vector3 result;
-            Transform(ref value, ref rotation, out result);
-            return result;
-        }
-
-        public static void Transform(ref Vector3 value, ref Quaternion rotation, out Vector3 result)
-        {
-            double x = 2 * (rotation.Y * value.Z - rotation.Z * value.Y);
-            double y = 2 * (rotation.Z * value.X - rotation.X * value.Z);
-            double z = 2 * (rotation.X * value.Y - rotation.Y * value.X);
-
-            result.X = value.X + x * rotation.W + (rotation.Y * z - rotation.Z * y);
-            result.Y = value.Y + y * rotation.W + (rotation.Z * x - rotation.X * z);
-            result.Z = value.Z + z * rotation.W + (rotation.X * y - rotation.Y * x);
         }
 
         public static void Transform(Vector3[] sourceArray, int sourceIndex, ref Matrix matrix, Vector3[] destinationArray, int destinationIndex, int length)
@@ -384,35 +366,6 @@ namespace Raytracer
             }
         }
 
-        public static void Transform(Vector3[] sourceArray, int sourceIndex, ref Quaternion rotation, Vector3[] destinationArray, int destinationIndex, int length)
-        {
-            if (sourceArray == null)
-                throw new ArgumentNullException("sourceArray");
-            if (destinationArray == null)
-                throw new ArgumentNullException("destinationArray");
-            if (sourceArray.Length < sourceIndex + length)
-                throw new ArgumentException("Source array length is lesser than sourceIndex + length");
-            if (destinationArray.Length < destinationIndex + length)
-                throw new ArgumentException("Destination array length is lesser than destinationIndex + length");
-
-            // TODO: Are there options on some platforms to implement a vectorized version of this?
-
-            for (var i = 0; i < length; i++)
-            {
-                var position = sourceArray[sourceIndex + i];
-
-                double x = 2 * (rotation.Y * position.Z - rotation.Z * position.Y);
-                double y = 2 * (rotation.Z * position.X - rotation.X * position.Z);
-                double z = 2 * (rotation.X * position.Y - rotation.Y * position.X);
-
-                destinationArray[destinationIndex + i] =
-                    new Vector3(
-                        position.X + x * rotation.W + (rotation.Y * z - rotation.Z * y),
-                        position.Y + y * rotation.W + (rotation.Z * x - rotation.X * z),
-                        position.Z + z * rotation.W + (rotation.X * y - rotation.Y * x));
-            }
-        }
-
         public static void Transform(Vector3[] sourceArray, ref Matrix matrix, Vector3[] destinationArray)
         {
             if (sourceArray == null)
@@ -435,35 +388,6 @@ namespace Raytracer
             }
         }
 
-        public static void Transform(Vector3[] sourceArray, ref Quaternion rotation, Vector3[] destinationArray)
-        {
-            if (sourceArray == null)
-                throw new ArgumentNullException("sourceArray");
-            if (destinationArray == null)
-                throw new ArgumentNullException("destinationArray");
-            if (destinationArray.Length < sourceArray.Length)
-                throw new ArgumentException("Destination array length is lesser than source array length");
-
-            // TODO: Are there options on some platforms to implement a vectorized version of this?
-
-            for (var i = 0; i < sourceArray.Length; i++)
-            {
-                var position = sourceArray[i];
-
-                double x = 2 * (rotation.Y * position.Z - rotation.Z * position.Y);
-                double y = 2 * (rotation.Z * position.X - rotation.X * position.Z);
-                double z = 2 * (rotation.X * position.Y - rotation.Y * position.X);
-
-                destinationArray[i] =
-                    new Vector3(
-                        position.X + x * rotation.W + (rotation.Y * z - rotation.Z * y),
-                        position.Y + y * rotation.W + (rotation.Z * x - rotation.X * z),
-                        position.Z + z * rotation.W + (rotation.X * y - rotation.Y * x));
-            }
-        }
-        #endregion
-
-        #region TransformNormal
         public static Vector3 TransformNormal(Vector3 normal, Matrix matrix)
         {
             TransformNormal(ref normal, ref matrix, out normal);
@@ -475,6 +399,7 @@ namespace Raytracer
             var x = (normal.X * matrix.M11) + (normal.Y * matrix.M21) + (normal.Z * matrix.M31);
             var y = (normal.X * matrix.M12) + (normal.Y * matrix.M22) + (normal.Z * matrix.M32);
             var z = (normal.X * matrix.M13) + (normal.Y * matrix.M23) + (normal.Z * matrix.M33);
+            result = Vector3.Zero;
             result.X = x;
             result.Y = y;
             result.Z = z;
@@ -528,8 +453,6 @@ namespace Raytracer
                         (normal.X*matrix.M13) + (normal.Y*matrix.M23) + (normal.Z*matrix.M33));
             }
         }
-
-        #endregion*/
 
         public void Deconstruct(out double x, out double y, out double z)
         {

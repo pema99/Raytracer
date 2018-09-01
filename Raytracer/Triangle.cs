@@ -28,46 +28,50 @@ namespace Raytracer
         {
             Hit = Vector3.Zero;
             Normal = Vector3.Zero;
-
+            
             Vector3 A = V1 - V0;
             Vector3 B = V2 - V0;
+            Vector3 N = this.Normal;
 
-            Vector3 N = Vector3.Cross(A, B);
-            double Denom = Vector3.Dot(N, N);
-
-            //Parallel case
-            double NdotRayDirection = Vector3.Dot(N, Ray.Direction);
-            if (Math.Abs(NdotRayDirection) < 1e-8)
+            //Backface culling
+            if (Vector3.Dot(N, Ray.Direction) > 0)
             {
                 return false;
             }
 
-            double D = Vector3.Dot(N, V0);
-            double T = (Vector3.Dot(N, Ray.Origin) + D) / NdotRayDirection;
+            //Triangle's plane intersection
+            double Denom = Vector3.Dot(-N, Ray.Direction);
+            if (Denom <= 1e-6)
+            {
+                return false;
+            }
+            Vector3 RayToPlane = V0 - Ray.Origin;
+            double T = Vector3.Dot(RayToPlane, -N) / Denom;
 
             //Triangle behind ray
-            if (T < 0) return false;
+            if (T < 0)
+            {
+                return false;
+            }
 
             //Find hit point
-            Hit = Ray.Origin + T * Ray.Direction;
-            Normal = this.Normal;
+            Vector3 CurrentHit = Ray.Origin + T * Ray.Direction;
 
             //Check if hit is in triangle
-            Vector3 C;
             double U, V;
 
             //Edge A
             Vector3 EdgeA = V1 - V0;
-            Vector3 VPA = Hit - V0;
-            C = Vector3.Cross(EdgeA, VPA);
+            Vector3 VPA = CurrentHit - V0;
+            Vector3 C = Vector3.Cross(EdgeA, VPA);
             if (Vector3.Dot(N, C) < 0)
             {
                 return false;
-            } 
+            }
 
             //Edge B
             Vector3 EdgeB = V2 - V1;
-            Vector3 VPB = Hit - V1;
+            Vector3 VPB = CurrentHit - V1;
             C = Vector3.Cross(EdgeB, VPB);
             if ((U = Vector3.Dot(N, C)) < 0)
             {
@@ -76,16 +80,20 @@ namespace Raytracer
 
             //Edge C
             Vector3 EdgeC = V0 - V2;
-            Vector3 VPC = Hit - V2;
+            Vector3 VPC = CurrentHit - V2;
             C = Vector3.Cross(EdgeC, VPC);
             if ((V = Vector3.Dot(N, C)) < 0)
             {
                 return false;
             }
 
-            //TODO: Use UV's
-            U /= Denom;
-            V /= Denom;
+            //Scale UV's
+            double UVScale = Vector3.Dot(N, N);
+            U /= UVScale;
+            V /= UVScale;
+
+            Hit = CurrentHit;
+            Normal = this.Normal;
 
             return true;
         }

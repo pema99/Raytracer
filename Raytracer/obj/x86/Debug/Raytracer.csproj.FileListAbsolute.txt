@@ -3,9 +3,9 @@ C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Ray
 C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\obj\x86\Debug\Raytracer.csproj.CoreCompileInputs.cache
 C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\obj\x86\Debug\Raytracer.exe
 C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\obj\x86\Debug\Raytracer.pdb
-C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\obj\x86\Debug\Raytracer.csprojAssemblyReference.cache
 C:\Users\Pema Malling\Desktop\Repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Raytracer.exe
 C:\Users\Pema Malling\Desktop\Repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Raytracer.pdb
 C:\Users\Pema Malling\Desktop\Repos\Raytracer\Raytracer\obj\x86\Debug\Raytracer.csprojResolveAssemblyReference.cache
 C:\Users\Pema Malling\Desktop\Repos\Raytracer\Raytracer\obj\x86\Debug\Raytracer.exe
 C:\Users\Pema Malling\Desktop\Repos\Raytracer\Raytracer\obj\x86\Debug\Raytracer.pdb
+C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\obj\x86\Debug\Raytracer.csprojAssemblyReference.cache
