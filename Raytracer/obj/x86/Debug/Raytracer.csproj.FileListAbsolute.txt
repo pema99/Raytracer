@@ -10,3 +10,10 @@ C:\Users\Pema Malling\Desktop\Repos\Raytracer\Raytracer\obj\x86\Debug\Raytracer.
 C:\Users\Pema Malling\Desktop\Repos\Raytracer\Raytracer\obj\x86\Debug\Raytracer.pdb
 C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\obj\x86\Debug\Raytracer.csprojAssemblyReference.cache
 C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\cube.ply
+C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\monkey.ply
+C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\bunny.ply
+C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\monkey255.ply
+C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\cylinder.ply
+C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\cylindersmooth.ply
+C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\cylinderhighpoly.ply
+C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\smoothcube.ply

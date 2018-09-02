@@ -13,40 +13,22 @@ namespace Raytracer
         public override Material Material { get; set; }
         public Vector3[] Vertices { get; set; }
         public int[] VertexIndices { get; set; }
-        public Vector3[] Normals { get; set; }
+        public Vector3[] FaceNormals { get; set; }
+        public Vector3[] VertexNormals { get; set; }
+        public bool SmoothShading { get; set; }
         public int NumFaces { get; private set; }
         public Vector3 AABBMin { get; private set; }
         public Vector3 AABBMax { get; private set; }
 
-        public TriangleMesh(Material Material, Vector3[] Vertices, int[] VertexIndices, Vector3[] Normals)
+        public TriangleMesh(Material Material, string Path, bool SmoothShading = true)
         {
             this.Material = Material;
-            this.Vertices = Vertices;
-            this.VertexIndices = VertexIndices;
-            this.Normals = Normals;
-            this.NumFaces = VertexIndices.Length / 3;
-
-            CalculateNormals();
-            CalculateAABB();
-        }
-
-        public TriangleMesh(Material Material, Vector3[] Vertices, int[] VertexIndices)
-        {
-            this.Material = Material;
-            this.Vertices = Vertices;
-            this.VertexIndices = VertexIndices;
-            this.NumFaces = VertexIndices.Length / 3;
-
-            CalculateNormals();
-            CalculateAABB();
-        }
-
-        public TriangleMesh(Material Material, string Path)
-        {
-            this.Material = Material;
+            this.SmoothShading = SmoothShading;
 
             StreamReader Reader = new StreamReader(Path);
             string Line;
+
+            //Read header
             while ((Line = Reader.ReadLine()) != null)
             {
                 string[] Tokens = Line.Split(' ');
@@ -67,12 +49,21 @@ namespace Raytracer
                     break;
                 }
             }
+
+            //Import vertex normals if they are specified
+            this.VertexNormals = new Vector3[Vertices.Length];
             for (int i = 0; i < Vertices.Length; i++)
             {
                 Line = Reader.ReadLine();
                 string[] Tokens = Line.Split(' ');
                 Vertices[i] = new Vector3(double.Parse(Tokens[0], CultureInfo.InvariantCulture), double.Parse(Tokens[1], CultureInfo.InvariantCulture), double.Parse(Tokens[2], CultureInfo.InvariantCulture));
+                if (Tokens.Length > 3)
+                {
+                    VertexNormals[i] = new Vector3(double.Parse(Tokens[3], CultureInfo.InvariantCulture), double.Parse(Tokens[4], CultureInfo.InvariantCulture), double.Parse(Tokens[5], CultureInfo.InvariantCulture));
+                }
             }
+
+            //Import faces
             for (int i = 0; i < NumFaces; i++)
             {
                 Line = Reader.ReadLine();
@@ -82,31 +73,31 @@ namespace Raytracer
                 VertexIndices[i * 3 + 2] = int.Parse(Tokens[3]);
             }
 
+            //Calculate face normals and bounding box
             CalculateNormals();
             CalculateAABB();
         }
 
         public override bool Intersect(Ray Ray, out Vector3 Hit, out Vector3 Normal)
         {
-            double MinDistance = double.MaxValue;
             Hit = Vector3.Zero;
             Normal = Vector3.Zero;
-            double MinU = 0, MinV = 0;
 
+            //If ray doesn't intersect bounding box we can return
             if (!IntersectAABB(Ray))
             {
                 return false;
             }
 
+            //Check intersection for all faces
+            double MinDistance = double.MaxValue;
             for (int i = 0; i < NumFaces; i++)
             {
                 Vector3 V0 = Vertices[VertexIndices[i * 3]];
                 Vector3 V1 = Vertices[VertexIndices[i * 3 + 1]];
                 Vector3 V2 = Vertices[VertexIndices[i * 3 + 2]];
 
-                Vector3 A = V1 - V0;
-                Vector3 B = V2 - V0;
-                Vector3 N = Normals[i];
+                Vector3 N = FaceNormals[i];
 
                 //Backface culling
                 if (Vector3.Dot(N, Ray.Direction) > 0)
@@ -162,10 +153,14 @@ namespace Raytracer
                     continue;
                 }
 
-                //Scale UV's
-                double UVScale = Vector3.Dot(N, N);
-                CurrentU /= UVScale;
-                CurrentV /= UVScale;
+                /*double U = 0, V = 0;
+                Vector3 PVec = Vector3.Cross(Ray.Direction, B);
+                double Det = Vector3.Dot(A, PVec);
+                double InvDet = 1.0 / Det;
+                Vector3 TVec = Ray.Origin - V0;
+                U = Vector3.Dot(TVec, PVec) * InvDet;
+                Vector3 QVec = Vector3.Cross(TVec, A);
+                V = Vector3.Dot(Ray.Direction, QVec) * InvDet;*/
 
                 //Only want closest intersection
                 double CurrentDistance = (CurrentHit - Ray.Origin).Length();
@@ -173,20 +168,29 @@ namespace Raytracer
                 {
                     MinDistance = CurrentDistance;
                     Hit = CurrentHit;
-                    Normal = N;
-                    MinU = CurrentU;
-                    MinV = CurrentV;
+
+                    //Area of triangles
+                    double AreaABC = Vector3.Dot(N, Vector3.Cross((V1 - V0), (V2 - V0)));
+                    double AreaPBC = Vector3.Dot(N, Vector3.Cross((V1 - CurrentHit), (V2 - CurrentHit)));
+                    double AreaPCA = Vector3.Dot(N, Vector3.Cross((V2 - CurrentHit), (V0 - CurrentHit)));
+
+                    //Barycentric coords
+                    double BaryAlpha = AreaPBC / AreaABC;
+                    double BaryBeta = AreaPCA / AreaABC;
+                    double BaryGamma = 1.0 - BaryAlpha - BaryBeta;
+
+                    if (SmoothShading)
+                    {
+                        Normal = Vector3.Normalize(BaryAlpha * VertexNormals[VertexIndices[i * 3]] + BaryBeta * VertexNormals[VertexIndices[i * 3 + 1]] + BaryGamma * VertexNormals[VertexIndices[i * 3 + 2]]);
+                    }
+                    else
+                    {
+                        Normal = N;
+                    }
                 }
             }
 
-            if (MinDistance < double.MaxValue)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return MinDistance < double.MaxValue;
         }
 
         public void Transform(Matrix TransformMatrix)
@@ -201,14 +205,16 @@ namespace Raytracer
         
         public void CalculateNormals()
         {
-            Normals = new Vector3[NumFaces];
-            for (int i = 0; i < Normals.Length; i++)
+            FaceNormals = new Vector3[NumFaces];
+            for (int i = 0; i < FaceNormals.Length; i++)
             {
                 Vector3 V0 = Vertices[VertexIndices[i * 3]];
                 Vector3 V1 = Vertices[VertexIndices[i * 3 + 1]];
                 Vector3 V2 = Vertices[VertexIndices[i * 3 + 2]];
 
-                Normals[i] = Vector3.Normalize(Vector3.Cross(V1 - V0, V2 - V0));
+                FaceNormals[i] = Vector3.Normalize(Vector3.Cross(V1 - V0, V2 - V0));
+
+                //TODO: Recalculate vertex normals
             }
         }
 

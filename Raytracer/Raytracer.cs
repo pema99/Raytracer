@@ -44,7 +44,7 @@ namespace Raytracer
             };
             Shapes = new List<Shape>()
             {
-                new TriangleMesh(new Material(Color.DarkGreen.ToVector3(), 0, 0.8, Vector3.Zero), "Assets/bunny.ply"),
+                new TriangleMesh(new Material(Color.DarkGreen.ToVector3(), 1, 0.02, Vector3.Zero), "Assets/cylinder.ply"),
 
                 new Sphere(new Material(Color.White.ToVector3(), 1, 0.01, Vector3.Zero), new Vector3(-2.5, -1, 5), 1),
                 //new Sphere(new Material(Color.Green.ToVector3(), 1, 0.3, Vector3.Zero), new Vector3(0, -1, 6), 1),
@@ -55,10 +55,10 @@ namespace Raytracer
                 new Plane(new Material(Color.Green.ToVector3(), 0, 1, Vector3.Zero), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
                 new Plane(new Material(Color.Green.ToVector3(), 0, 1, Vector3.Zero), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
                 new Plane(new Material(Color.Pink.ToVector3(),  0, 1, Vector3.Zero), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
-                new Plane(new Material(Color.LightSalmon.ToVector3(), 0, 1, Vector3.Zero), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
+                new Plane(new Material(Color.Black.ToVector3(), 0, 1, Vector3.Zero), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
             };
 
-            (Shapes[0] as TriangleMesh).Transform(Matrix.CreateScale(1.3) * Matrix.CreateTranslation(0, -1, 4));
+            (Shapes[0] as TriangleMesh).Transform(Matrix.CreateScale(1) * Matrix.CreateTranslation(0, -1, 6));
         }
 
         public void Render()
