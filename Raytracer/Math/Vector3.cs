@@ -76,6 +76,24 @@ namespace Raytracer
         public double Y { get; set; }
         public double Z { get; set; }
 
+        public double this[int i]
+        {
+            get
+            {
+                if (i == 0) return X;
+                if (i == 1) return Y;
+                if (i == 2) return Z;
+                throw new Exception("Not a valid index");
+            }
+            set
+            {
+                if (i == 0) X = value;
+                else if (i == 1) Y = value;
+                else if (i == 2) Z = value;
+                else throw new Exception("Not a valid index");
+            }
+        }
+
         public Vector3(double x, double y, double z)
         {
             this.X = x;

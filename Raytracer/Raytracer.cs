@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
 
@@ -15,13 +16,14 @@ namespace Raytracer
         public int Threads { get; private set; }
 
         private Vector3[,] Framebuffer { get; set; }
-        private List<Light> Lights { get; set; }
         private List<Shape> Shapes { get; set; }
 
         private double InvWidth { get; set; }
         private double InvHeight { get; set; }
         private double AspectRatio { get; set; }
         private double ViewAngle { get; set; }
+        
+        private int[] SamplesPerBounce { get; set; }
 
         public Raytracer(int Width, int Height, double FOV, int MaxBounces, int Samples, int Threads)
         {
@@ -38,17 +40,28 @@ namespace Raytracer
             this.AspectRatio = (double)Width / (double)Height;
             this.ViewAngle = Math.Tan(MathHelper.Pi * 0.5 * FOV / 180.0);
 
-            Lights = new List<Light>()
+            //Calculate samples per bounce, exponential falloff
+            this.SamplesPerBounce = new int[MaxBounces];
+            double DecimalMargin = 0;
+            for (int i = 0; i < MaxBounces; i++)
             {
-                //new Light(new Vector3(0, 2, 4), 10, Color.White.ToVector3()),
-            };
+                double CurrentSamples = Samples * Math.Pow(0.5, (i + 1 - (i == MaxBounces - 1 ? 1 : 0)));
+                DecimalMargin += CurrentSamples - (int)CurrentSamples;
+                SamplesPerBounce[i] = (int)CurrentSamples;
+            }
+            for (int i = 0; i < DecimalMargin; i++)
+            {
+                SamplesPerBounce[i]++;
+            }
+
+            //Setup scene
             Shapes = new List<Shape>()
             {
-                new TriangleMesh(new Material(Color.DarkGreen.ToVector3(), 1, 0.02, Vector3.Zero), "Assets/cylinder.ply"),
+                new TriangleMesh(new Material(Color.DarkGreen.ToVector3(), 1, 0.02, Vector3.Zero), Matrix.CreateScale(2) * Matrix.CreateTranslation(0, 0, 6), "Assets/monkeysmooth.ply"),
 
-                new Sphere(new Material(Color.White.ToVector3(), 1, 0.01, Vector3.Zero), new Vector3(-2.5, -1, 5), 1),
+                new Sphere(new Material(Color.Red.ToVector3(), 1, 0.4, Vector3.Zero), new Vector3(-2.5, -1, 5), 1),
                 //new Sphere(new Material(Color.Green.ToVector3(), 1, 0.3, Vector3.Zero), new Vector3(0, -1, 6), 1),
-                new Sphere(new Material(Color.Blue.ToVector3(), 0, 1, Vector3.Zero), new Vector3(2.5, -1, 5), 1),
+                new Sphere(new Material(Color.Blue.ToVector3(), 0, 0.4, Vector3.Zero), new Vector3(2.5, -1, 5), 1),
 
                 new Plane(new Material(Color.LightGray.ToVector3(), 0, 1, Vector3.Zero), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
                 new Plane(new Material(Color.LightBlue.ToVector3(), 0, 1, Vector3.One), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
@@ -57,8 +70,6 @@ namespace Raytracer
                 new Plane(new Material(Color.Pink.ToVector3(),  0, 1, Vector3.Zero), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
                 new Plane(new Material(Color.Black.ToVector3(), 0, 1, Vector3.Zero), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
             };
-
-            (Shapes[0] as TriangleMesh).Transform(Matrix.CreateScale(1) * Matrix.CreateTranslation(0, -1, 6));
         }
 
         public void Render()
@@ -115,6 +126,7 @@ namespace Raytracer
             Render.Save(Path);
         }
 
+        #region Raytracing
         private Vector3 Trace(Ray Ray, Vector3 ViewPosition, int Bounces)
         {
             Vector3 Result = Vector3.Zero;
@@ -129,42 +141,42 @@ namespace Raytracer
                     return FirstShape.Material.Emission;
                 }
 
-                //Direct lighting, phong
-                Vector3 Direct = Vector3.Zero;
-                foreach (Light Light in Lights)
-                {
-                    Vector3 ShadowRayDirection = Light.Origin - FirstShapeHit;
-                    ShadowRayDirection.Normalize();
-                    Ray ShadowRay = new Ray(FirstShapeHit + FirstShapeNormal * 0.001, ShadowRayDirection);
-                    Raycast(ShadowRay, out Shape FirstShadow, out Vector3 FirstShadowHit, out Vector3 FirstShadowNormal);
-
-                    if (FirstShadow == null || FirstShadow == FirstShape || (FirstShadowHit - FirstShapeHit).Length() > (Light.Origin - FirstShapeHit).Length())
-                    {
-                        double Distance = (Light.Origin - FirstShapeHit).Length();
-                        double Attenuation = 1.0 / (Distance * Distance);
-                        double CosTheta = Math.Max(Vector3.Dot(FirstShapeNormal, ShadowRayDirection), 0);
-                        Direct = Light.Intensity * Light.Color * CosTheta * Attenuation;
-                    }
-                }
-
                 //If we are about to hit max depth, no need to calculate indirect lighting
                 if (Bounces >= MaxBounces)
                 {
-                    return (Direct * FirstShape.Material.Color) / Math.PI;
+                    return Vector3.Zero;
                 }
 
                 //Indirect lighting using monte carlo path tracing
                 Vector3 Indirect = Vector3.Zero;
-                CreateCartesian(FirstShapeNormal, out Vector3 NT, out Vector3 NB);
 
                 Vector3 TotalDiffuse = Vector3.Zero;
                 Vector3 TotalSpecular = Vector3.Zero;
 
                 Vector3 ViewDirection = Vector3.Normalize(ViewPosition - FirstShapeHit);
                 Vector3 F0 = Vector3.Lerp(new Vector3(0.04), FirstShape.Material.Color, FirstShape.Material.Metalness);
-                Vector3 ReflectionDirection = Vector3.Reflect(-ViewDirection, FirstShapeNormal);
 
-                for (int i = 0; i < Samples; i++)
+                double TotalSamples = SamplesPerBounce[Bounces];
+                double HalfSamples = TotalSamples * 0.5;
+                double MetalSamplesOffset = (TotalSamples * 0.5 * FirstShape.Material.Metalness);
+                int DiffuseSamples = (int)(HalfSamples - MetalSamplesOffset);
+                int SpecularSamples = (int)(HalfSamples + MetalSamplesOffset);
+
+                Vector3 NT = Vector3.Zero;
+                Vector3 NB = Vector3.Zero;
+                if(DiffuseSamples > 0)
+                {
+                    CreateCartesian(FirstShapeNormal, out NT, out NB);
+                }
+
+                Vector3 ReflectionDirection = Vector3.Zero;
+                if (SpecularSamples > 0)
+                {
+                    ReflectionDirection= Vector3.Reflect(-ViewDirection, FirstShapeNormal);
+                }
+
+                //Diffuse
+                for (int i = 0; i < DiffuseSamples; i++)
                 {
                     double R1 = Util.Random.NextDouble();
                     double R2 = Util.Random.NextDouble();
@@ -183,11 +195,13 @@ namespace Raytracer
                     Vector3 Kd = Vector3.One - Ks;
 
                     Kd *= 1.0 - FirstShape.Material.Metalness;
-                    Vector3 Diffuse = Kd * FirstShape.Material.Color / Math.PI;
+                    Vector3 Diffuse = Kd * FirstShape.Material.Color;
                     
-                    TotalDiffuse += Diffuse * SampleRadiance * CosTheta / (1.0 / (2.0 * Math.PI));
+                    TotalDiffuse += Diffuse * SampleRadiance * CosTheta;
                 }
-                for (int i = 0; i < Samples; i++)
+
+                //Specular
+                for (int i = 0; i < SpecularSamples; i++)
                 {
                     double R1 = Util.Random.NextDouble();
                     double R2 = Util.Random.NextDouble();
@@ -205,15 +219,25 @@ namespace Raytracer
                     double SpecularDenominator = 4.0 * Math.Max(Vector3.Dot(FirstShapeNormal, ViewDirection), 0.0) * CosTheta + 0.001;
                     Vector3 Specular = SpecularNumerator / SpecularDenominator;
 
-                    TotalSpecular += Specular * SampleRadiance * CosTheta / (D * Vector3.Dot(FirstShapeNormal, Halfway) / (4 * Vector3.Dot(Halfway, ViewDirection))+0.0001);
+                    TotalSpecular += Specular * SampleRadiance * CosTheta / (D * Vector3.Dot(FirstShapeNormal, Halfway) / (4 * Vector3.Dot(Halfway, ViewDirection)) + 0.0001);
                 }
 
-                TotalDiffuse /= (double)Samples;
-                TotalSpecular /= (double)Samples;
-
+                //Divide results
+                if (DiffuseSamples > 0)
+                {
+                    //PDF division and color division by pi is implicit here
+                    //We move division with PDF out because it is constant
+                    //And we move MaterialColor / Pi division out because pi is constant also
+                    //DiffuseSamples * (1.0 / (2.0 * Pi)) * Pi    is equivalent to    DiffuseSamples / 2
+                    TotalDiffuse /= (double)DiffuseSamples * 0.5;
+                }
+                if (SpecularSamples > 0)
+                {
+                    TotalSpecular /= (double)SpecularSamples;
+                }
                 Indirect = TotalDiffuse + TotalSpecular;
 
-                Result = (Direct + Indirect);
+                Result = Indirect;
             }
             return Result;
         }
@@ -240,6 +264,7 @@ namespace Raytracer
             }
             return FirstShape != null;
         }
+        #endregion
 
         #region MonteCarlo
         private void CreateCartesian(Vector3 Normal, out Vector3 NT, out Vector3 NB)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -17,10 +18,9 @@ namespace Raytracer
         public Vector3[] VertexNormals { get; set; }
         public bool SmoothShading { get; set; }
         public int NumFaces { get; private set; }
-        public Vector3 AABBMin { get; private set; }
-        public Vector3 AABBMax { get; private set; }
+        public SpatialGrid Grid { get; set; }
 
-        public TriangleMesh(Material Material, string Path, bool SmoothShading = true)
+        public TriangleMesh(Material Material, Matrix TransformMatrix, string Path, bool SmoothShading = true)
         {
             this.Material = Material;
             this.SmoothShading = SmoothShading;
@@ -73,137 +73,131 @@ namespace Raytracer
                 VertexIndices[i * 3 + 2] = int.Parse(Tokens[3]);
             }
 
-            //Calculate face normals and bounding box
+            //Move mesh to wanted location, calculated spatial grid
+            for (int i = 0; i < Vertices.Length; i++)
+            {
+                Vertices[i] = Vector3.Transform(Vertices[i], TransformMatrix);
+            }
+            Grid = new SpatialGrid(this, 10);
             CalculateNormals();
-            CalculateAABB();
         }
 
         public override bool Intersect(Ray Ray, out Vector3 Hit, out Vector3 Normal)
         {
+            return Grid.Intersect(Ray, out Hit, out Normal);
+        }
+
+        public bool IntersectTriangle(Ray Ray, int Index, out Vector3 Hit, out Vector3 Normal)
+        {
             Hit = Vector3.Zero;
             Normal = Vector3.Zero;
 
-            //If ray doesn't intersect bounding box we can return
-            if (!IntersectAABB(Ray))
+            Vector3 V0 = Vertices[VertexIndices[Index * 3]];
+            Vector3 V1 = Vertices[VertexIndices[Index * 3 + 1]];
+            Vector3 V2 = Vertices[VertexIndices[Index * 3 + 2]];
+
+            Vector3 N = FaceNormals[Index];
+
+            //Backface culling
+            if (Vector3.Dot(N, Ray.Direction) > 0)
             {
                 return false;
             }
 
-            //Check intersection for all faces
-            double MinDistance = double.MaxValue;
-            for (int i = 0; i < NumFaces; i++)
+            //Triangle's plane intersection
+            double Denom = Vector3.Dot(-N, Ray.Direction);
+            if (Denom <= 1e-6)
             {
-                Vector3 V0 = Vertices[VertexIndices[i * 3]];
-                Vector3 V1 = Vertices[VertexIndices[i * 3 + 1]];
-                Vector3 V2 = Vertices[VertexIndices[i * 3 + 2]];
+                return false;
+            }
+            Vector3 RayToPlane = V0 - Ray.Origin;
+            double T = Vector3.Dot(RayToPlane, -N) / Denom;
 
-                Vector3 N = FaceNormals[i];
-
-                //Backface culling
-                if (Vector3.Dot(N, Ray.Direction) > 0)
-                {
-                    continue;
-                }
-
-                //Triangle's plane intersection
-                double Denom = Vector3.Dot(-N, Ray.Direction);
-                if (Denom <= 1e-6)
-                {
-                    continue;
-                }
-                Vector3 RayToPlane = V0 - Ray.Origin;
-                double T = Vector3.Dot(RayToPlane, -N) / Denom;
-
-                //Triangle behind ray
-                if (T < 0)
-                {
-                    continue;
-                }
-
-                //Find hit point
-                Vector3 CurrentHit = Ray.Origin + T * Ray.Direction;
-
-                //Check if hit is in triangle
-                double CurrentU, CurrentV;
-
-                //Edge A
-                Vector3 EdgeA = V1 - V0;
-                Vector3 VPA = CurrentHit - V0;
-                Vector3 C = Vector3.Cross(EdgeA, VPA);
-                if (Vector3.Dot(N, C) < 0)
-                {
-                    continue;
-                }
-
-                //Edge B
-                Vector3 EdgeB = V2 - V1;
-                Vector3 VPB = CurrentHit - V1;
-                C = Vector3.Cross(EdgeB, VPB);
-                if ((CurrentU = Vector3.Dot(N, C)) < 0)
-                {
-                    continue;
-                }
-
-                //Edge C
-                Vector3 EdgeC = V0 - V2;
-                Vector3 VPC = CurrentHit - V2;
-                C = Vector3.Cross(EdgeC, VPC);
-                if ((CurrentV = Vector3.Dot(N, C)) < 0)
-                {
-                    continue;
-                }
-
-                /*double U = 0, V = 0;
-                Vector3 PVec = Vector3.Cross(Ray.Direction, B);
-                double Det = Vector3.Dot(A, PVec);
-                double InvDet = 1.0 / Det;
-                Vector3 TVec = Ray.Origin - V0;
-                U = Vector3.Dot(TVec, PVec) * InvDet;
-                Vector3 QVec = Vector3.Cross(TVec, A);
-                V = Vector3.Dot(Ray.Direction, QVec) * InvDet;*/
-
-                //Only want closest intersection
-                double CurrentDistance = (CurrentHit - Ray.Origin).Length();
-                if (CurrentDistance < MinDistance)
-                {
-                    MinDistance = CurrentDistance;
-                    Hit = CurrentHit;
-
-                    //Area of triangles
-                    double AreaABC = Vector3.Dot(N, Vector3.Cross((V1 - V0), (V2 - V0)));
-                    double AreaPBC = Vector3.Dot(N, Vector3.Cross((V1 - CurrentHit), (V2 - CurrentHit)));
-                    double AreaPCA = Vector3.Dot(N, Vector3.Cross((V2 - CurrentHit), (V0 - CurrentHit)));
-
-                    //Barycentric coords
-                    double BaryAlpha = AreaPBC / AreaABC;
-                    double BaryBeta = AreaPCA / AreaABC;
-                    double BaryGamma = 1.0 - BaryAlpha - BaryBeta;
-
-                    if (SmoothShading)
-                    {
-                        Normal = Vector3.Normalize(BaryAlpha * VertexNormals[VertexIndices[i * 3]] + BaryBeta * VertexNormals[VertexIndices[i * 3 + 1]] + BaryGamma * VertexNormals[VertexIndices[i * 3 + 2]]);
-                    }
-                    else
-                    {
-                        Normal = N;
-                    }
-                }
+            //Triangle behind ray
+            if (T < 0)
+            {
+                return false;
             }
 
-            return MinDistance < double.MaxValue;
+            //Find hit point
+            Vector3 CurrentHit = Ray.Origin + T * Ray.Direction;
+
+            //Check if hit is in triangle
+            double CurrentU, CurrentV;
+
+            //Edge A
+            Vector3 EdgeA = V1 - V0;
+            Vector3 VPA = CurrentHit - V0;
+            Vector3 C = Vector3.Cross(EdgeA, VPA);
+            if (Vector3.Dot(N, C) < 0)
+            {
+                return false;
+            }
+
+            //Edge B
+            Vector3 EdgeB = V2 - V1;
+            Vector3 VPB = CurrentHit - V1;
+            C = Vector3.Cross(EdgeB, VPB);
+            if ((CurrentU = Vector3.Dot(N, C)) < 0)
+            {
+                return false;
+            }
+
+            //Edge C
+            Vector3 EdgeC = V0 - V2;
+            Vector3 VPC = CurrentHit - V2;
+            C = Vector3.Cross(EdgeC, VPC);
+            if ((CurrentV = Vector3.Dot(N, C)) < 0)
+            {
+                return false;
+            }
+
+            /*double U = 0, V = 0;
+            Vector3 PVec = Vector3.Cross(Ray.Direction, B);
+            double Det = Vector3.Dot(A, PVec);
+            double InvDet = 1.0 / Det;
+            Vector3 TVec = Ray.Origin - V0;
+            U = Vector3.Dot(TVec, PVec) * InvDet;
+            Vector3 QVec = Vector3.Cross(TVec, A);
+            V = Vector3.Dot(Ray.Direction, QVec) * InvDet;*/
+
+            Hit = CurrentHit;
+
+            if (SmoothShading)
+            {
+                //Area of triangles
+                double AreaABC = Vector3.Dot(N, Vector3.Cross((V1 - V0), (V2 - V0)));
+                double AreaPBC = Vector3.Dot(N, Vector3.Cross((V1 - CurrentHit), (V2 - CurrentHit)));
+                double AreaPCA = Vector3.Dot(N, Vector3.Cross((V2 - CurrentHit), (V0 - CurrentHit)));
+
+                //Barycentric coords
+                double BaryAlpha = AreaPBC / AreaABC;
+                double BaryBeta = AreaPCA / AreaABC;
+                double BaryGamma = 1.0 - BaryAlpha - BaryBeta;
+
+                Normal = Vector3.Normalize(BaryAlpha * VertexNormals[VertexIndices[Index * 3]] + BaryBeta * VertexNormals[VertexIndices[Index * 3 + 1]] + BaryGamma * VertexNormals[VertexIndices[Index * 3 + 2]]);
+            }
+            else
+            {
+                Normal = N;
+            }
+
+            return true;
         }
 
+        [Obsolete("This method requires recalculation of the grid, pass a matrix to the constructor instead.")]
         public void Transform(Matrix TransformMatrix)
         {
             for (int i = 0; i < Vertices.Length; i++)
             {
                 Vertices[i] = Vector3.Transform(Vertices[i], TransformMatrix);
             }
+
+            Grid = new SpatialGrid(this, 10);
             CalculateNormals();
-            CalculateAABB();
         }
         
-        public void CalculateNormals()
+        private void CalculateNormals()
         {
             FaceNormals = new Vector3[NumFaces];
             for (int i = 0; i < FaceNormals.Length; i++)
@@ -216,98 +210,6 @@ namespace Raytracer
 
                 //TODO: Recalculate vertex normals
             }
-        }
-
-        public void CalculateAABB()
-        {
-            double MinX = double.MaxValue;
-            double MinY = double.MaxValue;
-            double MinZ = double.MaxValue;
-            double MaxX = double.MinValue;
-            double MaxY = double.MinValue;
-            double MaxZ = double.MinValue;
-            foreach (Vector3 Vertex in Vertices)
-            {
-                if (Vertex.X < MinX)
-                {
-                    MinX = Vertex.X;
-                }
-                if (Vertex.Y < MinY)
-                {
-                    MinY = Vertex.Y;
-                }
-                if (Vertex.Z < MinZ)
-                {
-                    MinZ = Vertex.Z;
-                }
-                if (Vertex.X > MaxX)
-                {
-                    MaxX = Vertex.X;
-                }
-                if (Vertex.Y > MaxY)
-                {
-                    MaxY = Vertex.Y;
-                }
-                if (Vertex.Z > MaxZ)
-                {
-                    MaxZ = Vertex.Z;
-                }
-            }
-            AABBMin = new Vector3(MinX, MinY, MinZ);
-            AABBMax = new Vector3(MaxX, MaxY, MaxZ);
-        }
-
-        public bool IntersectAABB(Ray r)
-        {
-            double TMin = (AABBMin.X - r.Origin.X) / r.Direction.X;
-            double TMax = (AABBMax.X - r.Origin.X) / r.Direction.X;
-
-            if (TMin > TMax)
-            {
-                double Temp = TMin;
-                TMin = TMax;
-                TMax = Temp;
-            }
-
-            double TYMax = (AABBMax.Y - r.Origin.Y) / r.Direction.Y;
-            double TYMin = (AABBMin.Y - r.Origin.Y) / r.Direction.Y;
-
-            if (TYMin > TYMax)
-            {
-                double Temp = TYMin;
-                TYMin = TYMax;
-                TYMax = Temp;
-            }
-
-            if ((TMin > TYMax) || (TYMin > TMax))
-                return false;
-
-            if (TYMin > TMin)
-                TMin = TYMin;
-
-            if (TYMax < TMax)
-                TMax = TYMax;
-
-            double TZMin = (AABBMin.Z - r.Origin.Z) / r.Direction.Z;
-            double TZMax = (AABBMax.Z - r.Origin.Z) / r.Direction.Z;
-
-            if (TZMin > TZMax)
-            {
-                double Temp = TZMin;
-                TZMin = TZMax;
-                TZMax = Temp;
-            }
-
-            if ((TMin > TZMax) || (TZMin > TMax))
-                return false;
-
-            if (TZMin > TMin)
-                TMin = TZMin;
-
-            if (TZMax < TMax)
-                TMax = TZMax;
-
-            return true;
         }
     }
 }

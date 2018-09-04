@@ -58,11 +58,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Disc.cs" />
-    <Compile Include="Light.cs" />
     <Compile Include="Material.cs" />
     <Compile Include="Math\MathHelper.cs" />
     <Compile Include="Math\Matrix.cs" />
     <Compile Include="Math\Vector3.cs" />
+    <Compile Include="SpatialGrid.cs" />
+    <Compile Include="SpatialGridNode.cs" />
     <Compile Include="TriangleMesh.cs" />
     <Compile Include="Plane.cs" />
     <Compile Include="Program.cs" />
@@ -71,7 +72,6 @@
     <Compile Include="Raytracer.cs" />
     <Compile Include="Shape.cs" />
     <Compile Include="Sphere.cs" />
-    <Compile Include="Triangle.cs" />
     <Compile Include="Util.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -111,6 +111,16 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\barrel.ply">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\monkeysmooth.ply">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\dragon_vrip.ply">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

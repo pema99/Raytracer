@@ -14,6 +14,6 @@ C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Ass
 C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\bunny.ply
 C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\monkey255.ply
 C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\cylinder.ply
-C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\cylindersmooth.ply
-C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\cylinderhighpoly.ply
-C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\smoothcube.ply
+C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\barrel.ply
+C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\monkeysmooth.ply
+C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\dragon_vrip.ply
