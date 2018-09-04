@@ -12,26 +12,30 @@ namespace Raytracer
         public Vector3 AABBMin { get; set; }
         public Vector3 AABBMax { get; set; }
         public SpatialGridNode[,,] Grid { get; set; }
-        public int GridResolution { get; set; }
+        public Vector3 GridResolution { get; set; }
         public Vector3 CellSize { get; set; }
         public TriangleMesh Owner { get; set; }
 
         private readonly int[] AxisMap = { 2, 1, 2, 1, 2, 2, 0, 0 };
 
-        public SpatialGrid(TriangleMesh Owner, int GridResolution)
+        public SpatialGrid(TriangleMesh Owner, double GridLambda = 3)
         {
             this.Owner = Owner;
-            this.GridResolution = GridResolution;
-            this.Grid = new SpatialGridNode[GridResolution, GridResolution, GridResolution];
             this.CalculateAABB();
-            this.CellSize = new Vector3((AABBMax.X - AABBMin.X) / GridResolution, (AABBMax.Y - AABBMin.Y) / GridResolution, (AABBMax.Z - AABBMin.Z) / GridResolution);
+
+            //Calculate grid resolution using cleary's approximation
+            double GridResolutionTerm = Math.Pow((GridLambda * Owner.NumFaces) / ((AABBMax.X - AABBMin.X) * (AABBMax.Y - AABBMin.Y) * (AABBMax.Z - AABBMin.Z)), (1.0 / 3.0));
+            this.GridResolution = new Vector3(Math.Floor((AABBMax.X - AABBMin.X) * GridResolutionTerm), Math.Floor((AABBMax.Y - AABBMin.Y) * GridResolutionTerm), Math.Floor((AABBMax.Z - AABBMin.Z) * GridResolutionTerm));
+
+            this.Grid = new SpatialGridNode[(int)GridResolution.X, (int)GridResolution.Y, (int)GridResolution.Z];
+            this.CellSize = new Vector3((AABBMax.X - AABBMin.X) / GridResolution.X, (AABBMax.Y - AABBMin.Y) / GridResolution.Y, (AABBMax.Z - AABBMin.Z) / GridResolution.Z);
 
             //Initialize grid
-            for (int x = 0; x < GridResolution; x++)
+            for (int x = 0; x < GridResolution.X; x++)
             {
-                for (int y = 0; y < GridResolution; y++)
+                for (int y = 0; y < GridResolution.Y; y++)
                 {
-                    for (int z = 0; z < GridResolution; z++)
+                    for (int z = 0; z < GridResolution.Z; z++)
                     {
                         Grid[x, y, z] = new SpatialGridNode();
                     }
@@ -93,7 +97,7 @@ namespace Raytracer
             for (int i = 0; i < 3; i++)
             {                                                                                                                                              
                 double RayOriginCell = (AABBHit[i] - AABBMin[i]);
-                CurrentCell[i] = MathHelper.Clamp(Math.Floor(RayOriginCell / CellSize[i]), 0, GridResolution - 1);
+                CurrentCell[i] = MathHelper.Clamp(Math.Floor(RayOriginCell / CellSize[i]), 0, GridResolution[i] - 1);
                 if (Ray.Direction[i] < 0)
                 {
                     StepDelta[i] = -CellSize[i] * (1 / Ray.Direction[i]);
@@ -105,7 +109,7 @@ namespace Raytracer
                 {
                     StepDelta[i] = CellSize[i] * (1 / Ray.Direction[i]);
                     NextIntersection[i] = TMin + ((CurrentCell[i] + 1) * CellSize[i] - RayOriginCell) * (1 / Ray.Direction[i]);
-                    Exit[i] = GridResolution;
+                    Exit[i] = GridResolution[i];
                     Step[i] = 1;
                 }
             }

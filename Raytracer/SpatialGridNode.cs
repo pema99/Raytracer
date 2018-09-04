@@ -9,10 +9,12 @@ namespace Raytracer
     public class SpatialGridNode
     {
         public List<int> TriangleIndices { get; set; }
+        public List<int> Mailbox { get; set; }
 
         public SpatialGridNode()
         {
             this.TriangleIndices = new List<int>();
+            this.Mailbox = new List<int>();
         }
     }
 }

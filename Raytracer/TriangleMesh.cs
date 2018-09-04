@@ -20,7 +20,7 @@ namespace Raytracer
         public int NumFaces { get; private set; }
         public SpatialGrid Grid { get; set; }
 
-        public TriangleMesh(Material Material, Matrix TransformMatrix, string Path, bool SmoothShading = true)
+        public TriangleMesh(Material Material, Matrix TransformMatrix, string Path, double GridLambda = 3, bool SmoothShading = true)
         {
             this.Material = Material;
             this.SmoothShading = SmoothShading;
@@ -57,7 +57,7 @@ namespace Raytracer
                 Line = Reader.ReadLine();
                 string[] Tokens = Line.Split(' ');
                 Vertices[i] = new Vector3(double.Parse(Tokens[0], CultureInfo.InvariantCulture), double.Parse(Tokens[1], CultureInfo.InvariantCulture), double.Parse(Tokens[2], CultureInfo.InvariantCulture));
-                if (Tokens.Length > 3)
+                if (Tokens.Length >= 6)
                 {
                     VertexNormals[i] = new Vector3(double.Parse(Tokens[3], CultureInfo.InvariantCulture), double.Parse(Tokens[4], CultureInfo.InvariantCulture), double.Parse(Tokens[5], CultureInfo.InvariantCulture));
                 }
@@ -78,7 +78,8 @@ namespace Raytracer
             {
                 Vertices[i] = Vector3.Transform(Vertices[i], TransformMatrix);
             }
-            Grid = new SpatialGrid(this, 10);
+            Grid = new SpatialGrid(this, GridLambda);
+
             CalculateNormals();
         }
 
@@ -186,14 +187,14 @@ namespace Raytracer
         }
 
         [Obsolete("This method requires recalculation of the grid, pass a matrix to the constructor instead.")]
-        public void Transform(Matrix TransformMatrix)
+        public void Transform(Matrix TransformMatrix, double GridLambda = 3)
         {
             for (int i = 0; i < Vertices.Length; i++)
             {
                 Vertices[i] = Vector3.Transform(Vertices[i], TransformMatrix);
             }
 
-            Grid = new SpatialGrid(this, 10);
+            Grid = new SpatialGrid(this, GridLambda);
             CalculateNormals();
         }
         
