@@ -16,14 +16,17 @@ namespace Raytracer
         public int[] VertexIndices { get; set; }
         public Vector3[] FaceNormals { get; set; }
         public Vector3[] VertexNormals { get; set; }
-        public bool SmoothShading { get; set; }
         public int NumFaces { get; private set; }
         public SpatialGrid Grid { get; set; }
 
-        public TriangleMesh(Material Material, Matrix TransformMatrix, string Path, double GridLambda = 3, bool SmoothShading = true)
+        public bool SmoothShading { get; set; }
+        public bool BackFaceCulling { get; set; }
+
+        public TriangleMesh(Material Material, Matrix TransformMatrix, string Path, double GridLambda = 3, bool SmoothShading = true, bool BackFaceCulling = true)
         {
             this.Material = Material;
             this.SmoothShading = SmoothShading;
+            this.BackFaceCulling = BackFaceCulling;
 
             StreamReader Reader = new StreamReader(Path);
             string Line;
@@ -88,102 +91,84 @@ namespace Raytracer
             return Grid.Intersect(Ray, out Hit, out Normal);
         }
 
+        //Möller-Trumbore algorithm
         public bool IntersectTriangle(Ray Ray, int Index, out Vector3 Hit, out Vector3 Normal)
         {
             Hit = Vector3.Zero;
             Normal = Vector3.Zero;
 
+            double Epsilon = 0.000001;
+
             Vector3 V0 = Vertices[VertexIndices[Index * 3]];
             Vector3 V1 = Vertices[VertexIndices[Index * 3 + 1]];
             Vector3 V2 = Vertices[VertexIndices[Index * 3 + 2]];
 
-            Vector3 N = FaceNormals[Index];
-
-            //Backface culling
-            if (Vector3.Dot(N, Ray.Direction) > 0)
-            {
-                return false;
-            }
-
-            //Triangle's plane intersection
-            double Denom = Vector3.Dot(-N, Ray.Direction);
-            if (Denom <= 1e-6)
-            {
-                return false;
-            }
-            Vector3 RayToPlane = V0 - Ray.Origin;
-            double T = Vector3.Dot(RayToPlane, -N) / Denom;
-
-            //Triangle behind ray
-            if (T < 0)
-            {
-                return false;
-            }
-
-            //Find hit point
-            Vector3 CurrentHit = Ray.Origin + T * Ray.Direction;
-
-            //Check if hit is in triangle
-            double CurrentU, CurrentV;
-
-            //Edge A
             Vector3 EdgeA = V1 - V0;
-            Vector3 VPA = CurrentHit - V0;
-            Vector3 C = Vector3.Cross(EdgeA, VPA);
-            if (Vector3.Dot(N, C) < 0)
+            Vector3 EdgeB = V2 - V0;
+
+            Vector3 P = Vector3.Cross(Ray.Direction, EdgeB);
+            double Determinant = Vector3.Dot(EdgeA, P);
+
+            if (BackFaceCulling)
             {
-                return false;
-            }
-
-            //Edge B
-            Vector3 EdgeB = V2 - V1;
-            Vector3 VPB = CurrentHit - V1;
-            C = Vector3.Cross(EdgeB, VPB);
-            if ((CurrentU = Vector3.Dot(N, C)) < 0)
-            {
-                return false;
-            }
-
-            //Edge C
-            Vector3 EdgeC = V0 - V2;
-            Vector3 VPC = CurrentHit - V2;
-            C = Vector3.Cross(EdgeC, VPC);
-            if ((CurrentV = Vector3.Dot(N, C)) < 0)
-            {
-                return false;
-            }
-
-            /*double U = 0, V = 0;
-            Vector3 PVec = Vector3.Cross(Ray.Direction, B);
-            double Det = Vector3.Dot(A, PVec);
-            double InvDet = 1.0 / Det;
-            Vector3 TVec = Ray.Origin - V0;
-            U = Vector3.Dot(TVec, PVec) * InvDet;
-            Vector3 QVec = Vector3.Cross(TVec, A);
-            V = Vector3.Dot(Ray.Direction, QVec) * InvDet;*/
-
-            Hit = CurrentHit;
-
-            if (SmoothShading)
-            {
-                //Area of triangles
-                double AreaABC = Vector3.Dot(N, Vector3.Cross((V1 - V0), (V2 - V0)));
-                double AreaPBC = Vector3.Dot(N, Vector3.Cross((V1 - CurrentHit), (V2 - CurrentHit)));
-                double AreaPCA = Vector3.Dot(N, Vector3.Cross((V2 - CurrentHit), (V0 - CurrentHit)));
-
-                //Barycentric coords
-                double BaryAlpha = AreaPBC / AreaABC;
-                double BaryBeta = AreaPCA / AreaABC;
-                double BaryGamma = 1.0 - BaryAlpha - BaryBeta;
-
-                Normal = Vector3.Normalize(BaryAlpha * VertexNormals[VertexIndices[Index * 3]] + BaryBeta * VertexNormals[VertexIndices[Index * 3 + 1]] + BaryGamma * VertexNormals[VertexIndices[Index * 3 + 2]]);
+                if (Determinant < Epsilon)
+                {
+                    return false;
+                }
             }
             else
             {
-                Normal = N;
+                if (Math.Abs(Determinant) < Epsilon)
+                {
+                    return false;
+                }
             }
 
-            return true;
+            double InvDeterminant = 1.0 / Determinant;
+            Vector3 S = Ray.Origin - V0;
+            double U = InvDeterminant * Vector3.Dot(S, P);
+            if (U < 0.0 || U > 1.0)
+            {
+                return false;
+            }
+
+            Vector3 Q = Vector3.Cross(S, EdgeA);
+            double V = InvDeterminant * Vector3.Dot(Ray.Direction, Q);
+            if (V < 0.0 || U + V > 1.0)
+            {
+                return false;
+            }
+
+            double T = InvDeterminant * Vector3.Dot(EdgeB, Q);
+            if (T > Epsilon)
+            {
+                Hit = Ray.Origin + Ray.Direction * T;
+
+                Vector3 N = FaceNormals[Index];
+                if (SmoothShading)
+                {
+                    //Area of triangles
+                    double AreaABC = Vector3.Dot(N, Vector3.Cross((V1 - V0), (V2 - V0)));
+                    double AreaPBC = Vector3.Dot(N, Vector3.Cross((V1 - Hit), (V2 - Hit)));
+                    double AreaPCA = Vector3.Dot(N, Vector3.Cross((V2 - Hit), (V0 - Hit)));
+
+                    //Barycentric coords
+                    double BaryAlpha = AreaPBC / AreaABC;
+                    double BaryBeta = AreaPCA / AreaABC;
+                    double BaryGamma = 1.0 - BaryAlpha - BaryBeta;
+
+                    //Interpolated vertex normal
+                    Normal = Vector3.Normalize(BaryAlpha * VertexNormals[VertexIndices[Index * 3]] + BaryBeta * VertexNormals[VertexIndices[Index * 3 + 1]] + BaryGamma * VertexNormals[VertexIndices[Index * 3 + 2]]);
+                }
+                else
+                {
+                    Normal = N;
+                }
+
+                return true;
+            }
+
+            return false;
         }
 
         [Obsolete("This method requires recalculation of the grid, pass a matrix to the constructor instead.")]
