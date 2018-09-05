@@ -76,27 +76,18 @@ namespace Raytracer
 
         public void Render()
         {
-            //TODO: Allow thread numbers that the width isn't divisble with
-            /*Thread[] ThreadPool = new Thread[Threads];
-            for (int i = 0; i < Threads; i++)
+            int Progress = 0;
+            using (new Timer(_ => Console.WriteLine("Rendered {0} of {1} scanlines", Progress, Width), null, 1000, 1000))
             {
-                int j = i;
-                ThreadPool[i] = new Thread(() => {
-                    RenderLines(j, Width / Threads);
-                });
-                ThreadPool[i].Start();
+                Parallel.For(0, Width, new ParallelOptions { MaxDegreeOfParallelism = Threads }, (i) => { RenderLine(i); Progress++; });
             }
-            foreach (Thread T in ThreadPool)
-            {
-                T.Join();
-            }*/
-            
-            Parallel.For(0, Width, new ParallelOptions { MaxDegreeOfParallelism = Threads }, RenderLine);
+
+            //Parallel.For(0, Width, new ParallelOptions { MaxDegreeOfParallelism = Threads }, RenderLine);
         }
         
         private void RenderLine(int x)
         {
-            Console.WriteLine("Processed line " + x);
+            //Console.WriteLine("Processed line " + x);
             for (int y = 0; y < Height; y++)
             {
                 //Raycast to nearest shape

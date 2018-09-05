@@ -19,7 +19,8 @@ namespace Raytracer
 
             System.Diagnostics.Process.Start("Render.png");
 
-            Console.WriteLine("Finished in {0} seconds.", Time.Elapsed.TotalSeconds);
+            Console.WriteLine("Finished rendering in {0} seconds", Time.Elapsed.TotalSeconds);
+            Console.WriteLine("Press any key to exit");
             Console.ReadKey();
         }
     }
