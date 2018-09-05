@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Raytracer
 {
@@ -75,7 +77,7 @@ namespace Raytracer
         public void Render()
         {
             //TODO: Allow thread numbers that the width isn't divisble with
-            Thread[] ThreadPool = new Thread[Threads];
+            /*Thread[] ThreadPool = new Thread[Threads];
             for (int i = 0; i < Threads; i++)
             {
                 int j = i;
@@ -87,24 +89,23 @@ namespace Raytracer
             foreach (Thread T in ThreadPool)
             {
                 T.Join();
-            }
+            }*/
+            
+            Parallel.For(0, Width, new ParallelOptions { MaxDegreeOfParallelism = Threads }, RenderLine);
         }
-
-        private void RenderLines(int Start, int Amount)
+        
+        private void RenderLine(int x)
         {
-            for (int x = Start * Amount; x < Start * Amount + Amount; x++)
+            Console.WriteLine("Processed line " + x);
+            for (int y = 0; y < Height; y++)
             {
-                Console.WriteLine("Processed line " + x);
-                for (int y = 0; y < Height; y++)
-                {
-                    //Raycast to nearest shape
-                    Vector3 RayDir = new Vector3((2.0 * ((x + 0.5) * InvWidth) - 1.0) * ViewAngle * AspectRatio, (1.0 - 2.0 * ((y + 0.5) * InvHeight)) * ViewAngle, 1);
-                    RayDir.Normalize();
-
-                    //Trace primary ray
-                    Framebuffer[x, y] = Trace(new Ray(Vector3.Zero, RayDir), Vector3.Zero, 0);
-                }
-            }
+                //Raycast to nearest shape
+                Vector3 RayDir = new Vector3((2.0 * ((x + 0.5) * InvWidth) - 1.0) * ViewAngle * AspectRatio, (1.0 - 2.0 * ((y + 0.5) * InvHeight)) * ViewAngle, 1);
+                RayDir.Normalize();
+                   
+                //Trace primary ray
+                Framebuffer[x, y] = Trace(new Ray(Vector3.Zero, RayDir), Vector3.Zero, 0);
+            }         
         }
 
         public void ExportToFile(string Path, double Gamma = 2.2)
