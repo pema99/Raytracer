@@ -15,6 +15,8 @@ Because I am bored.
 
 ### Cool, show some pictures.
 [<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Dragon.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Dragon.png)
+[<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Monkey.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Monkey.png)
+[<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Monkey2.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Monkey2.png)
 
 ### How do I use it?
 You shouldn't.
