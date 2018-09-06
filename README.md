@@ -13,6 +13,9 @@ Cool.
 ### Why?
 Because I am bored.
 
+### Cool, show some pictures.
+[<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Dragon.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Dragon.png)
+
 ### How do I use it?
 You shouldn't.
 If you really want to, build with VS2017 and edit Program.cs or something idk.
