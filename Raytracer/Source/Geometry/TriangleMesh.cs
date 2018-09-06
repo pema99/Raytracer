@@ -86,16 +86,17 @@ namespace Raytracer
             CalculateNormals();
         }
 
-        public override bool Intersect(Ray Ray, out Vector3 Hit, out Vector3 Normal)
+        public override bool Intersect(Ray Ray, out Vector3 Hit, out Vector3 Normal, out Vector2 UV)
         {
-            return Grid.Intersect(Ray, out Hit, out Normal);
+            return Grid.Intersect(Ray, out Hit, out Normal, out UV);
         }
 
         //Möller-Trumbore algorithm
-        public bool IntersectTriangle(Ray Ray, int Index, out Vector3 Hit, out Vector3 Normal)
+        public bool IntersectTriangle(Ray Ray, int Index, out Vector3 Hit, out Vector3 Normal, out Vector2 UV)
         {
             Hit = Vector3.Zero;
             Normal = Vector3.Zero;
+            UV = Vector2.Zero;
 
             double Epsilon = 0.000001;
 

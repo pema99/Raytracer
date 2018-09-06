@@ -1,4 +1,6 @@
-﻿namespace Raytracer
+﻿using System;
+
+namespace Raytracer
 {
     public class Sphere : Shape
     {
@@ -13,10 +15,11 @@
             this.Radius = Radius;
         }
 
-        public override bool Intersect(Ray Ray, out Vector3 Hit, out Vector3 Normal)
+        public override bool Intersect(Ray Ray, out Vector3 Hit, out Vector3 Normal, out Vector2 UV)
         {
             Hit = Vector3.Zero;
             Normal = Vector3.Zero;
+            UV = Vector2.Zero;
 
             double A = 1.0;
             double B = 2.0 * Vector3.Dot(Ray.Direction, (Ray.Origin - Origin));
@@ -49,6 +52,10 @@
 
             Normal = Hit - Origin;
             Normal.Normalize();
+
+            //float TexX = (1 + (float)Math.Atan2(Normal.Y, Normal.X) / MathHelper.Pi) * 0.5f;
+            //float TexY = (float)Math.Acos(Normal.Z) / MathHelper.Pi;
+            UV = new Vector2((1.0 + Math.Atan2(Normal.Z, Normal.X) / MathHelper.Pi) * 0.5, Math.Acos(Normal.Y) / MathHelper.Pi);
 
             return true;
         }

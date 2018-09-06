@@ -1,20 +1,26 @@
 ﻿namespace Raytracer
 {
-    public class Plane : Shape
+    public class Disc : Shape
     {
         public Vector3 Origin { get; set; }
         public Vector3 Normal { get; set; }
+        public double Radius { get; set; }
         public override Material Material { get; set; }
 
-        public Plane(Material Material, Vector3 Origin, Vector3 Normal)
+        public Disc(Material Material, Vector3 Origin, Vector3 Normal, double Radius)
         {
             this.Material = Material;
             this.Origin = Origin;
             this.Normal = Normal;
+            this.Radius = Radius;
         }
 
-        public override bool Intersect(Ray Ray, out Vector3 Hit, out Vector3 Normal)
+        public override bool Intersect(Ray Ray, out Vector3 Hit, out Vector3 Normal, out Vector2 UV)
         {
+            Hit = Vector3.Zero;
+            Normal = Vector3.Zero;
+            UV = Vector2.Zero;
+
             double Denom = Vector3.Dot(-this.Normal, Ray.Direction);
             if (Denom > 1e-6)
             {
@@ -24,12 +30,17 @@
                 {
                     Hit = Ray.Origin + Ray.Direction * T;
                     Normal = this.Normal;
-                    return true;
+
+                    Vector3 P = Ray.Origin + Ray.Direction * T;
+                    Vector3 V = P - Origin;
+                    return V.Length() < Radius;
+                    //return Math.Abs(V.X) <= Radius && Math.Abs(V.Y) <= Radius && Math.Abs(V.Z) <= Radius;
+                }
+                else
+                {
+                    return false;
                 }
             }
-
-            Hit = Vector3.Zero;
-            Normal = Vector3.Zero;
 
             return false;
         }

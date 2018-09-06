@@ -77,10 +77,11 @@ namespace Raytracer
             }
         }
 
-        public bool Intersect(Ray Ray, out Vector3 Hit, out Vector3 Normal)
+        public bool Intersect(Ray Ray, out Vector3 Hit, out Vector3 Normal, out Vector2 UV)
         {
             Hit = Vector3.Zero;
             Normal = Vector3.Zero;
+            UV = Vector2.Zero;
 
             if (!Util.IntersectAABB(Ray, AABBMin, AABBMax, out Vector3 AABBHit, out double TMin, out double TMax))
             {
@@ -120,7 +121,7 @@ namespace Raytracer
                 double MinDistance = double.MaxValue;
                 foreach (int Tri in Grid[(int)CurrentCell.X, (int)CurrentCell.Y, (int)CurrentCell.Z].TriangleIndices)
                 {
-                    if (Owner.IntersectTriangle(Ray, Tri, out Vector3 TriHit, out Vector3 TriNormal))
+                    if (Owner.IntersectTriangle(Ray, Tri, out Vector3 TriHit, out Vector3 TriNormal, out Vector2 TriUV))
                     {
                         double CurrentDistance = (TriHit - Ray.Origin).Length();
                         if (CurrentDistance < MinDistance)
@@ -128,6 +129,7 @@ namespace Raytracer
                             MinDistance = CurrentDistance;
                             Hit = TriHit;
                             Normal = TriNormal;
+                            UV = TriUV;
                         }
                     }
                 }

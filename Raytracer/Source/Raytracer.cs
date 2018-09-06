@@ -61,7 +61,7 @@ namespace Raytracer
             {
                 new TriangleMesh(new Material(Color.DarkGreen.ToVector3(), 1, 0.02, Vector3.Zero), Matrix.CreateScale(25) * Matrix.CreateTranslation(0, -1, 6), "Assets/dragon_vrip.ply", 3, false, false),
 
-                new Sphere(new Material(Color.Red.ToVector3(), 1, 0.4, Vector3.Zero), new Vector3(-2.5, -1, 5), 1),
+                new Sphere(new Material(new MaterialTextureNode(new Texture("Assets/UVTest.png")), new MaterialConstantNode(1), new MaterialConstantNode(0.4), new MaterialConstantNode(Vector3.Zero))/*new Material(Color.Red.ToVector3(), 1, 0.4, Vector3.Zero)*/, new Vector3(-2.5, -1, 5), 1),
                 //new Sphere(new Material(Color.Green.ToVector3(), 1, 0.3, Vector3.Zero), new Vector3(0, -1, 6), 1),
                 new Sphere(new Material(Color.Blue.ToVector3(), 0, 0.4, Vector3.Zero), new Vector3(2.5, -1, 5), 1),
 
@@ -124,13 +124,14 @@ namespace Raytracer
             Vector3 Result = Vector3.Zero;
 
             //Raycast to nearest geometry, if any
-            Raycast(Ray, out Shape FirstShape, out Vector3 FirstShapeHit, out Vector3 FirstShapeNormal);
+            Raycast(Ray, out Shape FirstShape, out Vector3 FirstShapeHit, out Vector3 FirstShapeNormal, out Vector2 UV);
             if (FirstShape != null)
             {
                 //Area lights
-                if (FirstShape.Material.Emission != Vector3.Zero)
+                Vector3 Emission = FirstShape.Material.Emission(UV);
+                if (Emission != Vector3.Zero)
                 {
-                    return FirstShape.Material.Emission;
+                    return Emission;
                 }
 
                 //If we are about to hit max depth, no need to calculate indirect lighting
@@ -142,15 +143,19 @@ namespace Raytracer
                 //Indirect lighting using monte carlo path tracing
                 Vector3 Indirect = Vector3.Zero;
 
+                Vector3 Albedo = FirstShape.Material.Albedo(UV);
+                double Roughness = FirstShape.Material.Roughness(UV);
+                double Metalness = FirstShape.Material.Metalness(UV);
+
                 Vector3 TotalDiffuse = Vector3.Zero;
                 Vector3 TotalSpecular = Vector3.Zero;
 
                 Vector3 ViewDirection = Vector3.Normalize(ViewPosition - FirstShapeHit);
-                Vector3 F0 = Vector3.Lerp(new Vector3(0.04), FirstShape.Material.Color, FirstShape.Material.Metalness);
+                Vector3 F0 = Vector3.Lerp(new Vector3(0.04), Albedo, Metalness);
 
                 double TotalSamples = SamplesPerBounce[Bounces];
                 double HalfSamples = TotalSamples * 0.5;
-                double MetalSamplesOffset = (TotalSamples * 0.5 * FirstShape.Material.Metalness);
+                double MetalSamplesOffset = (TotalSamples * 0.5 * Metalness);
                 int DiffuseSamples = (int)(HalfSamples - MetalSamplesOffset);
                 int SpecularSamples = (int)(HalfSamples + MetalSamplesOffset);
 
@@ -164,7 +169,7 @@ namespace Raytracer
                 Vector3 ReflectionDirection = Vector3.Zero;
                 if (SpecularSamples > 0)
                 {
-                    ReflectionDirection= Vector3.Reflect(-ViewDirection, FirstShapeNormal);
+                    ReflectionDirection = Vector3.Reflect(-ViewDirection, FirstShapeNormal);
                 }
 
                 //Diffuse
@@ -186,8 +191,8 @@ namespace Raytracer
                     Vector3 Ks = FresnelSchlick(Math.Max(Vector3.Dot(Halfway, ViewDirection), 0.0), F0);
                     Vector3 Kd = Vector3.One - Ks;
 
-                    Kd *= 1.0 - FirstShape.Material.Metalness;
-                    Vector3 Diffuse = Kd * FirstShape.Material.Color;
+                    Kd *= 1.0 - Metalness;
+                    Vector3 Diffuse = Kd * Albedo;
                     
                     TotalDiffuse += Diffuse * SampleRadiance * CosTheta;
                 }
@@ -197,7 +202,7 @@ namespace Raytracer
                 {
                     double R1 = Util.Random.NextDouble();
                     double R2 = Util.Random.NextDouble();
-                    Vector3 SampleWorld = ImportanceSampleGGX(R1, R2, ReflectionDirection, FirstShape.Material.Roughness);
+                    Vector3 SampleWorld = ImportanceSampleGGX(R1, R2, ReflectionDirection, Roughness);
 
                     Vector3 SampleRadiance = Trace(new Ray(FirstShapeHit + SampleWorld * 0.001, SampleWorld), FirstShapeHit, Bounces + 1);
                     double CosTheta = Math.Max(Vector3.Dot(FirstShapeNormal, SampleWorld), 0);
@@ -205,8 +210,8 @@ namespace Raytracer
 
                     Vector3 Ks = FresnelSchlick(Math.Max(Vector3.Dot(Halfway, ViewDirection), 0.0), F0);
 
-                    double D = GGXDistribution(FirstShapeNormal, Halfway, FirstShape.Material.Roughness);
-                    double G = GeometrySmith(FirstShapeNormal, ViewDirection, SampleWorld, FirstShape.Material.Roughness);
+                    double D = GGXDistribution(FirstShapeNormal, Halfway, Roughness);
+                    double G = GeometrySmith(FirstShapeNormal, ViewDirection, SampleWorld, Roughness);
                     Vector3 SpecularNumerator = D * G * Ks;
                     double SpecularDenominator = 4.0 * Math.Max(Vector3.Dot(FirstShapeNormal, ViewDirection), 0.0) * CosTheta + 0.001;
                     Vector3 Specular = SpecularNumerator / SpecularDenominator;
@@ -234,15 +239,16 @@ namespace Raytracer
             return Result;
         }
 
-        private bool Raycast(Ray Ray, out Shape FirstShape, out Vector3 FirstShapeHit, out Vector3 FirstShapeNormal)
+        private bool Raycast(Ray Ray, out Shape FirstShape, out Vector3 FirstShapeHit, out Vector3 FirstShapeNormal, out Vector2 FirstShapeUV)
         {
             double MinDistance = double.MaxValue;
             FirstShape = null;
             FirstShapeHit = Vector3.Zero;
             FirstShapeNormal = Vector3.Zero;
+            FirstShapeUV = Vector2.Zero;
             foreach (Shape Shape in Shapes)
             {
-                if (Shape.Intersect(Ray, out Vector3 Hit, out Vector3 Normal))
+                if (Shape.Intersect(Ray, out Vector3 Hit, out Vector3 Normal, out Vector2 UV))
                 {
                     double Distance = (Hit - Ray.Origin).Length();
                     if (Distance < MinDistance)
@@ -251,6 +257,7 @@ namespace Raytracer
                         FirstShape = Shape;
                         FirstShapeHit = Hit;
                         FirstShapeNormal = Normal;
+                        FirstShapeUV = UV;
                     }
                 }
             }
