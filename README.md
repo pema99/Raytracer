@@ -1,12 +1,14 @@
 ### What is it?
-A path tracer using monte carlo integration methods and physically based renderring.
+A path tracer using monte carlo integration methods and physically based rendering.
 
 ### What can it do?
-Render simple scenes.
+Render simple scenes with global illumination.
 
 Specular, diffuse controllable via roughness and metalness parameters.
 
 Meshes, spheres, rectangles.
+
+Spatial partitioning so I don't have infinitely long render times.
 
 Cool.
 
