@@ -1,4 +1,4 @@
-### What is it?
+﻿### What is it?
 A path tracer using monte carlo integration methods and physically based rendering.
 
 ### What can it do?
@@ -17,6 +17,7 @@ Because I am bored.
 
 ### Cool, show some pictures.
 [<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Dragon.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Dragon.png)
+[<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Metal.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Metal.png)
 [<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Monkey.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Monkey.png)
 [<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Monkey2.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Monkey2.png)
 

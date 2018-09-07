@@ -59,11 +59,11 @@ namespace Raytracer
             //Setup scene
             Shapes = new List<Shape>()
             {
-                //new TriangleMesh(new Material(Color.DarkGreen.ToVector3(), 1, 0.02, Vector3.Zero), Matrix.CreateScale(1) * Matrix.CreateTranslation(0, -1, 6), "Assets/Meshes/cylinderfinal.ply", 3, true, true),
+                new TriangleMesh(new Material(Color.DarkGreen.ToVector3(), 1, 0.02, Vector3.Zero), Matrix.CreateScale(25) * Matrix.CreateTranslation(0, -1, 6), "Assets/Meshes/dragon_vrip.ply", 3, false, false),
 
-                new Sphere(new Material("wornpaintedcement"), new Vector3(0, 0, 5), 2),
+                new Sphere(new Material("wornpaintedcement"), new Vector3(-2.5, -1, 5), 1),
                 //new Sphere(new Material(Color.Green.ToVector3(), 1, 0.3, Vector3.Zero), new Vector3(0, -1, 6), 1),
-                //new Sphere(new Material("rustediron2"), new Vector3(2.5, -1, 5), 1),
+                new Sphere(new Material("rustediron2"), new Vector3(2.5, -1, 5), 1),
 
                 new Plane(new Material(Color.LightGray.ToVector3(), 0, 1, Vector3.Zero), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
                 new Plane(new Material(Color.LightBlue.ToVector3(), 0, 1, Vector3.One), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
