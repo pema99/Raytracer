@@ -21,11 +21,8 @@ C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Ass
 C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\Meshes\barrel.ply
 C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\Meshes\monkeysmooth.ply
 C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\Meshes\dragon_vrip.ply
-C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\Materials\darktiles1_basecolor.png
-C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\Materials\darktiles1_metallic.png
-C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\Materials\darktiles1_normal.png
-C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\Materials\darktiles1_roughness.png
 C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\Materials\wornpaintedcement_basecolor.png
 C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\Materials\wornpaintedcement_metallic.png
-C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\Materials\wornpaintedcement_norrmal.png
 C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\Materials\wornpaintedcement_roughness.png
+C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\Meshes\cylinderfinal.ply
+C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\Materials\wornpaintedcement_normal.png

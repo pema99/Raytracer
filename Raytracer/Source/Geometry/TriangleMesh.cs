@@ -16,6 +16,7 @@ namespace Raytracer
         public int[] VertexIndices { get; set; }
         public Vector3[] FaceNormals { get; set; }
         public Vector3[] VertexNormals { get; set; }
+        public Vector2[] VertexUVs { get; set; }
         public int NumFaces { get; private set; }
         public SpatialGrid Grid { get; set; }
 
@@ -53,8 +54,9 @@ namespace Raytracer
                 }
             }
 
-            //Import vertex normals if they are specified
+            //Import vertex normals, uvs, if they are specified
             this.VertexNormals = new Vector3[Vertices.Length];
+            this.VertexUVs = new Vector2[Vertices.Length];
             for (int i = 0; i < Vertices.Length; i++)
             {
                 Line = Reader.ReadLine();
@@ -63,6 +65,10 @@ namespace Raytracer
                 if (Tokens.Length >= 6)
                 {
                     VertexNormals[i] = new Vector3(double.Parse(Tokens[3], CultureInfo.InvariantCulture), double.Parse(Tokens[4], CultureInfo.InvariantCulture), double.Parse(Tokens[5], CultureInfo.InvariantCulture));
+                }
+                if (Tokens.Length >= 8)
+                {
+                    VertexUVs[i] = new Vector2(double.Parse(Tokens[6], CultureInfo.InvariantCulture), double.Parse(Tokens[7], CultureInfo.InvariantCulture));
                 }
             }
 
@@ -80,10 +86,11 @@ namespace Raytracer
             for (int i = 0; i < Vertices.Length; i++)
             {
                 Vertices[i] = Vector3.Transform(Vertices[i], TransformMatrix);
+                VertexNormals[i] = Vector3.TransformNormal(VertexNormals[i], TransformMatrix);
             }
             Grid = new SpatialGrid(this, GridLambda);
 
-            CalculateNormals();
+            CalculateFaceNormals();
         }
 
         public override bool Intersect(Ray Ray, out Vector3 Hit, out Vector3 Normal, out Vector2 UV)
@@ -146,24 +153,38 @@ namespace Raytracer
                 Hit = Ray.Origin + Ray.Direction * T;
 
                 Vector3 N = FaceNormals[Index];
-                if (SmoothShading)
+
+                //Barycentric coords
+                double BaryAlpha = 1 - U - V;
+                double BaryBeta = U;
+                double BaryGamma = V;
+
+                if (VertexUVs.Length > 0)
                 {
-                    //Area of triangles
-                    double AreaABC = Vector3.Dot(N, Vector3.Cross((V1 - V0), (V2 - V0)));
-                    double AreaPBC = Vector3.Dot(N, Vector3.Cross((V1 - Hit), (V2 - Hit)));
-                    double AreaPCA = Vector3.Dot(N, Vector3.Cross((V2 - Hit), (V0 - Hit)));
-
-                    //Barycentric coords
-                    double BaryAlpha = AreaPBC / AreaABC;
-                    double BaryBeta = AreaPCA / AreaABC;
-                    double BaryGamma = 1.0 - BaryAlpha - BaryBeta;
-
-                    //Interpolated vertex normal
-                    Normal = Vector3.Normalize(BaryAlpha * VertexNormals[VertexIndices[Index * 3]] + BaryBeta * VertexNormals[VertexIndices[Index * 3 + 1]] + BaryGamma * VertexNormals[VertexIndices[Index * 3 + 2]]);
+                    UV = BaryAlpha * VertexUVs[VertexIndices[Index * 3]] + BaryBeta * VertexUVs[VertexIndices[Index * 3 + 1]] + BaryGamma * VertexUVs[VertexIndices[Index * 3 + 2]];
                 }
                 else
                 {
-                    Normal = N;
+                    UV = new Vector2(U, V);
+                }
+
+                if (Material.HasNormal())
+                {
+                    Vector3 TangentSpaceNormal = Material.GetNormal(UV);
+                    Matrix TBN = Matrix.CreateWorld(Vector3.Zero, EdgeA, N);
+                    Normal = Vector3.Transform(TangentSpaceNormal, TBN);
+                }
+                else
+                {
+                    if (SmoothShading)
+                    {
+                        //Interpolated vertex normal
+                        Normal = Vector3.Normalize(BaryAlpha * VertexNormals[VertexIndices[Index * 3]] + BaryBeta * VertexNormals[VertexIndices[Index * 3 + 1]] + BaryGamma * VertexNormals[VertexIndices[Index * 3 + 2]]);
+                    }
+                    else
+                    {
+                        Normal = N;
+                    }
                 }
 
                 return true;
@@ -171,20 +192,8 @@ namespace Raytracer
 
             return false;
         }
-
-        [Obsolete("This method requires recalculation of the grid, pass a matrix to the constructor instead.")]
-        public void Transform(Matrix TransformMatrix, double GridLambda = 3)
-        {
-            for (int i = 0; i < Vertices.Length; i++)
-            {
-                Vertices[i] = Vector3.Transform(Vertices[i], TransformMatrix);
-            }
-
-            Grid = new SpatialGrid(this, GridLambda);
-            CalculateNormals();
-        }
         
-        private void CalculateNormals()
+        private void CalculateFaceNormals()
         {
             FaceNormals = new Vector3[NumFaces];
             for (int i = 0; i < FaceNormals.Length; i++)
@@ -194,9 +203,20 @@ namespace Raytracer
                 Vector3 V2 = Vertices[VertexIndices[i * 3 + 2]];
 
                 FaceNormals[i] = Vector3.Normalize(Vector3.Cross(V1 - V0, V2 - V0));
-
-                //TODO: Recalculate vertex normals
             }
+        }
+
+        [Obsolete("This method requires recalculation of the grid, pass a matrix to the constructor instead.")]
+        public void Transform(Matrix TransformMatrix, double GridLambda = 3)
+        {
+            for (int i = 0; i < Vertices.Length; i++)
+            {
+                Vertices[i] = Vector3.Transform(Vertices[i], TransformMatrix);
+                VertexNormals[i] = Vector3.TransformNormal(VertexNormals[i], TransformMatrix);
+            }
+
+            Grid = new SpatialGrid(this, GridLambda);
+            CalculateFaceNormals();
         }
     }
 }

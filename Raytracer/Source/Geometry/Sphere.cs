@@ -47,15 +47,28 @@ namespace Raytracer
                 }
             }
 
-            //T = T0
             Hit = Ray.Origin + T0 * Ray.Direction;
 
-            Normal = Hit - Origin;
-            Normal.Normalize();
+            Vector3 N = Hit - Origin;
+            N.Normalize();
 
+            UV = new Vector2((1.0 + Math.Atan2(N.Z, N.X) / MathHelper.Pi) * 0.5, Math.Acos(N.Y) / MathHelper.Pi);
+
+            if (Material.HasNormal())
+            {
+                Vector3 Tangent = new Vector3(1, 1, (N.X + N.Y) / (-N.Z));
+                Tangent.Normalize();
+
+                Vector3 TangentSpaceNormal = Material.GetNormal(UV);
+                Matrix TBN = Matrix.CreateWorld(Vector3.Zero, Tangent, N);
+                Normal = Vector3.Transform(TangentSpaceNormal, TBN);
+            }
+            else
+            {
+                Normal = N;
+            }
             //float TexX = (1 + (float)Math.Atan2(Normal.Y, Normal.X) / MathHelper.Pi) * 0.5f;
             //float TexY = (float)Math.Acos(Normal.Z) / MathHelper.Pi;
-            UV = new Vector2((1.0 + Math.Atan2(Normal.Z, Normal.X) / MathHelper.Pi) * 0.5, Math.Acos(Normal.Y) / MathHelper.Pi);
 
             return true;
         }

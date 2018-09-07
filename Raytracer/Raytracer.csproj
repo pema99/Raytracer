@@ -63,6 +63,7 @@
     <Compile Include="Source\Material\MaterialNode.cs" />
     <Compile Include="Source\Material\MaterialNodeValue.cs" />
     <Compile Include="Source\Material\MaterialNodeValueType.cs" />
+    <Compile Include="Source\Material\MaterialNormalNode.cs" />
     <Compile Include="Source\Material\MaterialOutputNode.cs" />
     <Compile Include="Source\Material\MaterialTextureNode.cs" />
     <Compile Include="Source\Utility classes\Math\MathHelper.cs" />
@@ -101,7 +102,7 @@
     <Content Include="Assets\Materials\wornpaintedcement_metallic.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Materials\wornpaintedcement_norrmal.png">
+    <Content Include="Assets\Materials\wornpaintedcement_normal.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\Materials\wornpaintedcement_roughness.png">
@@ -153,6 +154,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\Meshes\dragon_vrip.ply">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\Meshes\cylinderfinal.ply">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

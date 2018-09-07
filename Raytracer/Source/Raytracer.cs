@@ -59,7 +59,7 @@ namespace Raytracer
             //Setup scene
             Shapes = new List<Shape>()
             {
-                new TriangleMesh(new Material(Color.DarkGreen.ToVector3(), 1, 0.02, Vector3.Zero), Matrix.CreateScale(25) * Matrix.CreateTranslation(0, -1, 6), "Assets/Meshes/dragon_vrip.ply", 3, false, false),
+                new TriangleMesh(new Material(Color.DarkGreen.ToVector3(), 1, 0.02, Vector3.Zero), Matrix.CreateScale(1) * Matrix.CreateTranslation(0, -1, 6), "Assets/Meshes/cylinderfinal.ply", 3, true, true),
 
                 new Sphere(new Material("wornpaintedcement"), new Vector3(-2.5, -1, 5), 1),
                 //new Sphere(new Material(Color.Green.ToVector3(), 1, 0.3, Vector3.Zero), new Vector3(0, -1, 6), 1),
@@ -128,7 +128,7 @@ namespace Raytracer
             if (FirstShape != null)
             {
                 //Area lights
-                Vector3 Emission = FirstShape.Material.Emission(UV);
+                Vector3 Emission = FirstShape.Material.GetEmission(UV);
                 if (Emission != Vector3.Zero)
                 {
                     return Emission;
@@ -143,9 +143,9 @@ namespace Raytracer
                 //Indirect lighting using monte carlo path tracing
                 Vector3 Indirect = Vector3.Zero;
 
-                Vector3 Albedo = FirstShape.Material.Albedo(UV);
-                double Roughness = MathHelper.Clamp(FirstShape.Material.Roughness(UV), 0.001, 1);
-                double Metalness = FirstShape.Material.Metalness(UV);
+                Vector3 Albedo = FirstShape.Material.GetAlbedo(UV);
+                double Roughness = MathHelper.Clamp(FirstShape.Material.GetRoughness(UV), 0.001, 1);
+                double Metalness = FirstShape.Material.GetMetalness(UV);
 
                 Vector3 TotalDiffuse = Vector3.Zero;
                 Vector3 TotalSpecular = Vector3.Zero;
