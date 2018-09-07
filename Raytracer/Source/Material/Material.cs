@@ -43,28 +43,12 @@
 
         public double Metalness(Vector2 UV)
         {
-            MaterialNodeValue Metal = Output.GetFinalValue(1, UV);
-            if (Metal.Type == MaterialNodeValueType.Number)
-            {
-                return Metal.Number;
-            }
-            else
-            {
-                return Metal.Color.X;
-            }
+            return Output.GetFinalValue(1, UV);
         }
 
         public double Roughness(Vector2 UV)
         {
-            MaterialNodeValue Rough = Output.GetFinalValue(2, UV);
-            if (Rough.Type == MaterialNodeValueType.Number)
-            {
-                return Rough.Number;
-            }
-            else
-            {
-                return Rough.Color.X;
-            }
+            return Output.GetFinalValue(2, UV);
         }
 
         //TODO: Normal mapping, AO

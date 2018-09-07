@@ -37,5 +37,59 @@ namespace Raytracer
             this.Color = Vector3.Zero;
             this.Number = Number;
         }
+
+        public static implicit operator Texture(MaterialNodeValue M)
+        {
+            switch (M.Type)
+            {
+                case MaterialNodeValueType.Texture:
+                    return M.Texture;
+
+                case MaterialNodeValueType.Color:
+                    return new Texture(new Vector3[,] { { M.Color } });
+
+                case MaterialNodeValueType.Number:
+                    return new Texture(new Vector3[,] { { new Vector3(M.Number) } });
+
+                default:
+                    return null;
+            }
+        }
+
+        public static implicit operator Vector3(MaterialNodeValue M)
+        {
+            switch (M.Type)
+            {
+                case MaterialNodeValueType.Texture:
+                    return M.Texture.Data[0, 0];
+
+                case MaterialNodeValueType.Color:
+                    return M.Color;
+
+                case MaterialNodeValueType.Number:
+                    return new Vector3(M.Number);
+
+                default:
+                    return Vector3.Zero;
+            }
+        }
+
+        public static implicit operator double(MaterialNodeValue M)
+        {
+            switch (M.Type)
+            {
+                case MaterialNodeValueType.Texture:
+                    return M.Texture.Data[0, 0].X;
+
+                case MaterialNodeValueType.Color:
+                    return M.Color.X;
+
+                case MaterialNodeValueType.Number:
+                    return M.Number;
+
+                default:
+                    return 0;
+            }
+        }
     }
 }
