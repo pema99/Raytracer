@@ -8,11 +8,14 @@ namespace Raytracer
         public double Radius { get; set; }
         public override Material Material { get; set; }
 
+        private double RadiusSquared { get; set; }
+
         public Sphere(Material Material, Vector3 Origin, double Radius)
         {
             this.Material = Material;
             this.Origin = Origin;
             this.Radius = Radius;
+            this.RadiusSquared = Radius * Radius;
         }
 
         public override bool Intersect(Ray Ray, out Vector3 Hit, out Vector3 Normal, out Vector2 UV)
@@ -21,33 +24,48 @@ namespace Raytracer
             Normal = Vector3.Zero;
             UV = Vector2.Zero;
 
-            double A = 1.0;
-            double B = 2.0 * Vector3.Dot(Ray.Direction, (Ray.Origin - Origin));
-            double C = (Ray.Origin - Origin).LengthSquared() - (Radius * Radius);
+            Vector3 SphereToRay = Origin - Ray.Origin;
 
-            double T0, T1;
-            if (!Util.SolveQuadratic(A, B, C, out T0, out T1))
+            //On the edge, 0 = edge
+            double AdjacentUnscaled = Vector3.Dot(SphereToRay, Ray.Direction);
+            if (AdjacentUnscaled < 0)
             {
                 return false;
             }
 
-            if (T0 > T1)
+            //Outside of circle, opposite larger than radius
+            double OppositeSquared = Vector3.Dot(SphereToRay, SphereToRay) - AdjacentUnscaled * AdjacentUnscaled;
+            if (OppositeSquared > RadiusSquared)
             {
-                double Temp = T1;
-                T1 = T0;
-                T0 = Temp;
+                return false;
             }
 
-            if (T0 < 0)
+            //Pythagoras
+            double Adjacent = Math.Sqrt(RadiusSquared - OppositeSquared);
+
+            //The 2 intersection points
+            double TMin = AdjacentUnscaled - Adjacent;
+            double TMax = AdjacentUnscaled + Adjacent;
+
+            //If we are closer to second intersection, swap them
+            if (TMin > TMax)
             {
-                T0 = T1;
-                if (T0 < 0)
+                double Temp = TMax;
+                TMax = TMin;
+                TMin = Temp;
+            }
+
+            //If scalar is under 0 we can never hit
+            if (TMin < 0)
+            {
+                TMin = TMax;
+                if (TMin < 0)
                 {
                     return false;
                 }
             }
 
-            Hit = Ray.Origin + T0 * Ray.Direction;
+            Hit = Ray.Origin + TMin * Ray.Direction;
 
             Vector3 N = Hit - Origin;
             N.Normalize();
@@ -67,8 +85,6 @@ namespace Raytracer
             {
                 Normal = N;
             }
-            //float TexX = (1 + (float)Math.Atan2(Normal.Y, Normal.X) / MathHelper.Pi) * 0.5f;
-            //float TexY = (float)Math.Acos(Normal.Z) / MathHelper.Pi;
 
             return true;
         }
