@@ -59,11 +59,11 @@ namespace Raytracer
             //Setup scene
             Shapes = new List<Shape>()
             {
-                new TriangleMesh(new Material(Color.DarkGreen.ToVector3(), 1, 0.02, Vector3.Zero), Matrix.CreateScale(25) * Matrix.CreateTranslation(0, -1, 6), "Assets/dragon_vrip.ply", 3, false, false),
+                new TriangleMesh(new Material(Color.DarkGreen.ToVector3(), 1, 0.02, Vector3.Zero), Matrix.CreateScale(25) * Matrix.CreateTranslation(0, -1, 6), "Assets/Meshes/dragon_vrip.ply", 3, false, false),
 
-                new Sphere(new Material(new MaterialTextureNode(new Texture("Assets/UVTest.png")), new MaterialConstantNode(1), new MaterialConstantNode(0.4), new MaterialConstantNode(Vector3.Zero))/*new Material(Color.Red.ToVector3(), 1, 0.4, Vector3.Zero)*/, new Vector3(-2.5, -1, 5), 1),
+                new Sphere(new Material("wornpaintedcement"), new Vector3(-2.5, -1, 5), 1),
                 //new Sphere(new Material(Color.Green.ToVector3(), 1, 0.3, Vector3.Zero), new Vector3(0, -1, 6), 1),
-                new Sphere(new Material(Color.Blue.ToVector3(), 0, 0.4, Vector3.Zero), new Vector3(2.5, -1, 5), 1),
+                new Sphere(new Material("rustediron2"), new Vector3(2.5, -1, 5), 1),
 
                 new Plane(new Material(Color.LightGray.ToVector3(), 0, 1, Vector3.Zero), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
                 new Plane(new Material(Color.LightBlue.ToVector3(), 0, 1, Vector3.One), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
@@ -144,7 +144,7 @@ namespace Raytracer
                 Vector3 Indirect = Vector3.Zero;
 
                 Vector3 Albedo = FirstShape.Material.Albedo(UV);
-                double Roughness = FirstShape.Material.Roughness(UV);
+                double Roughness = MathHelper.Clamp(FirstShape.Material.Roughness(UV), 0.001, 1);
                 double Metalness = FirstShape.Material.Metalness(UV);
 
                 Vector3 TotalDiffuse = Vector3.Zero;

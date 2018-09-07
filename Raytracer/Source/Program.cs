@@ -9,7 +9,11 @@ namespace Raytracer
         {
             Stopwatch Time = new Stopwatch();
 
-            Raytracer Raytracer = new Raytracer(600, 400, 75, 2, 32, 12);
+            #if (!DEBUG)
+            Raytracer Raytracer = new Raytracer(600, 400, 75, 2, 128, 12);
+            #else
+            Raytracer Raytracer = new Raytracer(600, 400, 75, 2, 32, 1);
+            #endif
 
             Time.Start();
             Raytracer.Render();
