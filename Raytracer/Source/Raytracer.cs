@@ -15,6 +15,7 @@ namespace Raytracer
         public double FOV { get; private set; }
         public int MaxBounces { get; private set; }
         public int Samples { get; private set; }
+        public bool Branched { get; private set; }
         public int Threads { get; private set; }
 
         private Vector3[,] Framebuffer { get; set; }
@@ -27,13 +28,14 @@ namespace Raytracer
         
         private int[] SamplesPerBounce { get; set; }
 
-        public Raytracer(int Width, int Height, double FOV, int MaxBounces, int Samples, int Threads)
+        public Raytracer(int Width, int Height, double FOV, int MaxBounces, int Samples, bool Branched, int Threads)
         {
             this.Width = Width;
             this.Height = Height;
             this.FOV = FOV;
             this.MaxBounces = MaxBounces;
             this.Samples = Samples;
+            this.Branched = Branched;
             this.Threads = Threads;
             this.Framebuffer = new Vector3[Width, Height];
 
@@ -43,17 +45,20 @@ namespace Raytracer
             this.ViewAngle = Math.Tan(MathHelper.Pi * 0.5 * FOV / 180.0);
 
             //Calculate samples per bounce, exponential falloff
-            this.SamplesPerBounce = new int[MaxBounces];
-            double DecimalMargin = 0;
-            for (int i = 0; i < MaxBounces; i++)
+            if (Branched)
             {
-                double CurrentSamples = Samples * Math.Pow(0.5, (i + 1 - (i == MaxBounces - 1 ? 1 : 0)));
-                DecimalMargin += CurrentSamples - (int)CurrentSamples;
-                SamplesPerBounce[i] = (int)CurrentSamples;
-            }
-            for (int i = 0; i < DecimalMargin; i++)
-            {
-                SamplesPerBounce[i]++;
+                this.SamplesPerBounce = new int[MaxBounces];
+                double DecimalMargin = 0;
+                for (int i = 0; i < MaxBounces; i++)
+                {
+                    double CurrentSamples = Samples * Math.Pow(0.5, (i + 1 - (i == MaxBounces - 1 ? 1 : 0)));
+                    DecimalMargin += CurrentSamples - (int)CurrentSamples;
+                    SamplesPerBounce[i] = (int)CurrentSamples;
+                }
+                for (int i = 0; i < DecimalMargin; i++)
+                {
+                    SamplesPerBounce[i]++;
+                }
             }
 
             //Setup scene
@@ -81,22 +86,31 @@ namespace Raytracer
             {
                 Parallel.For(0, Width, new ParallelOptions { MaxDegreeOfParallelism = Threads }, (i) => { RenderLine(i); Progress++; });
             }
-
-            //Parallel.For(0, Width, new ParallelOptions { MaxDegreeOfParallelism = Threads }, RenderLine);
         }
-        
+
         private void RenderLine(int x)
         {
-            //Console.WriteLine("Processed line " + x);
             for (int y = 0; y < Height; y++)
             {
                 //Raycast to nearest shape
                 Vector3 RayDir = new Vector3((2.0 * ((x + 0.5) * InvWidth) - 1.0) * ViewAngle * AspectRatio, (1.0 - 2.0 * ((y + 0.5) * InvHeight)) * ViewAngle, 1);
                 RayDir.Normalize();
-                   
-                //Trace primary ray
-                Framebuffer[x, y] = Trace(new Ray(Vector3.Zero, RayDir), Vector3.Zero, 0);
-            }         
+
+                if (Branched)
+                {
+                    Framebuffer[x, y] = TraceBranched(new Ray(Vector3.Zero, RayDir), Vector3.Zero, 0);
+                }
+                else
+                {
+                    for (int i = 0; i < Samples; i++)
+                    {
+                        //Trace primary ray
+                        Framebuffer[x, y] += TraceUnbranched(new Ray(Vector3.Zero, RayDir), Vector3.Zero, 0);
+                    }
+                    //Think I'm supposed to divide by maxbounces TODO: Figure out
+                    Framebuffer[x, y] /= Samples;// / MaxBounces;
+                }
+            }
         }
 
         public void ExportToFile(string Path, double Gamma = 2.2)
@@ -119,10 +133,90 @@ namespace Raytracer
         }
 
         #region Raytracing
-        private Vector3 Trace(Ray Ray, Vector3 ViewPosition, int Bounces)
+        private Vector3 TraceUnbranched(Ray Ray, Vector3 ViewPosition, int Bounces)
         {
-            Vector3 Result = Vector3.Zero;
+            //Raycast to nearest geometry, if any
+            Raycast(Ray, out Shape FirstShape, out Vector3 FirstShapeHit, out Vector3 FirstShapeNormal, out Vector2 UV);
+            if (FirstShape != null)
+            {
+                //Area lights
+                Vector3 Emission = FirstShape.Material.GetEmission(UV);
+                if (Emission != Vector3.Zero)
+                {
+                    return Emission;
+                }
 
+                //If we are about to hit max depth, no need to calculate indirect lighting
+                if (Bounces >= MaxBounces)
+                {
+                    return Vector3.Zero;
+                }
+
+                //Indirect lighting using monte carlo path tracing
+                Vector3 Albedo = FirstShape.Material.GetAlbedo(UV);
+                double Metalness = FirstShape.Material.GetMetalness(UV);
+
+                Vector3 ViewDirection = Vector3.Normalize(ViewPosition - FirstShapeHit);
+                Vector3 F0 = Vector3.Lerp(new Vector3(0.04), Albedo, Metalness);
+
+                double DiffuseSpecularRatio = 0.5 + (0.5 * Metalness);
+
+                if (Util.Random.NextDouble() > DiffuseSpecularRatio)
+                {
+                    Vector3 NT = Vector3.Zero;
+                    Vector3 NB = Vector3.Zero;
+                    CreateCartesian(FirstShapeNormal, out NT, out NB);
+
+                    double R1 = Util.Random.NextDouble();
+                    double R2 = Util.Random.NextDouble();
+                    Vector3 Sample = SampleHemisphere(R1, R2);
+                    Vector3 SampleWorld = new Vector3(
+                        Sample.X * NB.X + Sample.Y * FirstShapeNormal.X + Sample.Z * NT.X,
+                        Sample.X * NB.Y + Sample.Y * FirstShapeNormal.Y + Sample.Z * NT.Y,
+                        Sample.X * NB.Z + Sample.Y * FirstShapeNormal.Z + Sample.Z * NT.Z);
+                    SampleWorld.Normalize();
+
+                    Vector3 SampleRadiance = TraceUnbranched(new Ray(FirstShapeHit + SampleWorld * 0.001, SampleWorld), FirstShapeHit, Bounces + 1);
+                    double CosTheta = Math.Max(Vector3.Dot(FirstShapeNormal, SampleWorld), 0);
+                    Vector3 Halfway = Vector3.Normalize(SampleWorld + ViewDirection);
+
+                    Vector3 Ks = FresnelSchlick(Math.Max(Vector3.Dot(Halfway, ViewDirection), 0.0), F0);
+                    Vector3 Kd = Vector3.One - Ks;
+
+                    Kd *= 1.0 - Metalness;
+                    Vector3 Diffuse = Kd * Albedo;
+
+                    return (2 * Diffuse * SampleRadiance * CosTheta) / (1 - DiffuseSpecularRatio);
+                }
+                else 
+                {
+                    double Roughness = MathHelper.Clamp(FirstShape.Material.GetRoughness(UV), 0.0001, 1);
+
+                    Vector3 ReflectionDirection = Vector3.Reflect(-ViewDirection, FirstShapeNormal);
+                    double R1 = Util.Random.NextDouble();
+                    double R2 = Util.Random.NextDouble();
+                    Vector3 SampleWorld = ImportanceSampleGGX(R1, R2, ReflectionDirection, Roughness);
+
+                    Vector3 SampleRadiance = TraceUnbranched(new Ray(FirstShapeHit + SampleWorld * 0.001, SampleWorld), FirstShapeHit, Bounces + 1);
+                    double CosTheta = Math.Max(Vector3.Dot(FirstShapeNormal, SampleWorld), 0);
+                    Vector3 Halfway = Vector3.Normalize(SampleWorld + ViewDirection);
+
+                    Vector3 Ks = FresnelSchlick(Math.Max(Vector3.Dot(Halfway, ViewDirection), 0.0), F0);
+
+                    double D = GGXDistribution(FirstShapeNormal, Halfway, Roughness);
+                    double G = GeometrySmith(FirstShapeNormal, ViewDirection, SampleWorld, Roughness);
+                    Vector3 SpecularNumerator = D * G * Ks;
+                    double SpecularDenominator = 4.0 * Math.Max(Vector3.Dot(FirstShapeNormal, ViewDirection), 0.0) * CosTheta + 0.001;
+                    Vector3 Specular = SpecularNumerator / SpecularDenominator;
+
+                    return Specular * SampleRadiance * CosTheta / (D * Vector3.Dot(FirstShapeNormal, Halfway) / (4 * Vector3.Dot(Halfway, ViewDirection)) + 0.0001) / DiffuseSpecularRatio;
+                }
+            }
+            return Vector3.Zero;
+        }
+
+        private Vector3 TraceBranched(Ray Ray, Vector3 ViewPosition, int Bounces)
+        {
             //Raycast to nearest geometry, if any
             Raycast(Ray, out Shape FirstShape, out Vector3 FirstShapeHit, out Vector3 FirstShapeNormal, out Vector2 UV);
             if (FirstShape != null)
@@ -184,7 +278,7 @@ namespace Raytracer
                         Sample.X * NB.Z + Sample.Y * FirstShapeNormal.Z + Sample.Z * NT.Z);
                     SampleWorld.Normalize();
 
-                    Vector3 SampleRadiance = Trace(new Ray(FirstShapeHit + SampleWorld * 0.001, SampleWorld), FirstShapeHit, Bounces + 1);
+                    Vector3 SampleRadiance = TraceBranched(new Ray(FirstShapeHit + SampleWorld * 0.001, SampleWorld), FirstShapeHit, Bounces + 1);
                     double CosTheta = Math.Max(Vector3.Dot(FirstShapeNormal, SampleWorld), 0);
                     Vector3 Halfway = Vector3.Normalize(SampleWorld + ViewDirection);
 
@@ -204,7 +298,7 @@ namespace Raytracer
                     double R2 = Util.Random.NextDouble();
                     Vector3 SampleWorld = ImportanceSampleGGX(R1, R2, ReflectionDirection, Roughness);
 
-                    Vector3 SampleRadiance = Trace(new Ray(FirstShapeHit + SampleWorld * 0.001, SampleWorld), FirstShapeHit, Bounces + 1);
+                    Vector3 SampleRadiance = TraceBranched(new Ray(FirstShapeHit + SampleWorld * 0.001, SampleWorld), FirstShapeHit, Bounces + 1);
                     double CosTheta = Math.Max(Vector3.Dot(FirstShapeNormal, SampleWorld), 0);
                     Vector3 Halfway = Vector3.Normalize(SampleWorld + ViewDirection);
 
@@ -232,11 +326,9 @@ namespace Raytracer
                 {
                     TotalSpecular /= (double)SpecularSamples;
                 }
-                Indirect = TotalDiffuse + TotalSpecular;
-
-                Result = Indirect;
+                return TotalDiffuse + TotalSpecular;
             }
-            return Result;
+            return Vector3.Zero;
         }
 
         private bool Raycast(Ray Ray, out Shape FirstShape, out Vector3 FirstShapeHit, out Vector3 FirstShapeNormal, out Vector2 FirstShapeUV)
