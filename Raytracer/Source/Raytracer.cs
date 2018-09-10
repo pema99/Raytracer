@@ -64,11 +64,11 @@ namespace Raytracer
             //Setup scene
             Shapes = new List<Shape>()
             {
-                //new TriangleMesh(new Material(Color.DarkGreen.ToVector3(), 1, 0.02, Vector3.Zero), Matrix.CreateScale(25) * Matrix.CreateTranslation(0, -1, 6), "Assets/Meshes/dragon_vrip.ply", 3, false, false),
+                new TriangleMesh(new Material("Cerberus"), Matrix.CreateScale(5) * Matrix.CreateRotationY(Math.PI/2) * Matrix.CreateTranslation(-2, 0.5, 5), "Assets/Meshes/Gun.ply", 3, true, false),
 
-                new Sphere(new Material("wornpaintedcement"), new Vector3(-2.5, -0.5, 5), 1.5),
+                //new Sphere(new Material("wornpaintedcement"), new Vector3(-2.5, -0.5, 5), 1.5),
                 //new Sphere(new Material(Color.Green.ToVector3(), 1, 0.3, Vector3.Zero), new Vector3(0, -1, 6), 1),
-                new Sphere(new Material("rustediron2"), new Vector3(2.5, -0.5, 5), 1.5),
+                //new Sphere(new Material("rustediron2"), new Vector3(2.5, -0.5, 5), 1.5),
 
                 new Plane(new Material(Color.LightGray.ToVector3(), 0, 1, Vector3.Zero), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
                 new Plane(new Material(Color.LightBlue.ToVector3(), 0, 1, Vector3.One), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
@@ -111,8 +111,7 @@ namespace Raytracer
                         RayDir = new Vector3((2.0 * ((x + 0.5 + Util.Random.NextDouble()) * InvWidth) - 1.0) * ViewAngle * AspectRatio, (1.0 - 2.0 * ((y + 0.5 + Util.Random.NextDouble()) * InvHeight)) * ViewAngle, 1);
                         RayDir.Normalize();
                     }
-                    //Think I'm supposed to divide by maxbounces TODO: Figure out
-                    Framebuffer[x, y] /= Samples;// / MaxBounces;
+                    Framebuffer[x, y] /= Samples;
                 }
             }
         }
@@ -138,7 +137,13 @@ namespace Raytracer
 
         #region Raytracing
         private Vector3 TraceUnbranched(Ray Ray, Vector3 ViewPosition, int Bounces)
-        {
+        {                
+            //If we are about to hit max depth, no need to calculate indirect lighting
+            if (Bounces >= MaxBounces)
+            {
+                return Vector3.Zero;
+            }
+
             //Raycast to nearest geometry, if any
             Raycast(Ray, out Shape FirstShape, out Vector3 FirstShapeHit, out Vector3 FirstShapeNormal, out Vector2 UV);
             if (FirstShape != null)
@@ -148,12 +153,6 @@ namespace Raytracer
                 if (Emission != Vector3.Zero)
                 {
                     return Emission;
-                }
-
-                //If we are about to hit max depth, no need to calculate indirect lighting
-                if (Bounces >= MaxBounces)
-                {
-                    return Vector3.Zero;
                 }
 
                 //Indirect lighting using monte carlo path tracing
@@ -216,7 +215,7 @@ namespace Raytracer
                     return Specular * SampleRadiance * CosTheta / (D * Vector3.Dot(FirstShapeNormal, Halfway) / (4 * Vector3.Dot(Halfway, ViewDirection)) + 0.0001) / DiffuseSpecularRatio;
                 }
             }
-            return Vector3.Zero;
+            return Vector3.One;
         }
 
         private Vector3 TraceBranched(Ray Ray, Vector3 ViewPosition, int Bounces)

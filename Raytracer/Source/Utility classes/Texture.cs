@@ -53,7 +53,7 @@ namespace Raytracer
 
         public Vector3 GetColorAtUV(Vector2 UV)
         {
-            return Data[(int)(UV.X * Width), (int)(UV.Y * Height)];
+            return Data[(int)(UV.X * Width), (int)(Height - UV.Y * Height)];
         }
     }
 }

@@ -162,6 +162,14 @@ namespace Raytracer
                 if (VertexUVs.Length > 0)
                 {
                     UV = BaryAlpha * VertexUVs[VertexIndices[Index * 3]] + BaryBeta * VertexUVs[VertexIndices[Index * 3 + 1]] + BaryGamma * VertexUVs[VertexIndices[Index * 3 + 2]];
+                    if (UV.X > 1)
+                    {
+                        UV.X = UV.X % 1;
+                    }
+                    if (UV.Y > 1)
+                    {
+                        UV.Y = UV.Y % 1;
+                    }
                 }
                 else
                 {

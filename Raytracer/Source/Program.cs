@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpEXR;
+using System;
 using System.Diagnostics;
 
 namespace Raytracer
@@ -8,7 +9,7 @@ namespace Raytracer
         public static void Main(string[] Args)
         {
             #if (!DEBUG)
-            Raytracer Raytracer = new Raytracer(1920, 1080, 75, 2, 4096, false, 12);
+            Raytracer Raytracer = new Raytracer(600, 400, 75, 2, 100, false, 12);
             #else
             Raytracer Raytracer = new Raytracer(600, 400, 75, 2, 32, false, 1);
             #endif
