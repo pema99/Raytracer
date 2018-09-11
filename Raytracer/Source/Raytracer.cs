@@ -13,6 +13,9 @@ namespace Raytracer
         public int Width { get; private set; }
         public int Height { get; private set; }
         public double FOV { get; private set; }
+        public Vector3 CameraPosition { get; private set; }
+        public Vector3 CameraRotation { get; private set; }
+        public Texture EnvMap { get; set; }
         public int MaxBounces { get; private set; }
         public int Samples { get; private set; }
         public bool Branched { get; private set; }
@@ -25,14 +28,16 @@ namespace Raytracer
         private double InvHeight { get; set; }
         private double AspectRatio { get; set; }
         private double ViewAngle { get; set; }
+        private Matrix CameraRotationMatrix { get; set; }
         
         private int[] SamplesPerBounce { get; set; }
 
-        public Raytracer(int Width, int Height, double FOV, int MaxBounces, int Samples, bool Branched, int Threads)
+        public Raytracer(int Width, int Height, double FOV, Vector3 CameraPosition, Vector3 CameraRotation, Texture EnvMap, int MaxBounces, int Samples, bool Branched, int Threads)
         {
             this.Width = Width;
             this.Height = Height;
             this.FOV = FOV;
+            this.EnvMap = EnvMap;
             this.MaxBounces = MaxBounces;
             this.Samples = Samples;
             this.Branched = Branched;
@@ -43,6 +48,7 @@ namespace Raytracer
             this.InvHeight = 1.0 / Height;
             this.AspectRatio = (double)Width / (double)Height;
             this.ViewAngle = Math.Tan(MathHelper.Pi * 0.5 * FOV / 180.0);
+            this.CameraRotationMatrix = Matrix.CreateRotationX(CameraRotation.X) * Matrix.CreateRotationY(CameraRotation.Y) * Matrix.CreateRotationZ(CameraRotation.Z);
 
             //Calculate samples per bounce, exponential falloff
             if (Branched)
@@ -67,8 +73,10 @@ namespace Raytracer
                 new TriangleMesh(new Material("Cerberus"), Matrix.CreateScale(5) * Matrix.CreateRotationY(Math.PI/2) * Matrix.CreateTranslation(-2, 0.5, 5), "Assets/Meshes/Gun.ply", 3, true, false),
 
                 //new Sphere(new Material("wornpaintedcement"), new Vector3(-2.5, -0.5, 5), 1.5),
-                //new Sphere(new Material(Color.Green.ToVector3(), 1, 0.3, Vector3.Zero), new Vector3(0, -1, 6), 1),
                 //new Sphere(new Material("rustediron2"), new Vector3(2.5, -0.5, 5), 1.5),
+
+                //new Sphere(new Material(Color.Green.ToVector3(), 1, 0, Vector3.Zero), new Vector3(2.5, 0, 5), 1.5),
+                //new Sphere(new Material(Color.Red.ToVector3(), 0, 0.1, Vector3.Zero), new Vector3(-2.5, 0, 5), 1.5),
 
                 new Plane(new Material(Color.LightGray.ToVector3(), 0, 1, Vector3.Zero), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
                 new Plane(new Material(Color.LightBlue.ToVector3(), 0, 1, Vector3.One), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
@@ -95,21 +103,23 @@ namespace Raytracer
                 //Raycast to nearest shape
                 Vector3 RayDir = new Vector3((2.0 * ((x + 0.5) * InvWidth) - 1.0) * ViewAngle * AspectRatio, (1.0 - 2.0 * ((y + 0.5) * InvHeight)) * ViewAngle, 1);
                 RayDir.Normalize();
+                RayDir = Vector3.Transform(RayDir, CameraRotationMatrix);
 
                 if (Branched)
                 {
-                    Framebuffer[x, y] = TraceBranched(new Ray(Vector3.Zero, RayDir), Vector3.Zero, 0);
+                    Framebuffer[x, y] = TraceBranched(new Ray(CameraPosition, RayDir), Vector3.Zero, 0);
                 }
                 else
                 {
                     for (int i = 0; i < Samples; i++)
                     {
                         //Trace primary ray
-                        Framebuffer[x, y] += TraceUnbranched(new Ray(Vector3.Zero, RayDir), Vector3.Zero, 0);
+                        Framebuffer[x, y] += TraceUnbranched(new Ray(CameraPosition, RayDir), Vector3.Zero, 0);
 
                         //Supersampling
                         RayDir = new Vector3((2.0 * ((x + 0.5 + Util.Random.NextDouble()) * InvWidth) - 1.0) * ViewAngle * AspectRatio, (1.0 - 2.0 * ((y + 0.5 + Util.Random.NextDouble()) * InvHeight)) * ViewAngle, 1);
                         RayDir.Normalize();
+                        RayDir = Vector3.Transform(RayDir, CameraRotationMatrix);
                     }
                     Framebuffer[x, y] /= Samples;
                 }
@@ -137,8 +147,8 @@ namespace Raytracer
 
         #region Raytracing
         private Vector3 TraceUnbranched(Ray Ray, Vector3 ViewPosition, int Bounces)
-        {                
-            //If we are about to hit max depth, no need to calculate indirect lighting
+        {
+            //If we are about to hit max depth, no need to calculate lighting
             if (Bounces >= MaxBounces)
             {
                 return Vector3.Zero;
@@ -191,7 +201,7 @@ namespace Raytracer
 
                     return (2 * Diffuse * SampleRadiance * CosTheta) / (1 - DiffuseSpecularRatio);
                 }
-                else 
+                else
                 {
                     double Roughness = MathHelper.Clamp(FirstShape.Material.GetRoughness(UV), 0.0001, 1);
 
@@ -215,7 +225,14 @@ namespace Raytracer
                     return Specular * SampleRadiance * CosTheta / (D * Vector3.Dot(FirstShapeNormal, Halfway) / (4 * Vector3.Dot(Halfway, ViewDirection)) + 0.0001) / DiffuseSpecularRatio;
                 }
             }
-            return Vector3.One;
+            if (EnvMap == null)
+            {
+                return Vector3.Zero;
+            }
+            else
+            {
+                return EnvMap.GetColorAtUV(new Vector2(1 - (1.0 + Math.Atan2(Ray.Direction.Z, Ray.Direction.X) / MathHelper.Pi) * 0.5, 1 - Math.Acos(Ray.Direction.Y) / MathHelper.Pi));
+            }
         }
 
         private Vector3 TraceBranched(Ray Ray, Vector3 ViewPosition, int Bounces)
@@ -331,7 +348,14 @@ namespace Raytracer
                 }
                 return TotalDiffuse + TotalSpecular;
             }
-            return Vector3.Zero;
+            if (EnvMap == null)
+            {
+                return Vector3.Zero;
+            }
+            else
+            {
+                return EnvMap.GetColorAtUV(new Vector2(1 - (1.0 + Math.Atan2(Ray.Direction.Z, Ray.Direction.X) / MathHelper.Pi) * 0.5, 1 - Math.Acos(Ray.Direction.Y) / MathHelper.Pi));
+            }
         }
 
         private bool Raycast(Ray Ray, out Shape FirstShape, out Vector3 FirstShapeHit, out Vector3 FirstShapeNormal, out Vector2 FirstShapeUV)

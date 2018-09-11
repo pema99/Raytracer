@@ -52,4 +52,5 @@ C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Ass
 C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\Materials\Cerberus_normal.png
 C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\Materials\Cerberus_roughness.png
 C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\Meshes\Gun.ply
-C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\HDRIs\lythwood_field_2k.hdr
+C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\EnvMaps\creek.png
+C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\EnvMaps\portland.png
