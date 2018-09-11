@@ -9,9 +9,9 @@ namespace Raytracer
         public static void Main(string[] Args)
         {
             #if (!DEBUG)
-            Raytracer Raytracer = new Raytracer(600, 400, 75, Vector3.Zero, Vector3.Zero, new Texture("Assets/EnvMaps/portland.png", true), 3, 100, false, 12);
+            Raytracer Raytracer = new Raytracer(600, 400, 75, Vector3.Zero, Vector3.Zero, new Texture("Assets/EnvMaps/portland.png", true), 3, 1024, 12);
             #else
-            Raytracer Raytracer = new Raytracer(600, 400, 75, Vector3.Zero, Vector3.Zero, new Texture("Assets/EnvMaps/creek.png", true), 3, 100, false, 1);
+            Raytracer Raytracer = new Raytracer(600, 400, 75, Vector3.Zero, Vector3.Zero, new Texture("Assets/EnvMaps/portland.png", true), 5, 100, 1);
             #endif
 
             Stopwatch Time = new Stopwatch();
@@ -21,7 +21,7 @@ namespace Raytracer
 
             Raytracer.ExportToFile("Render.png");
 
-            System.Diagnostics.Process.Start("Render.png");
+            Process.Start("Render.png");
 
             Console.WriteLine("Finished rendering in {0} seconds", Time.Elapsed.TotalSeconds);
             Console.WriteLine("Press any key to exit");
