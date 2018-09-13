@@ -15,7 +15,7 @@ namespace Raytracer
         public double FOV { get; private set; }
         public Vector3 CameraPosition { get; private set; }
         public Vector3 CameraRotation { get; private set; }
-        public Texture EnvMap { get; set; }
+        public Texture SkyBox { get; set; }
         public int MaxBounces { get; private set; }
         public int Samples { get; private set; }
         public int Threads { get; private set; }
@@ -34,7 +34,7 @@ namespace Raytracer
             this.Width = Width;
             this.Height = Height;
             this.FOV = FOV;
-            this.EnvMap = EnvMap;
+            this.SkyBox = EnvMap;
             this.MaxBounces = MaxBounces;
             this.Samples = Samples;
             this.Threads = Threads;
@@ -51,20 +51,20 @@ namespace Raytracer
             {
                 //new TriangleMesh(new Material("Cerberus"), Matrix.CreateScale(5) * Matrix.CreateRotationY(Math.PI/2) * Matrix.CreateTranslation(-2, 0.5, 5), "Assets/Meshes/Gun.ply", 3, true, false),
                 //new TriangleMesh(new Material(Color.White.ToVector3(), 0, 0, Vector3.Zero), Matrix.CreateScale(2) * Matrix.CreateTranslation(0, 0, 5), "Assets/meshes/monkeysmooth.ply", 3, true, false),
-                //new TriangleMesh(new Material(new Vector3(1, 0.7, 0.7), 0, 0, Vector3.Zero, 1, 1.3), Matrix.CreateScale(25) * Matrix.CreateTranslation(0, -3, 5), "Assets/meshes/dragon_vrip.ply", 3, false, false),
+                new TriangleMesh(new Material(new Vector3(0.7, 1, 0.7), 1, 0.1, Vector3.Zero, 1, 1.3), Matrix.CreateScale(18) * Matrix.CreateTranslation(0.5, -3, 4), "Assets/meshes/dragon_vrip.ply", 3, false, false),
 
-                new Sphere(new Material("wornpaintedcement"), new Vector3(-2.5, -0.5, 5), 1.5),
-                new Sphere(new Material("rustediron2"), new Vector3(2.5, -0.5, 5), 1.5),
+                //new Sphere(new Material("wornpaintedcement"), new Vector3(-1, -0.5, 6), 1.5),
+                //new Sphere(new Material("rustediron2"), new Vector3(2.5, -0.5, 5), 1.5),
 
                 //new Sphere(new Material(Color.Green.ToVector3(), 1, 0, Vector3.Zero), new Vector3(2.5, 0, 5), 1.5),
-                //new Sphere(new Material(Color.Red.ToVector3(), 0, 0.1, Vector3.Zero), new Vector3(-2.5, 0, 5), 1.5),
+                new Sphere(new Material(Color.Red.ToVector3(), 0, 0.1, Vector3.Zero), new Vector3(-0.5, -0.5, 6), 1.5),
 
                 new Plane(new Material(Color.LightGray.ToVector3(), 0, 1, Vector3.Zero), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
-                new Plane(new Material(Color.LightBlue.ToVector3(), 0, 1, Vector3.One), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
-                new Plane(new Material(Color.Green.ToVector3(), 0, 1, Vector3.Zero), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
-                new Plane(new Material(Color.Green.ToVector3(), 0, 1, Vector3.Zero), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
-                new Plane(new Material(Color.Pink.ToVector3(),  0, 1, Vector3.Zero), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
-                new Plane(new Material(Color.Black.ToVector3(), 0, 1, Vector3.Zero), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
+                //new Plane(new Material(Color.LightBlue.ToVector3(), 0, 1, Vector3.One), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
+                //new Plane(new Material(Color.Green.ToVector3(), 0, 1, Vector3.Zero), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
+                //new Plane(new Material(Color.Green.ToVector3(), 0, 1, Vector3.Zero), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
+                //new Plane(new Material(Color.Pink.ToVector3(),  0, 1, Vector3.Zero), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
+                //new Plane(new Material(Color.Black.ToVector3(), 0, 1, Vector3.Zero), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
             };
         }
 
@@ -142,36 +142,33 @@ namespace Raytracer
                 Vector3 Albedo = FirstShape.Material.GetAlbedo(UV);
 
                 //Ideal specular dielectric
-                if (FirstShape.Material.HasTransparency())
+                if (Util.Random.NextDouble() <= FirstShape.Material.GetTransparency(UV))
                 {
-                    if (Util.Random.NextDouble() <= FirstShape.Material.GetTransparency(UV))
+                    double RefractiveIndex = FirstShape.Material.GetRefractiveIndex(UV);
+                    if (Util.Random.NextDouble() <= FresnelReal(MathHelper.Clamp(Vector3.Dot(Ray.Direction, FirstShapeNormal), -1, 1), RefractiveIndex))
                     {
-                        double RefractiveIndex = FirstShape.Material.GetRefractiveIndex(UV);
-                        if (Util.Random.NextDouble() <= FresnelReal(MathHelper.Clamp(Vector3.Dot(Ray.Direction, FirstShapeNormal), -1, 1), RefractiveIndex))
+                        Vector3 ReflectionDirection = Vector3.Normalize(Vector3.Reflect(Ray.Direction, FirstShapeNormal));
+                        return Trace(new Ray(FirstShapeHit + ReflectionDirection * 0.001, ReflectionDirection), Bounces + 1) * Albedo;
+                    }
+                    else
+                    {
+                        double CosTheta = MathHelper.Clamp(Vector3.Dot(Ray.Direction, FirstShapeNormal), -1, 1);
+                        double RefractiveIndexA = 1;
+                        double RefractiveIndexB = RefractiveIndex;
+                        if (CosTheta < 0)
                         {
-                            Vector3 ReflectionDirection = Vector3.Normalize(Vector3.Reflect(Ray.Direction, FirstShapeNormal));
-                            return Trace(new Ray(FirstShapeHit + ReflectionDirection * 0.001, ReflectionDirection), Bounces + 1) * Albedo;
+                            CosTheta = -CosTheta;
                         }
                         else
                         {
-                            double CosTheta = MathHelper.Clamp(Vector3.Dot(Ray.Direction, FirstShapeNormal), -1, 1);
-                            double RefractiveIndexA = 1;
-                            double RefractiveIndexB = RefractiveIndex;
-                            if (CosTheta < 0)
-                            {
-                                CosTheta = -CosTheta;
-                            }
-                            else
-                            {
-                                var Temp = RefractiveIndexA;
-                                RefractiveIndexA = RefractiveIndexB;
-                                RefractiveIndexB = Temp;
-                                FirstShapeNormal = -FirstShapeNormal;
-                            }
-                            double RefractiveRatio = RefractiveIndexA / RefractiveIndexB;
-                            Vector3 RefractionDirection = RefractiveRatio * Ray.Direction + (RefractiveRatio * CosTheta - Math.Sqrt(1 - RefractiveRatio * RefractiveRatio * (1 - CosTheta * CosTheta))) * FirstShapeNormal;
-                            return Trace(new Ray(FirstShapeHit + RefractionDirection * 0.001, RefractionDirection), Bounces + 1) * Albedo;
+                            var Temp = RefractiveIndexA;
+                            RefractiveIndexA = RefractiveIndexB;
+                            RefractiveIndexB = Temp;
+                            FirstShapeNormal = -FirstShapeNormal;
                         }
+                        double RefractiveRatio = RefractiveIndexA / RefractiveIndexB;
+                        Vector3 RefractionDirection = RefractiveRatio * Ray.Direction + (RefractiveRatio * CosTheta - Math.Sqrt(1 - RefractiveRatio * RefractiveRatio * (1 - CosTheta * CosTheta))) * FirstShapeNormal;
+                        return Trace(new Ray(FirstShapeHit + RefractionDirection * 0.001, RefractionDirection), Bounces + 1) * Albedo;
                     }
                 }
 
@@ -192,7 +189,7 @@ namespace Raytracer
 
                     double R1 = Util.Random.NextDouble();
                     double R2 = Util.Random.NextDouble();
-                    Vector3 Sample = SampleHemisphere(R1, R2);
+                    Vector3 Sample = CosineSampleHemisphere(R1, R2);
                     Vector3 SampleWorld = new Vector3(
                         Sample.X * NB.X + Sample.Y * FirstShapeNormal.X + Sample.Z * NT.X,
                         Sample.X * NB.Y + Sample.Y * FirstShapeNormal.Y + Sample.Z * NT.Y,
@@ -209,18 +206,19 @@ namespace Raytracer
                     Kd *= 1.0 - Metalness;
                     Vector3 Diffuse = Kd * Albedo;
 
-                    return (2 * Diffuse * SampleRadiance * CosTheta) / (1 - DiffuseSpecularRatio);
+                    //for uniform: return SampleRadiance * (2 * Diffuse * CosTheta) / (1 - DiffuseSpecularRatio);
+                    return (SampleRadiance * Diffuse * CosTheta) / Math.Sqrt(R1) / (1 - DiffuseSpecularRatio);
                 }
 
                 //Glossy
                 else
                 {
-                    double Roughness = MathHelper.Clamp(FirstShape.Material.GetRoughness(UV), 0.0001, 1);
+                    double Roughness = MathHelper.Clamp(FirstShape.Material.GetRoughness(UV), 0.001, 1);
 
                     Vector3 ReflectionDirection = Vector3.Reflect(-ViewDirection, FirstShapeNormal);
                     double R1 = Util.Random.NextDouble();
                     double R2 = Util.Random.NextDouble();
-                    Vector3 SampleWorld = ImportanceSampleGGX(R1, R2, ReflectionDirection, Roughness);
+                    Vector3 SampleWorld = SampleGGX(R1, R2, ReflectionDirection, Roughness);
 
                     Vector3 SampleRadiance = Trace(new Ray(FirstShapeHit + SampleWorld * 0.001, SampleWorld), Bounces + 1);
                     double CosTheta = Math.Max(Vector3.Dot(FirstShapeNormal, SampleWorld), 0);
@@ -237,16 +235,16 @@ namespace Raytracer
                     return Specular * SampleRadiance * CosTheta / (D * Vector3.Dot(FirstShapeNormal, Halfway) / (4 * Vector3.Dot(Halfway, ViewDirection)) + 0.0001) / DiffuseSpecularRatio;
                 }
             }
-            if (EnvMap == null)
+            if (SkyBox == null)
             {
                 return Vector3.Zero;
             }
             else
             {
-                return EnvMap.GetColorAtUV(new Vector2(1 - (1.0 + Math.Atan2(Ray.Direction.Z, Ray.Direction.X) / MathHelper.Pi) * 0.5, 1 - Math.Acos(Ray.Direction.Y) / MathHelper.Pi));
+                return SkyBox.GetColorAtUV(new Vector2(1 - (1.0 + Math.Atan2(Ray.Direction.Z, Ray.Direction.X) / MathHelper.Pi) * 0.5, 1 - Math.Acos(Ray.Direction.Y) / MathHelper.Pi));
             }
         }
-
+        
         private bool Raycast(Ray Ray, out Shape FirstShape, out Vector3 FirstShapeHit, out Vector3 FirstShapeNormal, out Vector2 FirstShapeUV)
         {
             double MinDistance = double.MaxValue;
@@ -287,7 +285,7 @@ namespace Raytracer
             NB = Vector3.Cross(Normal, NT);
         }
 
-        private Vector3 SampleHemisphere(double R1, double R2)
+        private Vector3 UniformSampleHemisphere(double R1, double R2)
         {
             double SinTheta = Math.Sqrt(1 - R1 * R1);
             double Phi = 2 * Math.PI * R2;
@@ -296,7 +294,15 @@ namespace Raytracer
             return new Vector3(X, R1, Z);
         }
 
-        private Vector3 ImportanceSampleGGX(double R1, double R2, Vector3 ReflectionDirection, double Roughness)
+        private Vector3 CosineSampleHemisphere(double R1, double R2)
+        {
+            double Theta = Math.Acos(Math.Sqrt(R1));
+            double Phi = 2.0 * Math.PI * R2;
+
+            return new Vector3(Math.Sin(Theta) * Math.Cos(Phi), Math.Cos(Theta), Math.Sin(Theta) * Math.Sin(Phi));
+        }
+
+        private Vector3 SampleGGX(double R1, double R2, Vector3 ReflectionDirection, double Roughness)
         {
             double A = Math.Pow(Roughness, 2.0);
 
