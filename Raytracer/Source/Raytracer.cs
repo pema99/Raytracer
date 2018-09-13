@@ -16,6 +16,7 @@ namespace Raytracer
         public Vector3 CameraPosition { get; private set; }
         public Vector3 CameraRotation { get; private set; }
         public Texture SkyBox { get; set; }
+        public int MinBounces { get; private set; }
         public int MaxBounces { get; private set; }
         public int Samples { get; private set; }
         public int Threads { get; private set; }
@@ -29,12 +30,13 @@ namespace Raytracer
         private double ViewAngle { get; set; }
         private Matrix CameraRotationMatrix { get; set; }
 
-        public Raytracer(int Width, int Height, double FOV, Vector3 CameraPosition, Vector3 CameraRotation, Texture EnvMap, int MaxBounces, int Samples, int Threads)
+        public Raytracer(int Width, int Height, double FOV, Vector3 CameraPosition, Vector3 CameraRotation, Texture EnvMap, int MinBounces, int MaxBounces, int Samples, int Threads)
         {
             this.Width = Width;
             this.Height = Height;
             this.FOV = FOV;
             this.SkyBox = EnvMap;
+            this.MinBounces = MinBounces;
             this.MaxBounces = MaxBounces;
             this.Samples = Samples;
             this.Threads = Threads;
@@ -51,20 +53,20 @@ namespace Raytracer
             {
                 //new TriangleMesh(new Material("Cerberus"), Matrix.CreateScale(5) * Matrix.CreateRotationY(Math.PI/2) * Matrix.CreateTranslation(-2, 0.5, 5), "Assets/Meshes/Gun.ply", 3, true, false),
                 //new TriangleMesh(new Material(Color.White.ToVector3(), 0, 0, Vector3.Zero), Matrix.CreateScale(2) * Matrix.CreateTranslation(0, 0, 5), "Assets/meshes/monkeysmooth.ply", 3, true, false),
-                new TriangleMesh(new Material(new Vector3(0.7, 1, 0.7), 1, 0.1, Vector3.Zero, 1, 1.3), Matrix.CreateScale(18) * Matrix.CreateTranslation(0.5, -3, 4), "Assets/meshes/dragon_vrip.ply", 3, false, false),
+                //new TriangleMesh(new Material(new Vector3(0.7, 1, 0.7), 1, 0.1, Vector3.Zero, 0, 1.3), Matrix.CreateScale(18) * Matrix.CreateTranslation(0.5, -3, 4), "Assets/meshes/dragon_vrip.ply", 3, false, false),
 
-                //new Sphere(new Material("wornpaintedcement"), new Vector3(-1, -0.5, 6), 1.5),
-                //new Sphere(new Material("rustediron2"), new Vector3(2.5, -0.5, 5), 1.5),
+                new Sphere(new Material("wornpaintedcement"), new Vector3(-2.5, -0.5, 5), 1.5),
+                new Sphere(new Material("rustediron2"), new Vector3(2.5, -0.5, 5), 1.5),
 
                 //new Sphere(new Material(Color.Green.ToVector3(), 1, 0, Vector3.Zero), new Vector3(2.5, 0, 5), 1.5),
-                new Sphere(new Material(Color.Red.ToVector3(), 0, 0.1, Vector3.Zero), new Vector3(-0.5, -0.5, 6), 1.5),
+                //new Sphere(new Material(Color.Red.ToVector3(), 0, 0.1, Vector3.Zero), new Vector3(-0.5, -0.5, 6), 1.5),
 
                 new Plane(new Material(Color.LightGray.ToVector3(), 0, 1, Vector3.Zero), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
-                //new Plane(new Material(Color.LightBlue.ToVector3(), 0, 1, Vector3.One), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
-                //new Plane(new Material(Color.Green.ToVector3(), 0, 1, Vector3.Zero), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
-                //new Plane(new Material(Color.Green.ToVector3(), 0, 1, Vector3.Zero), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
-                //new Plane(new Material(Color.Pink.ToVector3(),  0, 1, Vector3.Zero), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
-                //new Plane(new Material(Color.Black.ToVector3(), 0, 1, Vector3.Zero), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
+                new Plane(new Material(Color.LightBlue.ToVector3(), 0, 1, Vector3.One), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
+                new Plane(new Material(Color.Green.ToVector3(), 0, 1, Vector3.Zero), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
+                new Plane(new Material(Color.Green.ToVector3(), 0, 1, Vector3.Zero), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
+                new Plane(new Material(Color.Pink.ToVector3(),  0, 1, Vector3.Zero), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
+                new Plane(new Material(Color.Black.ToVector3(), 0, 1, Vector3.Zero), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
             };
         }
 
@@ -81,20 +83,15 @@ namespace Raytracer
         {
             for (int y = 0; y < Height; y++)
             {
-                //Raycast to nearest shape
-                Vector3 RayDir = new Vector3((2.0 * ((x + 0.5) * InvWidth) - 1.0) * ViewAngle * AspectRatio, (1.0 - 2.0 * ((y + 0.5) * InvHeight)) * ViewAngle, 1);
-                RayDir.Normalize();
-                RayDir = Vector3.Transform(RayDir, CameraRotationMatrix);
-
                 for (int i = 0; i < Samples; i++)
                 {
-                    //Trace primary ray
-                    Framebuffer[x, y] += Trace(new Ray(CameraPosition, RayDir), 0);
-
                     //Supersampling
-                    RayDir = new Vector3((2.0 * ((x + 0.5 + Util.Random.NextDouble()) * InvWidth) - 1.0) * ViewAngle * AspectRatio, (1.0 - 2.0 * ((y + 0.5 + Util.Random.NextDouble()) * InvHeight)) * ViewAngle, 1);
+                    Vector3 RayDir = new Vector3((2.0 * ((x + 0.5 + Util.Random.NextDouble()) * InvWidth) - 1.0) * ViewAngle * AspectRatio, (1.0 - 2.0 * ((y + 0.5 + Util.Random.NextDouble()) * InvHeight)) * ViewAngle, 1);
                     RayDir.Normalize();
                     RayDir = Vector3.Transform(RayDir, CameraRotationMatrix);
+                    
+                    //Trace primary ray
+                    Framebuffer[x, y] += Trace(new Ray(CameraPosition, RayDir), 0, Vector3.One);
                 }
                 Framebuffer[x, y] /= Samples;
             }
@@ -120,7 +117,7 @@ namespace Raytracer
         }
 
         #region Raytracing
-        private Vector3 Trace(Ray Ray, int Bounces)
+        private Vector3 Trace(Ray Ray, int Bounces, Vector3 Throughput)
         {
             //If we are about to hit max depth, no need to calculate lighting
             if (Bounces >= MaxBounces)
@@ -129,30 +126,33 @@ namespace Raytracer
             }
 
             //Raycast to nearest geometry, if any
-            Raycast(Ray, out Shape FirstShape, out Vector3 FirstShapeHit, out Vector3 FirstShapeNormal, out Vector2 UV);
-            if (FirstShape != null)
+            Raycast(Ray, out Shape Shape, out Vector3 Hit, out Vector3 Normal, out Vector2 UV);
+            if (Shape != null)
             {
                 //Area lights
-                Vector3 Emission = FirstShape.Material.GetEmission(UV);
+                Vector3 Emission = Shape.Material.GetEmission(UV);
                 if (Emission != Vector3.Zero)
                 {
                     return Emission;
                 }
 
-                Vector3 Albedo = FirstShape.Material.GetAlbedo(UV);
+                Vector3 FinalColor = Vector3.Zero;
 
-                //Ideal specular dielectric
-                if (Util.Random.NextDouble() <= FirstShape.Material.GetTransparency(UV))
+                Vector3 Albedo = Shape.Material.GetAlbedo(UV);
+
+                //Glass BXDF
+                if (Util.Random.NextDouble() <= Shape.Material.GetTransparency(UV))
                 {
-                    double RefractiveIndex = FirstShape.Material.GetRefractiveIndex(UV);
-                    if (Util.Random.NextDouble() <= FresnelReal(MathHelper.Clamp(Vector3.Dot(Ray.Direction, FirstShapeNormal), -1, 1), RefractiveIndex))
+                    double RefractiveIndex = Shape.Material.GetRefractiveIndex(UV);
+                    if (Util.Random.NextDouble() <= FresnelReal(MathHelper.Clamp(Vector3.Dot(Ray.Direction, Normal), -1, 1), RefractiveIndex))
                     {
-                        Vector3 ReflectionDirection = Vector3.Normalize(Vector3.Reflect(Ray.Direction, FirstShapeNormal));
-                        return Trace(new Ray(FirstShapeHit + ReflectionDirection * 0.001, ReflectionDirection), Bounces + 1) * Albedo;
+                        Vector3 ReflectionDirection = Vector3.Normalize(Vector3.Reflect(Ray.Direction, Normal));
+                        Throughput *= Albedo;
+                        FinalColor = Trace(new Ray(Hit + ReflectionDirection * 0.001, ReflectionDirection), Bounces + 1, Throughput) * Albedo;
                     }
                     else
                     {
-                        double CosTheta = MathHelper.Clamp(Vector3.Dot(Ray.Direction, FirstShapeNormal), -1, 1);
+                        double CosTheta = MathHelper.Clamp(Vector3.Dot(Ray.Direction, Normal), -1, 1);
                         double RefractiveIndexA = 1;
                         double RefractiveIndexB = RefractiveIndex;
                         if (CosTheta < 0)
@@ -164,77 +164,100 @@ namespace Raytracer
                             var Temp = RefractiveIndexA;
                             RefractiveIndexA = RefractiveIndexB;
                             RefractiveIndexB = Temp;
-                            FirstShapeNormal = -FirstShapeNormal;
+                            Normal = -Normal;
                         }
                         double RefractiveRatio = RefractiveIndexA / RefractiveIndexB;
-                        Vector3 RefractionDirection = RefractiveRatio * Ray.Direction + (RefractiveRatio * CosTheta - Math.Sqrt(1 - RefractiveRatio * RefractiveRatio * (1 - CosTheta * CosTheta))) * FirstShapeNormal;
-                        return Trace(new Ray(FirstShapeHit + RefractionDirection * 0.001, RefractionDirection), Bounces + 1) * Albedo;
+                        Vector3 RefractionDirection = RefractiveRatio * Ray.Direction + (RefractiveRatio * CosTheta - Math.Sqrt(1 - RefractiveRatio * RefractiveRatio * (1 - CosTheta * CosTheta))) * Normal;
+                        Throughput *= Albedo;
+                        FinalColor = Trace(new Ray(Hit + RefractionDirection * 0.001, RefractionDirection), Bounces + 1, Throughput) * Albedo;
                     }
                 }
 
-                //Indirect lighting using monte carlo path tracing
-                double Metalness = FirstShape.Material.GetMetalness(UV);
-
-                Vector3 ViewDirection = Vector3.Normalize(Ray.Origin - FirstShapeHit);
-                Vector3 F0 = Vector3.Lerp(new Vector3(0.04), Albedo, Metalness);
-
-                double DiffuseSpecularRatio = 0.5 + (0.5 * Metalness);
-
-                //Diffuse
-                if (Util.Random.NextDouble() > DiffuseSpecularRatio)
-                {
-                    Vector3 NT = Vector3.Zero;
-                    Vector3 NB = Vector3.Zero;
-                    CreateCartesian(FirstShapeNormal, out NT, out NB);
-
-                    double R1 = Util.Random.NextDouble();
-                    double R2 = Util.Random.NextDouble();
-                    Vector3 Sample = CosineSampleHemisphere(R1, R2);
-                    Vector3 SampleWorld = new Vector3(
-                        Sample.X * NB.X + Sample.Y * FirstShapeNormal.X + Sample.Z * NT.X,
-                        Sample.X * NB.Y + Sample.Y * FirstShapeNormal.Y + Sample.Z * NT.Y,
-                        Sample.X * NB.Z + Sample.Y * FirstShapeNormal.Z + Sample.Z * NT.Z);
-                    SampleWorld.Normalize();
-
-                    Vector3 SampleRadiance = Trace(new Ray(FirstShapeHit + SampleWorld * 0.001, SampleWorld), Bounces + 1);
-                    double CosTheta = Math.Max(Vector3.Dot(FirstShapeNormal, SampleWorld), 0);
-                    Vector3 Halfway = Vector3.Normalize(SampleWorld + ViewDirection);
-
-                    Vector3 Ks = FresnelSchlick(Math.Max(Vector3.Dot(Halfway, ViewDirection), 0.0), F0);
-                    Vector3 Kd = Vector3.One - Ks;
-
-                    Kd *= 1.0 - Metalness;
-                    Vector3 Diffuse = Kd * Albedo;
-
-                    //for uniform: return SampleRadiance * (2 * Diffuse * CosTheta) / (1 - DiffuseSpecularRatio);
-                    return (SampleRadiance * Diffuse * CosTheta) / Math.Sqrt(R1) / (1 - DiffuseSpecularRatio);
-                }
-
-                //Glossy
+                //Cook-Torrance PBR BXDF
                 else
                 {
-                    double Roughness = MathHelper.Clamp(FirstShape.Material.GetRoughness(UV), 0.001, 1);
+                    double Metalness = Shape.Material.GetMetalness(UV);
 
-                    Vector3 ReflectionDirection = Vector3.Reflect(-ViewDirection, FirstShapeNormal);
-                    double R1 = Util.Random.NextDouble();
-                    double R2 = Util.Random.NextDouble();
-                    Vector3 SampleWorld = SampleGGX(R1, R2, ReflectionDirection, Roughness);
+                    Vector3 ViewDirection = Vector3.Normalize(Ray.Origin - Hit);
+                    Vector3 F0 = Vector3.Lerp(new Vector3(0.04), Albedo, Metalness);
 
-                    Vector3 SampleRadiance = Trace(new Ray(FirstShapeHit + SampleWorld * 0.001, SampleWorld), Bounces + 1);
-                    double CosTheta = Math.Max(Vector3.Dot(FirstShapeNormal, SampleWorld), 0);
-                    Vector3 Halfway = Vector3.Normalize(SampleWorld + ViewDirection);
+                    double DiffuseSpecularRatio = 0.5 + (0.5 * Metalness);
 
-                    Vector3 Ks = FresnelSchlick(Math.Max(Vector3.Dot(Halfway, ViewDirection), 0.0), F0);
+                    //Diffuse
+                    if (Util.Random.NextDouble() > DiffuseSpecularRatio)
+                    {
+                        Vector3 NT = Vector3.Zero;
+                        Vector3 NB = Vector3.Zero;
+                        CreateCartesian(Normal, out NT, out NB);
 
-                    double D = GGXDistribution(FirstShapeNormal, Halfway, Roughness);
-                    double G = GeometrySmith(FirstShapeNormal, ViewDirection, SampleWorld, Roughness);
-                    Vector3 SpecularNumerator = D * G * Ks;
-                    double SpecularDenominator = 4.0 * Math.Max(Vector3.Dot(FirstShapeNormal, ViewDirection), 0.0) * CosTheta + 0.001;
-                    Vector3 Specular = SpecularNumerator / SpecularDenominator;
+                        double R1 = Util.Random.NextDouble();
+                        double R2 = Util.Random.NextDouble();
+                        Vector3 Sample = CosineSampleHemisphere(R1, R2);
+                        Vector3 SampleWorld = new Vector3(
+                            Sample.X * NB.X + Sample.Y * Normal.X + Sample.Z * NT.X,
+                            Sample.X * NB.Y + Sample.Y * Normal.Y + Sample.Z * NT.Y,
+                            Sample.X * NB.Z + Sample.Y * Normal.Z + Sample.Z * NT.Z);
+                        SampleWorld.Normalize();
 
-                    return Specular * SampleRadiance * CosTheta / (D * Vector3.Dot(FirstShapeNormal, Halfway) / (4 * Vector3.Dot(Halfway, ViewDirection)) + 0.0001) / DiffuseSpecularRatio;
+                        Vector3 SampleRadiance = Trace(new Ray(Hit + SampleWorld * 0.001, SampleWorld), Bounces + 1, Throughput);
+                        double CosTheta = Math.Max(Vector3.Dot(Normal, SampleWorld), 0);
+                        Vector3 Halfway = Vector3.Normalize(SampleWorld + ViewDirection);
+
+                        Vector3 Ks = FresnelSchlick(Math.Max(Vector3.Dot(Halfway, ViewDirection), 0.0), F0);
+                        Vector3 Kd = Vector3.One - Ks;
+
+                        Kd *= 1.0 - Metalness;
+                        Vector3 Diffuse = Kd * Albedo;
+
+                        //for uniform: return SampleRadiance * (2 * Diffuse * CosTheta) / (1 - DiffuseSpecularRatio);
+                        Vector3 BRDFAttenuation = (Diffuse * CosTheta) / Math.Sqrt(R1) / (1 - DiffuseSpecularRatio);
+                        Throughput *= BRDFAttenuation;
+
+                        FinalColor = SampleRadiance * BRDFAttenuation;
+                    }
+
+                    //Glossy
+                    else
+                    {
+                        double Roughness = MathHelper.Clamp(Shape.Material.GetRoughness(UV), 0.001, 1);
+
+                        Vector3 ReflectionDirection = Vector3.Reflect(-ViewDirection, Normal);
+                        double R1 = Util.Random.NextDouble();
+                        double R2 = Util.Random.NextDouble();
+                        Vector3 SampleWorld = SampleGGX(R1, R2, ReflectionDirection, Roughness);
+
+                        Vector3 SampleRadiance = Trace(new Ray(Hit + SampleWorld * 0.001, SampleWorld), Bounces + 1, Throughput);
+                        double CosTheta = Math.Max(Vector3.Dot(Normal, SampleWorld), 0);
+                        Vector3 Halfway = Vector3.Normalize(SampleWorld + ViewDirection);
+
+                        Vector3 Ks = FresnelSchlick(Math.Max(Vector3.Dot(Halfway, ViewDirection), 0.0), F0);
+
+                        double D = GGXDistribution(Normal, Halfway, Roughness);
+                        double G = GeometrySmith(Normal, ViewDirection, SampleWorld, Roughness);
+                        Vector3 SpecularNumerator = D * G * Ks;
+                        double SpecularDenominator = 4.0 * Math.Max(Vector3.Dot(Normal, ViewDirection), 0.0) * CosTheta + 0.001;
+                        Vector3 Specular = SpecularNumerator / SpecularDenominator;
+
+                        Vector3 BRDFAttenuation = Specular * CosTheta / (D * Vector3.Dot(Normal, Halfway) / (4 * Vector3.Dot(Halfway, ViewDirection)) + 0.0001) / DiffuseSpecularRatio;
+                        Throughput *= BRDFAttenuation;
+
+                        FinalColor = SampleRadiance * BRDFAttenuation;
+                    }
                 }
+
+                //Russian roulette
+                if (Bounces >= MinBounces)
+                {
+                    if (Util.Random.NextDouble() > Math.Max(Throughput.X, Math.Max(Throughput.Y, Throughput.Z)))
+                    {
+                        return Vector3.Zero;
+                    }
+                }
+
+                return FinalColor;
             }
+
+            //Return skybox color if nothing hit
             if (SkyBox == null)
             {
                 return Vector3.Zero;
