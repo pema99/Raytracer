@@ -58,6 +58,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Source\Geometry\Disc.cs" />
+    <Compile Include="Source\Material\GlassMaterial.cs" />
     <Compile Include="Source\Material\Material.cs" />
     <Compile Include="Source\Material\MaterialConstantNode.cs" />
     <Compile Include="Source\Material\MaterialNode.cs" />
@@ -66,6 +67,7 @@
     <Compile Include="Source\Material\MaterialNormalNode.cs" />
     <Compile Include="Source\Material\MaterialOutputNode.cs" />
     <Compile Include="Source\Material\MaterialTextureNode.cs" />
+    <Compile Include="Source\Material\PBRMaterial.cs" />
     <Compile Include="Source\Utility classes\Math\MathHelper.cs" />
     <Compile Include="Source\Utility classes\Math\Matrix.cs" />
     <Compile Include="Source\Utility classes\Math\Vector2.cs" />

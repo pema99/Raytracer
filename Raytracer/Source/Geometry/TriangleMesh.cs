@@ -176,9 +176,9 @@ namespace Raytracer
                     UV = new Vector2(U, V);
                 }
 
-                if (Material.HasNormal())
+                if (Material.HasProperty("normal"))
                 {
-                    Vector3 TangentSpaceNormal = Material.GetNormal(UV);
+                    Vector3 TangentSpaceNormal = Material.GetProperty("normal", UV);
                     Matrix TBN = Matrix.CreateWorld(Vector3.Zero, EdgeA, N);
                     Normal = Vector3.Transform(TangentSpaceNormal, TBN);
                 }

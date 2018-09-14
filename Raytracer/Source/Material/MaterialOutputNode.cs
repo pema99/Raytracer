@@ -10,8 +10,8 @@ namespace Raytracer
     {
         public override MaterialNode[] Inputs { get; protected set; }
 
-        public MaterialOutputNode() 
-            : base(8)
+        public MaterialOutputNode(int NumInputs) 
+            : base(NumInputs)
         {
         }
 

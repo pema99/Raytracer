@@ -72,12 +72,12 @@ namespace Raytracer
 
             UV = new Vector2((1.0 + Math.Atan2(N.Z, N.X) / MathHelper.Pi) * 0.5, Math.Acos(N.Y) / MathHelper.Pi);
 
-            if (Material.HasNormal())
+            if (Material.HasProperty("normal"))
             {
                 Vector3 Tangent = new Vector3(1, 1, (N.X + N.Y) / (-N.Z));
                 Tangent.Normalize();
 
-                Vector3 TangentSpaceNormal = Material.GetNormal(UV);
+                Vector3 TangentSpaceNormal = Material.GetProperty("normal", UV);
                 Matrix TBN = Matrix.CreateWorld(Vector3.Zero, Tangent, N);
                 Normal = Vector3.Transform(TangentSpaceNormal, TBN);
             }

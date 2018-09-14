@@ -9,9 +9,9 @@ namespace Raytracer
         public static void Main(string[] Args)
         {
             #if (!DEBUG)
-            Raytracer Raytracer = new Raytracer(600, 400, 75, Vector3.Zero, Vector3.Zero, new Texture("Assets/EnvMaps/portland.png", true), 3, 3, 1000, 12);
+            Raytracer Raytracer = new Raytracer(600, 400, 75, Vector3.Zero, Vector3.Zero, new Texture("Assets/EnvMaps/portland.png", true), 3, 3, 100, 12);
             #else
-            Raytracer Raytracer = new Raytracer(600, 400, 75, Vector3.Zero, Vector3.Zero, new Texture("Assets/EnvMaps/portland.png", true), 5, 100, 1);
+            Raytracer Raytracer = new Raytracer(600, 400, 75, Vector3.Zero, Vector3.Zero, new Texture("Assets/EnvMaps/portland.png", true), 3, 3, 100, 1);
             #endif
 
             Stopwatch Time = new Stopwatch();
