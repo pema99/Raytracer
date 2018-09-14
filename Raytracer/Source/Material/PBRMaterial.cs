@@ -8,22 +8,20 @@ namespace Raytracer
 {
     public class PBRMaterial : Material
     {
-        public PBRMaterial(Vector3 Albedo, double Metalness, double Roughness, Vector3 Emission)
+        public PBRMaterial(Vector3 Albedo, double Metalness, double Roughness)
         {
             Properties.Add("albedo", new MaterialConstantNode(Albedo));
             Properties.Add("metalness", new MaterialConstantNode(Metalness));
             Properties.Add("roughness", new MaterialConstantNode(Roughness));
-            Properties.Add("emission", new MaterialConstantNode(Emission));
         }
 
-        public PBRMaterial(MaterialNode Albedo, MaterialNode Metalness, MaterialNode Roughness, MaterialNode Normal, MaterialNode AmbientOcclusion, MaterialNode Emission, MaterialNode Transparency, MaterialNode RefractiveIndex)
+        public PBRMaterial(MaterialNode Albedo, MaterialNode Metalness, MaterialNode Roughness, MaterialNode Normal, MaterialNode AmbientOcclusion, MaterialNode Transparency, MaterialNode RefractiveIndex)
         {
             Properties.Add("albedo", Albedo);
             Properties.Add("metalness", Metalness);
             Properties.Add("roughness", Roughness);
             Properties.Add("normal", Normal);
             Properties.Add("ambientocclusion", AmbientOcclusion);
-            Properties.Add("emission", Emission);
         }
 
         public PBRMaterial(string Name)
@@ -32,7 +30,6 @@ namespace Raytracer
             Properties.Add("metalness", new MaterialTextureNode(new Texture("Assets/Materials/" + Name + "_metallic.png")));
             Properties.Add("roughness", new MaterialTextureNode(new Texture("Assets/Materials/" + Name + "_roughness.png")));
             Properties.Add("normal", new MaterialNormalNode(new Texture("Assets/Materials/" + Name + "_normal.png")));
-            Properties.Add("emission", new MaterialConstantNode(Vector3.Zero));
         }
 
         public override void Evaluate(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, out Vector3 SampleDirection, out Vector3 Attenuation)
@@ -48,11 +45,11 @@ namespace Raytracer
             {
                 Vector3 NT = Vector3.Zero;
                 Vector3 NB = Vector3.Zero;
-                CreateCartesian(Normal, out NT, out NB);
+                Util.CreateCartesian(Normal, out NT, out NB);
 
                 double R1 = Util.Random.NextDouble();
                 double R2 = Util.Random.NextDouble();
-                Vector3 Sample = CosineSampleHemisphere(R1, R2);
+                Vector3 Sample = Util.CosineSampleHemisphere(R1, R2);
                 SampleDirection = new Vector3(
                     Sample.X * NB.X + Sample.Y * Normal.X + Sample.Z * NT.X,
                     Sample.X * NB.Y + Sample.Y * Normal.Y + Sample.Z * NT.Y,
@@ -95,36 +92,6 @@ namespace Raytracer
 
                 Attenuation = Specular * CosTheta / (D * Vector3.Dot(Normal, Halfway) / (4 * Vector3.Dot(Halfway, ViewDirection)) + 0.0001) / DiffuseSpecularRatio;
             }
-        }
-
-        private void CreateCartesian(Vector3 Normal, out Vector3 NT, out Vector3 NB)
-        {
-            if (Math.Abs(Normal.X) > Math.Abs(Normal.Y))
-            {
-                NT = Vector3.Normalize(new Vector3(Normal.Z, 0, -Normal.X));
-            }
-            else
-            {
-                NT = Vector3.Normalize(new Vector3(0, -Normal.Z, Normal.Y));
-            }
-            NB = Vector3.Cross(Normal, NT);
-        }
-
-        private Vector3 UniformSampleHemisphere(double R1, double R2)
-        {
-            double SinTheta = Math.Sqrt(1 - R1 * R1);
-            double Phi = 2 * Math.PI * R2;
-            double X = SinTheta * Math.Cos(Phi);
-            double Z = SinTheta * Math.Sin(Phi);
-            return new Vector3(X, R1, Z);
-        }
-
-        private Vector3 CosineSampleHemisphere(double R1, double R2)
-        {
-            double Theta = Math.Acos(Math.Sqrt(R1));
-            double Phi = 2.0 * Math.PI * R2;
-
-            return new Vector3(Math.Sin(Theta) * Math.Cos(Phi), Math.Cos(Theta), Math.Sin(Theta) * Math.Sin(Phi));
         }
 
         private Vector3 SampleGGX(double R1, double R2, Vector3 ReflectionDirection, double Roughness)

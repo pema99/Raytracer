@@ -51,20 +51,19 @@ namespace Raytracer
             {
                 //new TriangleMesh(new Material("Cerberus"), Matrix.CreateScale(5) * Matrix.CreateRotationY(Math.PI/2) * Matrix.CreateTranslation(-2, 0.5, 5), "Assets/Meshes/Gun.ply", 3, true, false),
                 //new TriangleMesh(new Material(Color.White.ToVector3(), 0, 0, Vector3.Zero), Matrix.CreateScale(2) * Matrix.CreateTranslation(0, 0, 5), "Assets/meshes/monkeysmooth.ply", 3, true, false),
+
+                //new Sphere(new Material(Color.Red.ToVector3(), 0, 0.1, Vector3.Zero), new Vector3(-0.5, -0.5, 6), 1.5),
                 //new TriangleMesh(new GlassMaterial(new Vector3(0.7, 1, 0.7), 1.3), Matrix.CreateScale(18) * Matrix.CreateTranslation(0.5, -3, 4), "Assets/meshes/dragon_vrip.ply", 3, false, false),
 
                 new Sphere(new PBRMaterial("wornpaintedcement"), new Vector3(-2.5, -0.5, 5), 1.5),
                 new Sphere(new PBRMaterial("rustediron2"), new Vector3(2.5, -0.5, 5), 1.5),
 
-                //new Sphere(new Material(Color.Green.ToVector3(), 1, 0, Vector3.Zero), new Vector3(2.5, 0, 5), 1.5),
-                //new Sphere(new Material(Color.Red.ToVector3(), 0, 0.1, Vector3.Zero), new Vector3(-0.5, -0.5, 6), 1.5),
-
-                new Plane(new PBRMaterial(Color.LightGray.ToVector3(), 0, 1, Vector3.Zero), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
-                new Plane(new PBRMaterial(Color.LightBlue.ToVector3(), 0, 1, Vector3.One), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
-                new Plane(new PBRMaterial(Color.Green.ToVector3(), 0, 1, Vector3.Zero), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
-                new Plane(new PBRMaterial(Color.Green.ToVector3(), 0, 1, Vector3.Zero), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
-                new Plane(new PBRMaterial(Color.Pink.ToVector3(),  0, 1, Vector3.Zero), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
-                new Plane(new PBRMaterial(Color.Black.ToVector3(), 0, 1, Vector3.Zero), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
+                new Plane(new PBRMaterial(Color.LightGray.ToVector3(), 0, 1), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
+                new Plane(new EmissionMaterial(Vector3.One), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
+                new Plane(new PBRMaterial(Color.Green.ToVector3(), 0, 1), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
+                new Plane(new PBRMaterial(Color.Green.ToVector3(), 0, 1), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
+                new Plane(new PBRMaterial(Color.Pink.ToVector3(),  0, 1), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
+                new Plane(new PBRMaterial(Color.Black.ToVector3(), 0, 1), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
             };
         }
 
@@ -119,7 +118,7 @@ namespace Raytracer
             Vector3 FinalColor = Vector3.Zero;
             Vector3 Throughput = Vector3.One;
 
-            for (int i = 0; i < MaxBounces; i++)
+            for (int Bounce = 0; Bounce < MaxBounces; Bounce++)
             {
                 //Raycast to nearest geometry, if any
                 Raycast(Ray, out Shape Shape, out Vector3 Hit, out Vector3 Normal, out Vector2 UV);
@@ -141,18 +140,27 @@ namespace Raytracer
                 //Area lights
                 if (Shape.Material.HasProperty("emission"))
                 {
-                    Vector3 Emission = Shape.Material.GetProperty("emission", UV);
-                    if (Emission != Vector3.Zero)
-                    {
-                        FinalColor += Throughput * Emission;
-                        break;
-                    }
+                    FinalColor += Throughput * Shape.Material.GetProperty("emission", UV).Color;
+                    break;
                 }
 
                 Shape.Material.Evaluate(Vector3.Normalize(Ray.Origin - Hit), Normal, UV, out Vector3 SampleDirection, out Vector3 Attenuation);
 
+                //Accumulate BXDF attenuation
                 Throughput *= Attenuation;
 
+                //Russian roulette
+                if (Bounce >= MinBounces)
+                {
+                    double Prob = Math.Max(Throughput.X, Math.Max(Throughput.Y, Throughput.Z));
+                    if (Util.Random.NextDouble() > Prob)
+                    {
+                        break;
+                    }
+                    Throughput *= 1 / Prob;
+                }
+
+                //Set new ray direction to sampled ray
                 Ray.Origin = Hit + SampleDirection * 0.001;
                 Ray.Direction = SampleDirection;
             }

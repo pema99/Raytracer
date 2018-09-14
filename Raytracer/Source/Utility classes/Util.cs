@@ -40,39 +40,34 @@ namespace Raytracer
         #endregion
 
         #region Geometry utility
-        public static bool SolveQuadratic(double A, double B, double C, out double T0, out double T1)
+        public static void CreateCartesian(Vector3 Normal, out Vector3 NT, out Vector3 NB)
         {
-            double D = B * B - 4.0 * A * C;
-            if (D < 0.0)
+            if (Math.Abs(Normal.X) > Math.Abs(Normal.Y))
             {
-                T0 = T1 = 0.0;
-                return false;
-            }
-            else if (D == 0)
-            {
-                T0 = T1 = -0.5 * B / A;
+                NT = Vector3.Normalize(new Vector3(Normal.Z, 0, -Normal.X));
             }
             else
             {
-                double Q = 0.0;
-                if (B > 0.0)
-                {
-                    Q = -0.5 * (B + Math.Sqrt(D));
-                }
-                else
-                {
-                    Q = -0.5 * (B - Math.Sqrt(D));
-                }
-                T0 = Q / A;
-                T1 = C / Q;
+                NT = Vector3.Normalize(new Vector3(0, -Normal.Z, Normal.Y));
             }
-            if (T0 > T1)
-            {
-                double Temp = T1;
-                T1 = T0;
-                T0 = Temp;
-            }
-            return true;
+            NB = Vector3.Cross(Normal, NT);
+        }
+
+        public static Vector3 UniformSampleHemisphere(double R1, double R2)
+        {
+            double SinTheta = Math.Sqrt(1 - R1 * R1);
+            double Phi = 2 * Math.PI * R2;
+            double X = SinTheta * Math.Cos(Phi);
+            double Z = SinTheta * Math.Sin(Phi);
+            return new Vector3(X, R1, Z);
+        }
+
+        public static Vector3 CosineSampleHemisphere(double R1, double R2)
+        {
+            double Theta = Math.Acos(Math.Sqrt(R1));
+            double Phi = 2.0 * Math.PI * R2;
+
+            return new Vector3(Math.Sin(Theta) * Math.Cos(Phi), Math.Cos(Theta), Math.Sin(Theta) * Math.Sin(Phi));
         }
 
         public static bool IntersectAABB(Ray Ray, Vector3 AABBMin, Vector3 AABBMax, out Vector3 Hit, out double TMin, out double TMax)

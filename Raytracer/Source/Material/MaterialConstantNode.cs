@@ -31,19 +31,7 @@ namespace Raytracer
 
         public override MaterialNodeValue Evaluate(Vector2 UV)
         {
-            if (Constant.Type == MaterialNodeValueType.Color)
-            {
-                return new MaterialNodeValue(Constant.Color);
-            }
-            if (Constant.Type == MaterialNodeValueType.Texture)
-            {
-                return new MaterialNodeValue(Constant.Texture);
-            }
-            if (Constant.Type == MaterialNodeValueType.Number)
-            {
-                return new MaterialNodeValue(Constant.Number);
-            }
-            return new MaterialNodeValue();
+            return Constant;
         }
     }
 }
