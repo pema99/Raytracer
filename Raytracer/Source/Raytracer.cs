@@ -52,7 +52,7 @@ namespace Raytracer
                 //new TriangleMesh(new Material("Cerberus"), Matrix.CreateScale(5) * Matrix.CreateRotationY(Math.PI/2) * Matrix.CreateTranslation(-2, 0.5, 5), "Assets/Meshes/Gun.ply", 3, true, false),
                 //new TriangleMesh(new Material(Color.White.ToVector3(), 0, 0, Vector3.Zero), Matrix.CreateScale(2) * Matrix.CreateTranslation(0, 0, 5), "Assets/meshes/monkeysmooth.ply", 3, true, false),
 
-                //new Sphere(new Material(Color.Red.ToVector3(), 0, 0.1, Vector3.Zero), new Vector3(-0.5, -0.5, 6), 1.5),
+                //new Sphere(new PBRMaterial(Color.Red.ToVector3(), 1, 0.01), new Vector3(-0.5, -0.5, 6), 1.5),
                 //new TriangleMesh(new GlassMaterial(new Vector3(0.7, 1, 0.7), 1.3), Matrix.CreateScale(18) * Matrix.CreateTranslation(0.5, -3, 4), "Assets/meshes/dragon_vrip.ply", 3, false, false),
 
                 new Sphere(new PBRMaterial("wornpaintedcement"), new Vector3(-2.5, -0.5, 5), 1.5),

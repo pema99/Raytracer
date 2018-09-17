@@ -53,6 +53,15 @@ namespace Raytracer
             NB = Vector3.Cross(Normal, NT);
         }
 
+        public static Vector3 UniformSampleSphere(double R1, double R2)
+        {
+            double CosPhi = 2.0f * Util.Random.NextDouble() - 1.0f;
+            double SinPhi = Math.Sqrt(1.0f - CosPhi * CosPhi);
+            double Theta = 2 * Math.PI * Util.Random.NextDouble();
+
+            return new Vector3(SinPhi * Math.Sin(Theta), CosPhi, SinPhi * Math.Cos(Theta));
+        }
+
         public static Vector3 UniformSampleHemisphere(double R1, double R2)
         {
             double SinTheta = Math.Sqrt(1 - R1 * R1);
