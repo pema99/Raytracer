@@ -13,15 +13,13 @@ namespace Raytracer
         {
         }
 
-        public override Vector3 SampleDirection(Vector3 InDirection, out double PDF)
+        public override Vector3 SampleDirection(Vector3 InDirection)
         {
-            PDF = 1;
             return InDirection;
         }
 
-        public override double SampleDistance(double MaxDistance, out double PDF)
+        public override double SampleDistance(double MaxDistance)
         {
-            PDF = 1;
             return MaxDistance;
         }
 

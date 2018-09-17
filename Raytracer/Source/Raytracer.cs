@@ -53,17 +53,17 @@ namespace Raytracer
                 //new TriangleMesh(new Material(Color.White.ToVector3(), 0, 0, Vector3.Zero), Matrix.CreateScale(2) * Matrix.CreateTranslation(0, 0, 5), "Assets/meshes/monkeysmooth.ply", 3, true, false),
 
                 //new Sphere(new PBRMaterial(Color.Red.ToVector3(), 1, 0.01), new Vector3(-0.5, -0.5, 6), 1.5),
-                //new TriangleMesh(new GlassMaterial(new Vector3(0.7, 1, 0.7), 1.3), Matrix.CreateScale(18) * Matrix.CreateTranslation(0.5, -3, 4), "Assets/meshes/dragon_vrip.ply", 3, false, false),
+                new TriangleMesh(new GlassMaterial(new Vector3(1, 1, 1), 1.3, new IsotropicMedium(new Vector3(1, 0.5, 0.5), 0.1, 0.5)), Matrix.CreateScale(25) * Matrix.CreateTranslation(0, -3, 4), "Assets/meshes/dragon_vrip.ply", 3, false, false),
 
-                new Sphere(new PBRMaterial("wornpaintedcement"), new Vector3(-2.5, -0.5, 5), 1.5),
-                new Sphere(new PBRMaterial("rustediron2"), new Vector3(2.5, -0.5, 5), 1.5),
+                //new Sphere(new PBRMaterial("wornpaintedcement"), new Vector3(-2.5, -0.5, 5), 1.5),
+                //new Sphere(new PBRMaterial("rustediron2"), new Vector3(2.5, -0.5, 5), 1.5),
 
-                new Plane(new PBRMaterial(Color.LightGray.ToVector3(), 0, 1), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
-                new Plane(new EmissionMaterial(Vector3.One), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
-                new Plane(new PBRMaterial(Color.Green.ToVector3(), 0, 1), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
-                new Plane(new PBRMaterial(Color.Green.ToVector3(), 0, 1), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
-                new Plane(new PBRMaterial(Color.Pink.ToVector3(),  0, 1), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
-                new Plane(new PBRMaterial(Color.Black.ToVector3(), 0, 1), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
+                //new Plane(new PBRMaterial(Color.LightGray.ToVector3(), 0, 1), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
+                //new Plane(new EmissionMaterial(Vector3.One), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
+                //new Plane(new PBRMaterial(Color.Green.ToVector3(), 0, 1), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
+                //new Plane(new PBRMaterial(Color.Green.ToVector3(), 0, 1), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
+                //new Plane(new PBRMaterial(Color.Pink.ToVector3(),  0, 1), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
+                //new Plane(new PBRMaterial(Color.Black.ToVector3(), 0, 1), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
             };
         }
 
@@ -115,6 +115,8 @@ namespace Raytracer
 
         private Vector3 Trace(Ray Ray)
         {
+            Medium CurrentMedium = null;
+
             Vector3 FinalColor = Vector3.Zero;
             Vector3 Throughput = Vector3.One;
 
@@ -128,7 +130,7 @@ namespace Raytracer
                 {
                     if (SkyBox == null)
                     {
-                        FinalColor += Throughput * Vector3.Zero;
+                        FinalColor += Throughput * Vector3.One;
                     }
                     else
                     {
@@ -137,17 +139,47 @@ namespace Raytracer
                     break;
                 }
 
-                //Area lights
-                if (Shape.Material.HasProperty("emission"))
+                bool Scattered = false;
+                if (CurrentMedium != null)
                 {
-                    FinalColor += Throughput * Shape.Material.GetProperty("emission", UV).Color;
-                    break;
+                    double MaxDistance = (Hit - Ray.Origin).Length();
+
+                    double Distance = CurrentMedium.SampleDistance(MaxDistance);
+                    Vector3 Transmission = CurrentMedium.Transmission(Distance);
+                    Throughput *= Transmission;
+
+                    if (Distance < MaxDistance)
+                    {
+                        Scattered = true;
+
+                        Ray.Direction = CurrentMedium.SampleDirection(Ray.Direction);
+                        Ray.Origin = Hit + Ray.Direction * 0.001;
+                    }
                 }
 
-                Shape.Material.Evaluate(Vector3.Normalize(Ray.Origin - Hit), Normal, UV, out Vector3 SampleDirection, out Vector3 Attenuation);
+                if (!Scattered)
+                {
+                    //Area lights
+                    if (Shape.Material.HasProperty("emission"))
+                    {
+                        FinalColor += Throughput * Shape.Material.GetProperty("emission", UV).Color;
+                        break;
+                    }
 
-                //Accumulate BXDF attenuation
-                Throughput *= Attenuation;
+                    Shape.Material.Evaluate(Vector3.Normalize(Ray.Origin - Hit), Normal, UV, out Vector3 SampleDirection, out LobeType SampledLobe, out Vector3 Attenuation);
+
+                    //Accumulate BXDF attenuation
+                    Throughput *= Attenuation;
+
+                    if (SampledLobe == LobeType.SpecularTransmission)
+                    {
+                        CurrentMedium = Shape.Material.Medium;
+                    }
+
+                    //Set new ray direction to sampled ray
+                    Ray.Origin = Hit + SampleDirection * 0.001;
+                    Ray.Direction = SampleDirection;
+                }
 
                 //Russian roulette
                 if (Bounce >= MinBounces)
@@ -159,10 +191,6 @@ namespace Raytracer
                     }
                     Throughput *= 1 / Prob;
                 }
-
-                //Set new ray direction to sampled ray
-                Ray.Origin = Hit + SampleDirection * 0.001;
-                Ray.Direction = SampleDirection;
             }
 
             return FinalColor;

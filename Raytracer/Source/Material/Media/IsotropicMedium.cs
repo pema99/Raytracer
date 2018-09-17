@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Raytracer
 {
@@ -16,25 +12,22 @@ namespace Raytracer
             this.ScatteringCoefficient = 1 / ScatteringDistance;
         }
 
-        public override Vector3 SampleDirection(Vector3 InDirectio, out double PDFn)
+        public override Vector3 SampleDirection(Vector3 InDirection)
         {
-            PDFn = 1.0 / (4.0 * Math.PI);
-
             return Util.UniformSampleSphere(Util.Random.NextDouble(), Util.Random.NextDouble());
         }
 
-        public override double SampleDistance(double MaxDistance, out double PDF)
+        public override double SampleDistance(double MaxDistance)
         {
             double Distance = -Math.Log(Util.Random.NextDouble()) / ScatteringCoefficient;
 
+            //If we go outside of the medium
             if (Distance >= MaxDistance)
             {
-                PDF = 1.0f;
                 return MaxDistance;
             }
             else
             {
-                PDF = Math.Exp(-ScatteringCoefficient * Distance);
                 return Distance;
             }
         }

@@ -32,7 +32,7 @@ namespace Raytracer
             Properties.Add("normal", new MaterialNormalNode(new Texture("Assets/Materials/" + Name + "_normal.png")));
         }
 
-        public override void Evaluate(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, out Vector3 SampleDirection, out Vector3 Attenuation)
+        public override void Evaluate(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, out Vector3 SampleDirection, out LobeType SampledLobe, out Vector3 Attenuation)
         {
             Vector3 Albedo = GetProperty("albedo", UV);
             double Metalness = GetProperty("metalness", UV);
@@ -43,6 +43,8 @@ namespace Raytracer
             //Diffuse
             if (Util.Random.NextDouble() > DiffuseSpecularRatio)
             {
+                SampledLobe = LobeType.DiffuseReflection;
+
                 Vector3 NT = Vector3.Zero;
                 Vector3 NB = Vector3.Zero;
                 Util.CreateCartesian(Normal, out NT, out NB);
@@ -72,6 +74,8 @@ namespace Raytracer
             //Glossy
             else
             {
+                SampledLobe = LobeType.SpecularReflection;
+
                 double Roughness = MathHelper.Clamp(GetProperty("roughness", UV), 0.001, 1);
 
                 Vector3 ReflectionDirection = Vector3.Reflect(-ViewDirection, Normal);
