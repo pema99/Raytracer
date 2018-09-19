@@ -182,7 +182,7 @@ namespace Raytracer
                 }
             }
             AABBMin = new Vector3(MinX, MinY, MinZ);
-            AABBMax = new Vector3(MaxX, MaxY, MinZ);
+            AABBMax = new Vector3(MaxX, MaxY, MaxZ);
         }
         #endregion
     }

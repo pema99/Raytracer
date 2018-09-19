@@ -54,3 +54,7 @@ C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Ass
 C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\Meshes\Gun.ply
 C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\EnvMaps\creek.png
 C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\EnvMaps\portland.png
+C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\Meshes\cone.ply
+C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\Meshes\disc.ply
+C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\Meshes\ballcover.ply
+C:\Users\Pema Malling\source\repos\Raytracer\Raytracer\bin\Windows\x86\Debug\Assets\Meshes\strange.ply
