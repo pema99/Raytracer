@@ -2,13 +2,17 @@
 A path tracer using monte carlo integration methods and physically based rendering.
 
 ### What can it do?
-Render simple scenes with global illumination.
+Render scenes with global illumination.
 
-Specular, diffuse controllable via roughness and metalness parameters.
+Texture mapping.
 
-Meshes, spheres, rectangles.
+Multiple material types including a physically based material with roughness / metalness.
 
-Spatial partitioning so I don't have infinitely long render times.
+Meshes, spheres, planes.
+
+Acceleration structure so I don't have infinitely long render times.
+
+Image based lighting.
 
 Cool.
 
@@ -17,9 +21,9 @@ Because I am bored.
 
 ### Cool, show some pictures.
 [<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Main.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Main.png)
+[<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Volume.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Volume.png)
+[<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Velvet.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Velvet.png)
 [<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/IBL.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/IBL.png)
-[<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Dragon.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Dragon.png)
-[<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Monkey.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Monkey.png)
 
 ### How do I use it?
 You shouldn't.
