@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Raytracer
 {
@@ -45,9 +41,7 @@ namespace Raytracer
             {
                 SampledLobe = LobeType.DiffuseReflection;
 
-                Vector3 NT = Vector3.Zero;
-                Vector3 NB = Vector3.Zero;
-                Util.CreateCartesian(Normal, out NT, out NB);
+                Util.CreateCartesian(Normal, out Vector3 NT, out Vector3 NB);
 
                 double R1 = Util.Random.NextDouble();
                 double R2 = Util.Random.NextDouble();

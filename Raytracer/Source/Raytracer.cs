@@ -55,7 +55,7 @@ namespace Raytracer
                 //new TriangleMesh(new GlassMaterial(new Vector3(1, 1, 1), 1.35, new IsotropicMedium(new Vector3(0.9801986733, 0.4609674656, 0.4334596545), 0.15, 0.15)), Matrix.CreateScale(2) * Matrix.CreateRotationY(Math.PI/2) * Matrix.CreateTranslation(0, 0, 5), "Assets/meshes/strange.ply", 3, false, false),
 
                 new Sphere(new PBRMaterial("rustediron2"), new Vector3(0, 0, 4), 1),
-                new TriangleMesh(new PBRMaterial(Color.Red.ToVector3(), 0, 1), Matrix.CreateRotationY(Math.PI-0.4) * Matrix.CreateTranslation(0, 0, 4), "Assets/meshes/ballcover.ply", 3, true, true),
+                new TriangleMesh(new VelvetMaterial(0.65, Color.Red.ToVector3()), Matrix.CreateRotationY(Math.PI-0.4) * Matrix.CreateTranslation(0, 0, 4), "Assets/meshes/ballcover.ply", 3, true, true),
                 new Plane(new PBRMaterial(Vector3.One, 1, 0.2), new Vector3(0, -0.98, 0), new Vector3(0, 1, 0)),
 
                 //new Sphere(new GlassMaterial(new Vector3(1, 1, 1), 1.3, new IsotropicMedium(new Vector3(0.5, 1, 0.5), 1, 0.4)), new Vector3(0, 0, 6), 2),

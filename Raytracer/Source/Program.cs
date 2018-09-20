@@ -9,7 +9,7 @@ namespace Raytracer
         public static void Main(string[] Args)
         {
             #if (!DEBUG)
-            Raytracer Raytracer = new Raytracer(1280, 720, 75, Vector3.Zero, Vector3.Zero, new Texture("Assets/EnvMaps/portland.png", true), 3, 3, 600, 12);
+            Raytracer Raytracer = new Raytracer(1280, 720, 75, Vector3.Zero, Vector3.Zero, new Texture("Assets/EnvMaps/portland.png", true), 3, 3, 200, 12);
             #else
             Raytracer Raytracer = new Raytracer(600, 400, 75, Vector3.Zero, Vector3.Zero, new Texture("Assets/EnvMaps/portland.png", true), 3, 1500, 200, 1);
             #endif

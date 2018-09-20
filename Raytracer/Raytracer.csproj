@@ -58,12 +58,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Source\Geometry\Disc.cs" />
-    <Compile Include="Source\Material\EmissionMaterial.cs" />
-    <Compile Include="Source\Material\GlassMaterial.cs" />
+    <Compile Include="Source\Material\Types\EmissionMaterial.cs" />
+    <Compile Include="Source\Material\Types\GlassMaterial.cs" />
     <Compile Include="Source\Material\Media\IsotropicMedium.cs" />
     <Compile Include="Source\Material\Media\LinearMedium.cs" />
-    <Compile Include="Source\Material\LobeType.cs" />
+    <Compile Include="Source\Material\Types\LambertianMaterial.cs" />
+    <Compile Include="Source\Material\Types\TransparentMaterial.cs" />
+    <Compile Include="Source\Utility classes\LobeType.cs" />
     <Compile Include="Source\Material\Material.cs" />
+    <Compile Include="Source\Material\Types\MixMaterial.cs" />
     <Compile Include="Source\Material\NodeSystem\MaterialConstantNode.cs" />
     <Compile Include="Source\Material\NodeSystem\MaterialNode.cs" />
     <Compile Include="Source\Material\NodeSystem\MaterialNodeValue.cs" />
@@ -71,7 +74,8 @@
     <Compile Include="Source\Material\NodeSystem\MaterialNormalNode.cs" />
     <Compile Include="Source\Material\NodeSystem\MaterialTextureNode.cs" />
     <Compile Include="Source\Material\Media\Medium.cs" />
-    <Compile Include="Source\Material\PBRMaterial.cs" />
+    <Compile Include="Source\Material\Types\PBRMaterial.cs" />
+    <Compile Include="Source\Material\Types\VelvetMaterial.cs" />
     <Compile Include="Source\Utility classes\Math\MathHelper.cs" />
     <Compile Include="Source\Utility classes\Math\Matrix.cs" />
     <Compile Include="Source\Utility classes\Math\Vector2.cs" />

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Raytracer
 {
@@ -11,6 +7,11 @@ namespace Raytracer
         public EmissionMaterial(Vector3 Emission)
         {
             Properties.Add("emission", new MaterialConstantNode(Emission));
+        }
+
+        public EmissionMaterial(MaterialNode Emission)
+        {
+            Properties.Add("emission", Emission);
         }
 
         public override void Evaluate(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, out Vector3 SampleDirection, out LobeType SampledLobe, out Vector3 Attenuation)
