@@ -20,10 +20,10 @@ Cool.
 Because I am bored.
 
 ### Cool, show some pictures.
-[<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Main.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Main.png)
-[<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Volume.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Volume.png)
-[<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Velvet.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/Velvet.png)
-[<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/IBL.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer/Assets/IBL.png)
+[<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/Main.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/Main.png)
+[<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/Volume.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/Volume.png)
+[<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/Velvet.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/Velvet.png)
+[<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/IBL.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/IBL.png)
 
 ### How do I use it?
 You shouldn't.

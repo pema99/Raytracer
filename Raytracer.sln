@@ -3,38 +3,35 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2000
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Raytracer", "Raytracer\Raytracer.csproj", "{25F4160A-FA7F-42EC-BBBD-263E664D949F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Raytracer.Core", "Raytracer.Core\Raytracer.Core.csproj", "{B49E3C68-0689-4954-AE07-E5E71CF98514}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Raytracer.CLI", "Raytracer.CLI\Raytracer.CLI.csproj", "{BF19C148-4C5E-480B-83B6-5D99BFF1262B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Raytracer.Frontend", "Raytracer.Frontend\Raytracer.Frontend.csproj", "{EED04586-78D7-445A-BF9B-C878BA4FFAD7}"
 EndProject
 Global
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x86 = Debug|x86
-		Release|x86 = Release|x86
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{25F4160A-FA7F-42EC-BBBD-263E664D949F}.Debug|x86.ActiveCfg = Debug|x86
-		{25F4160A-FA7F-42EC-BBBD-263E664D949F}.Debug|x86.Build.0 = Debug|x86
-		{25F4160A-FA7F-42EC-BBBD-263E664D949F}.Release|x86.ActiveCfg = Release|x86
-		{25F4160A-FA7F-42EC-BBBD-263E664D949F}.Release|x86.Build.0 = Release|x86
+		{B49E3C68-0689-4954-AE07-E5E71CF98514}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B49E3C68-0689-4954-AE07-E5E71CF98514}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B49E3C68-0689-4954-AE07-E5E71CF98514}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B49E3C68-0689-4954-AE07-E5E71CF98514}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF19C148-4C5E-480B-83B6-5D99BFF1262B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF19C148-4C5E-480B-83B6-5D99BFF1262B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF19C148-4C5E-480B-83B6-5D99BFF1262B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF19C148-4C5E-480B-83B6-5D99BFF1262B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EED04586-78D7-445A-BF9B-C878BA4FFAD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EED04586-78D7-445A-BF9B-C878BA4FFAD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EED04586-78D7-445A-BF9B-C878BA4FFAD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EED04586-78D7-445A-BF9B-C878BA4FFAD7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {FC1A09E2-E321-4F22-879E-21F53E499F62}
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
+		SolutionGuid = {F69382EA-1F4B-479F-97F4-0B4CC2D49D33}
 	EndGlobalSection
 EndGlobal
