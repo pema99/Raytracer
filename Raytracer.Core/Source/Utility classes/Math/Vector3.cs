@@ -314,6 +314,26 @@ namespace Raytracer.Core
             return reflectedVector;
         }
 
+        public static Vector3 Refract(Vector3 vector, Vector3 normal, double ior)
+        {
+            double CosTheta = MathHelper.Clamp(Vector3.Dot(vector, normal), -1, 1);
+            double RefractiveIndexA = 1;
+            double RefractiveIndexB = ior;
+            if (CosTheta < 0)
+            {
+                CosTheta = -CosTheta;
+            }
+            else
+            {
+                var Temp = RefractiveIndexA;
+                RefractiveIndexA = RefractiveIndexB;
+                RefractiveIndexB = Temp;
+                normal = -normal;
+            }
+            double RefractiveRatio = RefractiveIndexA / RefractiveIndexB;
+            return RefractiveRatio * vector + (RefractiveRatio * CosTheta - Math.Sqrt(1 - RefractiveRatio * RefractiveRatio * (1 - CosTheta * CosTheta))) * normal;
+        }
+
         public static Vector3 SmoothStep(Vector3 value1, Vector3 value2, double amount)
         {
             return new Vector3(

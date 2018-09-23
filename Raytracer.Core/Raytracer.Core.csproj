@@ -61,11 +61,10 @@
     <Compile Include="Source\Material\NodeSystem\MaterialNormalNode.cs" />
     <Compile Include="Source\Material\NodeSystem\MaterialTextureNode.cs" />
     <Compile Include="Source\Material\Types\EmissionMaterial.cs" />
-    <Compile Include="Source\Material\Types\GlassMaterial.cs" />
     <Compile Include="Source\Material\Types\LambertianMaterial.cs" />
     <Compile Include="Source\Material\Types\MixMaterial.cs" />
     <Compile Include="Source\Material\Types\PBRMaterial.cs" />
-    <Compile Include="Source\Material\Types\RoughGlassMaterial.cs" />
+    <Compile Include="Source\Material\Types\GlassMaterial.cs" />
     <Compile Include="Source\Material\Types\TransparentMaterial.cs" />
     <Compile Include="Source\Material\Types\VelvetMaterial.cs" />
     <Compile Include="Source\Raytracer.cs" />

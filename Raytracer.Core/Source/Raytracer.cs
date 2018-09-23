@@ -91,7 +91,7 @@ namespace Raytracer.Core
                 //new TriangleMesh(new Material(Color.White.ToVector3(), 0, 0, Vector3.Zero), Matrix.CreateScale(2) * Matrix.CreateTranslation(0, 0, 5), "Assets/meshes/monkeysmooth.ply", 3, true, false),
 
                 //new TriangleMesh(new GlassMaterial(new Vector3(1, 1, 1), 1.35, new IsotropicMedium(new Vector3(0.9801986733, 0.4609674656, 0.4334596545), 0.15, 0.15)), Matrix.CreateScale(25) * Matrix.CreateRotationY(Math.PI) * Matrix.CreateTranslation(0, -2, 5), "Assets/meshes/dragon_vrip.ply", 3, false, false),
-                new TriangleMesh(new RoughGlassMaterial(Vector3.One, 1.1, 0.2), Matrix.CreateScale(25) * Matrix.CreateRotationY(Math.PI) * Matrix.CreateTranslation(0, -2.5, 5), "Assets/meshes/dragon_vrip.ply", 3, false, false),
+                new TriangleMesh(new GlassMaterial(Vector3.One, 1.1, 0.2), Matrix.CreateScale(25) * Matrix.CreateRotationY(Math.PI) * Matrix.CreateTranslation(0, -2.5, 5), "Assets/meshes/dragon_vrip.ply", 3, false, false),
 
                 //new Sphere(new PBRMaterial("rustediron2"), new Vector3(0, 0, 4), 1),
                 //new TriangleMesh(new VelvetMaterial(0.65, Color.Red.ToVector3()), Matrix.CreateRotationY(Math.PI-0.4) * Matrix.CreateTranslation(0, 0, 4), "Assets/meshes/ballcover.ply", 3, true, true),
@@ -229,7 +229,7 @@ namespace Raytracer.Core
                     }
 
                     //Set new ray direction to sampled ray
-                    Ray.Origin = Hit + SampleDirection * 0.00001;
+                    Ray.Origin = Hit + SampleDirection * 0.001;
                     Ray.Direction = SampleDirection;
                 }
 
