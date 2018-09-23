@@ -14,7 +14,7 @@ namespace Raytracer.Core
         public override void Evaluate(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, out Vector3 SampleDirection, out LobeType SampledLobe, out Vector3 Attenuation)
         {
             SampleDirection = -ViewDirection;
-            SampledLobe = LobeType.SpecularTransmission;
+            SampledLobe = LobeType.DiffuseTransmission;
             Attenuation = GetProperty("albedo", UV);
         }
     }

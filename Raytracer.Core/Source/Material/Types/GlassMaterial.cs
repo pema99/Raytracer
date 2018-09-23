@@ -29,13 +29,13 @@ namespace Raytracer.Core
             Vector3 RayDirection = -ViewDirection;
 
             //Fresnel reflect or refract
-            if (Util.Random.NextDouble() <= FresnelReal(MathHelper.Clamp(Vector3.Dot(RayDirection, Normal), -1, 1), RefractiveIndex))
+            if (Util.Random.NextDouble() <= Util.FresnelReal(MathHelper.Clamp(Vector3.Dot(RayDirection, Normal), -1, 1), RefractiveIndex))
             {
                 SampledLobe = LobeType.SpecularReflection;
 
                 Vector3 ReflectionDirection = Vector3.Normalize(Vector3.Reflect(RayDirection, Normal));
                 SampleDirection = ReflectionDirection;
-                Attenuation = Albedo;
+                Attenuation = Vector3.One;
             }
             else
             {
@@ -59,34 +59,6 @@ namespace Raytracer.Core
                 Vector3 RefractionDirection = RefractiveRatio * RayDirection + (RefractiveRatio * CosTheta - Math.Sqrt(1 - RefractiveRatio * RefractiveRatio * (1 - CosTheta * CosTheta))) * Normal;
                 SampleDirection = RefractionDirection;
                 Attenuation = Albedo;
-            }
-        }
-
-        public double FresnelReal(double CosTheta, double RefractiveIndex)
-        {
-            double RefractiveIndexA = 1;
-            double RefractiveIndexB = RefractiveIndex;
-
-            if (CosTheta > 0)
-            {
-                var Temp = RefractiveIndexA;
-                RefractiveIndexA = RefractiveIndexB;
-                RefractiveIndexB = Temp;
-            }
-
-            double SinOut = RefractiveIndexA / RefractiveIndexB * Math.Sqrt(Math.Max(0, 1 - Math.Pow(CosTheta, 2)));
-
-            if (SinOut >= 1)
-            {
-                return 1;
-            }
-            else
-            {
-                double CosOut = Math.Sqrt(Math.Max(0, 1 - SinOut * SinOut));
-                CosTheta = Math.Abs(CosTheta);
-                double Rs = ((RefractiveIndexB * CosTheta) - (RefractiveIndexA * CosOut)) / ((RefractiveIndexB * CosTheta) + (RefractiveIndexA * CosOut));
-                double Rp = ((RefractiveIndexA * CosTheta) - (RefractiveIndexB * CosOut)) / ((RefractiveIndexA * CosTheta) + (RefractiveIndexB * CosOut));
-                return (Rs * Rs + Rp * Rp) / 2;
             }
         }
     }

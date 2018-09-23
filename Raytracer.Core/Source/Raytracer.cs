@@ -90,15 +90,16 @@ namespace Raytracer.Core
                 //new TriangleMesh(new Material("Cerberus"), Matrix.CreateScale(5) * Matrix.CreateRotationY(Math.PI/2) * Matrix.CreateTranslation(-2, 0.5, 5), "Assets/Meshes/Gun.ply", 3, true, false),
                 //new TriangleMesh(new Material(Color.White.ToVector3(), 0, 0, Vector3.Zero), Matrix.CreateScale(2) * Matrix.CreateTranslation(0, 0, 5), "Assets/meshes/monkeysmooth.ply", 3, true, false),
 
-                //new TriangleMesh(new GlassMaterial(new Vector3(1, 1, 1), 1.35, new IsotropicMedium(new Vector3(0.9801986733, 0.4609674656, 0.4334596545), 0.15, 0.15)), Matrix.CreateScale(2) * Matrix.CreateRotationY(Math.PI/2) * Matrix.CreateTranslation(0, 0, 5), "Assets/meshes/strange.ply", 3, false, false),
+                //new TriangleMesh(new GlassMaterial(new Vector3(1, 1, 1), 1.35, new IsotropicMedium(new Vector3(0.9801986733, 0.4609674656, 0.4334596545), 0.15, 0.15)), Matrix.CreateScale(25) * Matrix.CreateRotationY(Math.PI) * Matrix.CreateTranslation(0, -2, 5), "Assets/meshes/dragon_vrip.ply", 3, false, false),
+                new TriangleMesh(new RoughGlassMaterial(Vector3.One, 1.1, 0.2), Matrix.CreateScale(25) * Matrix.CreateRotationY(Math.PI) * Matrix.CreateTranslation(0, -2.5, 5), "Assets/meshes/dragon_vrip.ply", 3, false, false),
 
                 //new Sphere(new PBRMaterial("rustediron2"), new Vector3(0, 0, 4), 1),
                 //new TriangleMesh(new VelvetMaterial(0.65, Color.Red.ToVector3()), Matrix.CreateRotationY(Math.PI-0.4) * Matrix.CreateTranslation(0, 0, 4), "Assets/meshes/ballcover.ply", 3, true, true),
                 //new Plane(new PBRMaterial(Vector3.One, 1, 0.2), new Vector3(0, -0.98, 0), new Vector3(0, 1, 0)),
 
-                new TriangleMesh(new GlassMaterial(new Vector3(0.8, 1, 0.8), 1.1), Matrix.CreateScale(0.8) * Matrix.CreateTranslation(0, -2, 6), "Assets/Meshes/Coffee/Cup.ply", 3, true, false),
-                new TriangleMesh(new PBRMaterial(Vector3.One, 0, 0.1), Matrix.CreateScale(0.8) * Matrix.CreateTranslation(0, -2.01, 6), "Assets/Meshes/Coffee/Plate.ply", 3, true, true),
-                new Plane(new PBRMaterial(Color.Brown.ToVector3(), 0, 1), new Vector3(0, -2, 0), new Vector3(0, 1, 0)),
+                //new TriangleMesh(new GlassMaterial(new Vector3(0.8, 1, 0.8), 1.1), Matrix.CreateScale(0.8) * Matrix.CreateTranslation(0, -2, 6), "Assets/Meshes/Coffee/Cup.ply", 3, true, false),
+                //new TriangleMesh(new PBRMaterial(Vector3.One, 0, 0.1), Matrix.CreateScale(0.8) * Matrix.CreateTranslation(0, -2.01, 6), "Assets/Meshes/Coffee/Plate.ply", 3, true, true),
+                //new Plane(new PBRMaterial(Color.Brown.ToVector3(), 0, 1), new Vector3(0, -2, 0), new Vector3(0, 1, 0)),
 
                 //new Sphere(new GlassMaterial(new Vector3(1, 1, 1), 1.3, new IsotropicMedium(new Vector3(0.5, 1, 0.5), 1, 0.4)), new Vector3(0, 0, 6), 2),
                 //new Sphere(new EmissionMaterial(new Vector3(1, 0, 0)*2), new Vector3(-2, -2, 9), 2),
@@ -222,13 +223,13 @@ namespace Raytracer.Core
                     //Accumulate BXDF attenuation
                     Throughput *= Attenuation;
 
-                    if (SampledLobe == LobeType.SpecularTransmission)
+                    if (SampledLobe == LobeType.SpecularTransmission || SampledLobe == LobeType.DiffuseTransmission)
                     {
                         CurrentMedium = Shape.Material.Medium;
                     }
 
                     //Set new ray direction to sampled ray
-                    Ray.Origin = Hit + SampleDirection * 0.001;
+                    Ray.Origin = Hit + SampleDirection * 0.00001;
                     Ray.Direction = SampleDirection;
                 }
 

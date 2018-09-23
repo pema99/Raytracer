@@ -185,6 +185,82 @@ namespace Raytracer.Core
             AABBMax = new Vector3(MaxX, MaxY, MaxZ);
         }
         #endregion
+
+        #region Shading
+        public static Vector3 SampleGGX(double R1, double R2, Vector3 ReflectionDirection, double Roughness)
+        {
+            double A = Math.Pow(Roughness, 2.0);
+
+            //Generate spherical
+            double Phi = 2.0 * Math.PI * R1;
+            double CosTheta = Math.Sqrt((1.0 - R2) / (1.0 + (A * A - 1.0) * R2));
+            double SinTheta = Math.Sqrt(1.0 - CosTheta * CosTheta);
+
+            //Spherical to cartesian
+            Vector3 H = new Vector3(Math.Cos(Phi) * SinTheta, Math.Sin(Phi) * SinTheta, CosTheta);
+
+            //Tangent-space to world-space
+            Vector3 Up = Math.Abs(ReflectionDirection.Z) < 0.999 ? new Vector3(0.0, 0.0, 1.0) : new Vector3(1.0, 0.0, 0.0);
+            Vector3 Tangent = Vector3.Normalize(Vector3.Cross(Up, ReflectionDirection));
+            Vector3 BiTangent = Vector3.Cross(ReflectionDirection, Tangent);
+
+            return Vector3.Normalize(Tangent * H.X + BiTangent * H.Y + ReflectionDirection * H.Z);
+        }
+
+        public static double GGXDistribution(Vector3 Normal, Vector3 Halfway, double Roughness)
+        {
+            double Numerator = Math.Pow(Roughness, 2.0);
+            double Denominator = Math.Pow(Math.Max(Vector3.Dot(Normal, Halfway), 0), 2) * (Numerator - 1.0) + 1.0;
+            Denominator = Math.Max(Math.PI * Math.Pow(Denominator, 2.0), 1e-7);
+            return Numerator / Denominator;
+        }
+
+        public static double GeometrySchlickGGX(Vector3 Normal, Vector3 View, double Roughness)
+        {
+            double Numerator = Math.Max(Vector3.Dot(Normal, View), 0);
+            double R = (Roughness * Roughness) / 8.0;
+            double Denominator = Numerator * (1.0 - R) + R;
+            return Numerator / Denominator;
+        }
+
+        public static double GeometrySmith(Vector3 Normal, Vector3 View, Vector3 Light, double Roughness)
+        {
+            return GeometrySchlickGGX(Normal, View, Roughness) * GeometrySchlickGGX(Normal, Light, Roughness);
+        }
+
+        public static Vector3 FresnelSchlick(double CosTheta, Vector3 F0)
+        {
+            return F0 + (Vector3.One - F0) * Math.Pow((1.0 - CosTheta), 5.0);
+        }
+
+        public static double FresnelReal(double CosTheta, double RefractiveIndex)
+        {
+            double RefractiveIndexA = 1;
+            double RefractiveIndexB = RefractiveIndex;
+
+            if (CosTheta > 0)
+            {
+                var Temp = RefractiveIndexA;
+                RefractiveIndexA = RefractiveIndexB;
+                RefractiveIndexB = Temp;
+            }
+
+            double SinOut = RefractiveIndexA / RefractiveIndexB * Math.Sqrt(Math.Max(0, 1 - Math.Pow(CosTheta, 2)));
+
+            if (SinOut >= 1)
+            {
+                return 1;
+            }
+            else
+            {
+                double CosOut = Math.Sqrt(Math.Max(0, 1 - SinOut * SinOut));
+                CosTheta = Math.Abs(CosTheta);
+                double Rs = ((RefractiveIndexB * CosTheta) - (RefractiveIndexA * CosOut)) / ((RefractiveIndexB * CosTheta) + (RefractiveIndexA * CosOut));
+                double Rp = ((RefractiveIndexA * CosTheta) - (RefractiveIndexB * CosOut)) / ((RefractiveIndexA * CosTheta) + (RefractiveIndexB * CosOut));
+                return (Rs * Rs + Rp * Rp) / 2;
+            }
+        }
+        #endregion
     }
 }
 
