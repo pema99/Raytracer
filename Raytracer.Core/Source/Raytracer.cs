@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -117,16 +118,18 @@ namespace Raytracer.Core
                 //new TriangleMesh(new GlassMaterial(Color.White.ToVector3(), 1.33, 0, new IsotropicMedium(Color.CornflowerBlue.ToVector3(), 2, 2)), Matrix.CreateScale(1.5) * Matrix.CreateTranslation(0, -2, 5), "Assets/Meshes/GlassTall/GlassTallLiquid.ply"),
 
                 //2 ball material scene
-                new Sphere(new PBRMaterial("wornpaintedcement"), new Vector3(-2.5, -0.5, 5), 1.5),
+                new Sphere(new LambertianMaterial(Color.Blue.ToVector3()), new Vector3(-2.5, -0.5, 5), 1.5),
                 //new Sphere(new PBRMaterial("rustediron2"), new Vector3(2.5, -0.5, 5), 1.5),
 
                 //Box Scene
-                new Plane(new PBRMaterial(Color.LightGray.ToVector3(), 0, 1), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
-                new Plane(new PBRMaterial(Color.Pink.ToVector3(),  0, 1), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
-                new Plane(new PBRMaterial(Color.Green.ToVector3(), 0, 1), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
-                new Plane(new PBRMaterial(Color.Green.ToVector3(), 0, 1), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
-                new Plane(new PBRMaterial(Color.Pink.ToVector3(),  0, 1), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
-                new Plane(new PBRMaterial(Color.Black.ToVector3(), 0, 1), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
+                new Plane(new LambertianMaterial(Color.LightGray.ToVector3()), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
+                new Plane(new LambertianMaterial(Color.Pink.ToVector3()), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
+                new Plane(new LambertianMaterial(Color.Green.ToVector3()), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
+                new Plane(new LambertianMaterial(Color.Green.ToVector3()), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
+                new Plane(new LambertianMaterial(Color.Pink.ToVector3()), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
+                new Plane(new LambertianMaterial(Color.Black.ToVector3()), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
+
+                new Sphere(new EmissionMaterial(Vector3.One), new Vector3(0, 4, 7), 0.5)
             };
         }
 
@@ -228,11 +231,12 @@ namespace Raytracer.Core
                     //Area lights
                     if (Shape.Material.HasProperty("emission"))
                     {
+                        //Don't add emission to diffuse term, we already sample it directly
                         if (SampledLobe == LobeType.SpecularReflection)
                         {
                             FinalColor += Throughput * Shape.Material.GetProperty("emission", UV).Color;
                         }
-                        break;
+                        //break;
                     }
 
                     Vector3 ViewDirection = Vector3.Normalize(Ray.Origin - Hit);
@@ -243,17 +247,57 @@ namespace Raytracer.Core
 
                     if (SampledLobe == LobeType.DiffuseReflection)
                     {
-                        Vector3 LightSample = new Vector3(0, 4, 7) - Hit;
+                        Sphere Light = Shapes.Last() as Sphere;
+                        Vector3 Emission = Light.Material.GetProperty("emission", UV).Color;
+
+                        Vector3 TotalDirectLighting = Vector3.Zero;
+                        Vector3 BSDFAttenuation = Vector3.Zero;
+                        double LightPDF, ScatterPDF;
+
+                        //Sample light directly
+                        Vector3 LightSample = Light.Sample() - Hit;
                         double Distance = LightSample.Length();
                         LightSample.Normalize();
-                        Shape.Material.Evaluate(ViewDirection, Normal, UV, LightSample, SampledLobe, out Vector3 LightAtt);
-                        Vector3 LightContrib = Vector3.One;
-                        Raycast(new Ray(Hit + LightSample * 0.001, LightSample), out Shape ShadowShape, out Vector3 ShadowHit, out Vector3 ShadowNormal, out Vector2 ShadowUV);
 
-                        if ((ShadowHit - Hit).Length() >= Distance)
+                        //Visibility check
+                        Raycast(new Ray(Hit + LightSample * 0.001, LightSample), out Shape LightShape, out Vector3 LightHit, out Vector3 LightNormal, out Vector2 LightUV);
+                        if (LightShape is Sphere && LightShape.Material.HasProperty("emission"))
                         {
-                            FinalColor += Throughput * LightContrib * LightAtt;
+                            //Calculate light pdf for light sample
+                            LightPDF = Math.Pow(Distance, 2) / (Vector3.Dot(LightNormal, -LightSample) * (Shapes.Last() as Sphere).Area());
+
+                            //Calculate bsdf pdf for light sample
+                            Shape.Material.Evaluate(ViewDirection, Normal, UV, LightSample, SampledLobe, out BSDFAttenuation);
+                            Shape.Material.PDF(ViewDirection, Normal, UV, LightSample, SampledLobe, out ScatterPDF);
+
+                            //Weighted sum of the 2 sampling strategies
+                            if (BSDFAttenuation != Vector3.Zero)
+                            {
+                                TotalDirectLighting += BSDFAttenuation * Emission * Util.BalanceHeuristic(LightPDF, ScatterPDF) / LightPDF;
+                            }
                         }
+
+                        //Sample light using BSDF  -  TODO: Sample only diffuse
+                        Shape.Material.Sample(ViewDirection, Normal, UV, out Vector3 BSDFSample, out LobeType BSDFLobe);
+                        Shape.Material.Evaluate(ViewDirection, Normal, UV, BSDFSample, BSDFLobe, out BSDFAttenuation);
+                        if (BSDFAttenuation != Vector3.Zero)
+                        {
+                            //Visibility check
+                            Raycast(new Ray(Hit + BSDFSample * 0.001, BSDFSample), out Shape BSDFShape, out Vector3 BSDFHit, out Vector3 BSDFNormal, out Vector2 BSDFUV);
+                            if (BSDFShape is Sphere && BSDFShape.Material.HasProperty("emission"))
+                            {
+                                //Calculate light pdf for bsdf sample
+                                LightPDF = Math.Pow((BSDFHit - Hit).Length(), 2) / (Vector3.Dot(BSDFNormal, Vector3.Normalize(Hit - BSDFHit)) * (Shapes.Last() as Sphere).Area());
+
+                                //Calculate bsdf pdf for bsdf sample
+                                Shape.Material.PDF(ViewDirection, Normal, UV, BSDFSample, BSDFLobe, out ScatterPDF);
+
+                                //Weighted sum of the 2 sampling strategies
+                                TotalDirectLighting += BSDFAttenuation * Emission * Util.BalanceHeuristic(ScatterPDF, LightPDF) / ScatterPDF;
+                            }
+                        }
+
+                        FinalColor += Throughput * TotalDirectLighting;
                     }
 
                     //Accumulate BXDF attenuation

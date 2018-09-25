@@ -88,5 +88,15 @@ namespace Raytracer.Core
 
             return true;
         }
+
+        public Vector3 Sample()
+        {
+            return Util.UniformSampleSphere(Util.Random.NextDouble(), Util.Random.NextDouble()) * Radius + Origin;
+        }
+
+        public double Area()
+        {
+            return 4 * Math.PI * Radius * Radius;
+        }
     }
 }

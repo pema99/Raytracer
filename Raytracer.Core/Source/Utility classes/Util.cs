@@ -37,6 +37,16 @@ namespace Raytracer.Core
         {
             return Integer > 0;
         }
+
+        public static double BalanceHeuristic(double PDF0, double PDF1)
+        {
+            return PDF0 / (PDF0 + PDF1);
+        }
+
+        public static double PowerHeuristic(double PDF0, double PDF1)
+        {
+            return PDF0 * PDF0 / (PDF0 * PDF0 + PDF1 * PDF1);
+        }
         #endregion
 
         #region Geometry utility
@@ -77,6 +87,12 @@ namespace Raytracer.Core
             double Phi = 2.0 * Math.PI * R2;
 
             return new Vector3(Math.Sin(Theta) * Math.Cos(Phi), Math.Cos(Theta), Math.Sin(Theta) * Math.Sin(Phi));
+        }
+
+        public static Vector2 UniformSampleDisc(double R1, double R2)
+        {
+            double Theta = R2 * Math.PI * 2;
+            return new Vector2(Math.Sqrt(R1) * Math.Cos(Theta), Math.Sqrt(R1) * Math.Sin(Theta));
         }
 
         public static bool IntersectAABB(Ray Ray, Vector3 AABBMin, Vector3 AABBMax, out Vector3 Hit, out double TMin, out double TMax)
