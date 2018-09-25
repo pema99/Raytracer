@@ -86,34 +86,47 @@ namespace Raytracer.Core
 
             //Setup scene
             Shapes = new List<Shape>()
-            {               
+            {
+                //Cerberus gun scene
                 //new TriangleMesh(new Material("Cerberus"), Matrix.CreateScale(5) * Matrix.CreateRotationY(Math.PI/2) * Matrix.CreateTranslation(-2, 0.5, 5), "Assets/Meshes/Gun.ply", 3, true, false),
-                //new TriangleMesh(new Material(Color.White.ToVector3(), 0, 0, Vector3.Zero), Matrix.CreateScale(2) * Matrix.CreateTranslation(0, 0, 5), "Assets/meshes/monkeysmooth.ply", 3, true, false),
 
-                //new TriangleMesh(new GlassMaterial(new Vector3(1, 1, 1), 1.35, new IsotropicMedium(new Vector3(0.9801986733, 0.4609674656, 0.4334596545), 0.15, 0.15)), Matrix.CreateScale(25) * Matrix.CreateRotationY(Math.PI) * Matrix.CreateTranslation(0, -2, 5), "Assets/meshes/dragon_vrip.ply", 3, false, false),
-                new TriangleMesh(new GlassMaterial(Vector3.One, 1.1, 0.2), Matrix.CreateScale(25) * Matrix.CreateRotationY(Math.PI) * Matrix.CreateTranslation(0, -2.5, 5), "Assets/meshes/dragon_vrip.ply", 3, false, false),
-
+                //Velvet Cloth scene
                 //new Sphere(new PBRMaterial("rustediron2"), new Vector3(0, 0, 4), 1),
                 //new TriangleMesh(new VelvetMaterial(0.65, Color.Red.ToVector3()), Matrix.CreateRotationY(Math.PI-0.4) * Matrix.CreateTranslation(0, 0, 4), "Assets/meshes/ballcover.ply", 3, true, true),
                 //new Plane(new PBRMaterial(Vector3.One, 1, 0.2), new Vector3(0, -0.98, 0), new Vector3(0, 1, 0)),
 
-                //new TriangleMesh(new GlassMaterial(new Vector3(0.8, 1, 0.8), 1.1), Matrix.CreateScale(0.8) * Matrix.CreateTranslation(0, -2, 6), "Assets/Meshes/Coffee/Cup.ply", 3, true, false),
+                //Coffee Scene
+                //new TriangleMesh(new GlassMaterial(new Vector3(0.8, 1, 0.8), 1.1, 0), Matrix.CreateScale(0.8) * Matrix.CreateTranslation(0, -2, 6), "Assets/Meshes/Coffee/Cup.ply", 3, true, false),
                 //new TriangleMesh(new PBRMaterial(Vector3.One, 0, 0.1), Matrix.CreateScale(0.8) * Matrix.CreateTranslation(0, -2.01, 6), "Assets/Meshes/Coffee/Plate.ply", 3, true, true),
                 //new Plane(new PBRMaterial(Color.Brown.ToVector3(), 0, 1), new Vector3(0, -2, 0), new Vector3(0, 1, 0)),
 
-                //new Sphere(new GlassMaterial(new Vector3(1, 1, 1), 1.3, new IsotropicMedium(new Vector3(0.5, 1, 0.5), 1, 0.4)), new Vector3(0, 0, 6), 2),
-                //new Sphere(new EmissionMaterial(new Vector3(1, 0, 0)*2), new Vector3(-2, -2, 9), 2),
-                //new TriangleMesh(new GlassMaterial(new Vector3(1, 1, 1), 1.35, new IsotropicMedium(new Vector3(0.9801986733, 0.4609674656, 0.4334596545), 0.15, 0.15)), Matrix.CreateRotationY(Math.PI) * Matrix.CreateScale(27) * Matrix.CreateTranslation(0, -3, 4), "Assets/meshes/dragon_vrip.ply", 3, false, false),
+                //BlenderBall Scene
+                //new TriangleMesh(new VelvetMaterial(Color.Gold.ToVector3(), 0.8), Matrix.CreateScale(0.25) * Matrix.CreateRotationY(-Math.PI/4) * Matrix.CreateTranslation(0, -1.5, 5), "Assets/Meshes/BlenderBall/BlenderBallShell.ply"),
+                //new TriangleMesh(new PBRMaterial(Color.Black.ToVector3(), 0, 0.8), Matrix.CreateScale(0.25) * Matrix.CreateRotationY(-Math.PI/4) * Matrix.CreateTranslation(0, -1.5, 5), "Assets/Meshes/BlenderBall/BlenderBallCore.ply"),
+                //new TriangleMesh(new PBRMaterial(Color.Black.ToVector3(), 0, 0.8), Matrix.CreateScale(0.25) * Matrix.CreateRotationY(-Math.PI/4) * Matrix.CreateTranslation(0, -1.5, 5), "Assets/Meshes/BlenderBall/BlenderBallBase.ply"),
+                //new Plane(new LambertianMaterial(Color.Gray.ToVector3()), new Vector3(0, -1.5, 0), new Vector3(0, 1, 0))
 
-                //new Sphere(new PBRMaterial("wornpaintedcement"), new Vector3(-2.5, -0.5, 5), 1.5),
+                //BlenderCup scene
+                //new TriangleMesh(new PBRMaterial(Color.White.ToVector3(), 0, 0.1), Matrix.CreateRotationY(-Math.PI/4) * Matrix.CreateTranslation(0, -1.5, 5), "Assets/Meshes/BlenderCup/Plate.ply"),
+                //new TriangleMesh(new GlassMaterial(new Vector3(0.8, 0.8, 1), 1.3, 0.3), Matrix.CreateRotationY(-Math.PI/4) * Matrix.CreateTranslation(0, -1.5, 5), "Assets/Meshes/BlenderCup/CupInner.ply"),
+                //new TriangleMesh(new PBRMaterial(Color.DarkGoldenrod.ToVector3(), 1, 0.3), Matrix.CreateRotationY(-Math.PI/4) * Matrix.CreateTranslation(0, -1.5, 5), "Assets/Meshes/BlenderCup/CupOuter.ply"),
+                //new Plane(new LambertianMaterial(Color.Brown.ToVector3()), new Vector3(0, -1.5, 0), new Vector3(0, 1, 0))
+
+                //GlassTall scene
+                //new TriangleMesh(new GlassMaterial(Color.White.ToVector3()*0.8, 1.45, 0), Matrix.CreateScale(1.5) * Matrix.CreateTranslation(0, -2, 5), "Assets/Meshes/GlassTall/GlassTall.ply"),
+                //new TriangleMesh(new GlassMaterial(Color.White.ToVector3(), 1.33, 0, new IsotropicMedium(Color.CornflowerBlue.ToVector3(), 2, 2)), Matrix.CreateScale(1.5) * Matrix.CreateTranslation(0, -2, 5), "Assets/Meshes/GlassTall/GlassTallLiquid.ply"),
+
+                //2 ball material scene
+                new Sphere(new PBRMaterial("wornpaintedcement"), new Vector3(-2.5, -0.5, 5), 1.5),
                 //new Sphere(new PBRMaterial("rustediron2"), new Vector3(2.5, -0.5, 5), 1.5),
 
-                //new Plane(new PBRMaterial(Color.LightGray.ToVector3(), 0, 1), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
-                //new Plane(new EmissionMaterial(Vector3.One), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
-                //new Plane(new PBRMaterial(Color.Green.ToVector3(), 0, 1), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
-                //new Plane(new PBRMaterial(Color.Green.ToVector3(), 0, 1), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
-                //new Plane(new PBRMaterial(Color.Pink.ToVector3(),  0, 1), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
-                //new Plane(new PBRMaterial(Color.Black.ToVector3(), 0, 1), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
+                //Box Scene
+                new Plane(new PBRMaterial(Color.LightGray.ToVector3(), 0, 1), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
+                new Plane(new EmissionMaterial(Vector3.One), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
+                new Plane(new PBRMaterial(Color.Green.ToVector3(), 0, 1), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
+                new Plane(new PBRMaterial(Color.Green.ToVector3(), 0, 1), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
+                new Plane(new PBRMaterial(Color.Pink.ToVector3(),  0, 1), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
+                new Plane(new PBRMaterial(Color.Black.ToVector3(), 0, 1), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
             };
         }
 
@@ -122,20 +135,20 @@ namespace Raytracer.Core
             Framebuffer = new Vector3[Width, Height];
 
             int Progress = 0;
-            using (new Timer(_ => Console.WriteLine("Rendered {0} of {1} scanlines", Progress, Width), null, 1000, 1000))
+            using (new Timer(_ => Console.WriteLine("Rendered {0} of {1} scanlines", Progress, Height), null, 1000, 1000))
             {
-                Parallel.For(0, Width, new ParallelOptions { MaxDegreeOfParallelism = Threads }, (i) => { RenderLine(i); Progress++; });
+                Parallel.For(0, Height, new ParallelOptions { MaxDegreeOfParallelism = Threads }, (i) => { RenderLine(i); Progress++; });
             }
         }
 
-        private void RenderLine(int x)
+        private void RenderLine(int y)
         {
-            for (int y = 0; y < Height; y++)
+            for (int x = 0; x < Width; x++)
             {
                 for (int i = 0; i < Samples; i++)
                 {
                     //Supersampling
-                    Vector3 RayDir = new Vector3((2.0 * ((x + 0.5 + Util.Random.NextDouble()) * InvWidth) - 1.0) * ViewAngle * AspectRatio, (1.0 - 2.0 * ((y + 0.5 + Util.Random.NextDouble()) * InvHeight)) * ViewAngle, 1);
+                    Vector3 RayDir = new Vector3((2.0 * ((x + Util.Random.NextDouble()) * InvWidth) - 1.0) * ViewAngle * AspectRatio, (1.0 - 2.0 * ((y + Util.Random.NextDouble()) * InvHeight)) * ViewAngle, 1);
                     RayDir.Normalize();
                     RayDir = Vector3.Transform(RayDir, CameraRotationMatrix);
 

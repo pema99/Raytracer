@@ -8,7 +8,7 @@ namespace Raytracer.CLI
         static void Main(string[] args)
         {
             #if (!DEBUG)
-            Core.Raytracer Raytracer = new Core.Raytracer(1280, 720, 75, Core.Vector3.Zero, Core.Vector3.Zero, new Core.Texture("Assets/EnvMaps/portland.png", true), 3, 7, 500, 12);
+            Core.Raytracer Raytracer = new Core.Raytracer(1280, 720, 75, Core.Vector3.Zero, Core.Vector3.Zero, new Core.Texture("Assets/EnvMaps/portland.png", true), 3, 7, 10, 12);
             #else
             Core.Raytracer Raytracer = new Core.Raytracer(1280, 720, 75, Core.Vector3.Zero, Core.Vector3.Zero, new Core.Texture("Assets/EnvMaps/portland.png", true), 3, 7, 20, 1);
             #endif

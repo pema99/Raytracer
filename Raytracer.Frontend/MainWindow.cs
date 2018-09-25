@@ -19,11 +19,11 @@ namespace Raytracer.Frontend
         private System.Numerics.Vector3 CamPos = new System.Numerics.Vector3(0, 0, 0);
         private System.Numerics.Vector3 CamRot = new System.Numerics.Vector3(0, 0, 0);
         private int MinBounces = 3;
-        private int MaxBounces = 3;
-        private int Samples = 10;
+        private int MaxBounces = 6;
+        private int Samples = 1000;
         private int Threads = 11;
 
-        private bool Progressive = false;
+        private bool Progressive = true;
         private int Frames = 0;
         private Core.Vector3[,] FrameBuffer;
         private Texture2D RenderTarget;
