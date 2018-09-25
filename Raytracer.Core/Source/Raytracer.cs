@@ -122,7 +122,7 @@ namespace Raytracer.Core
 
                 //Box Scene
                 new Plane(new PBRMaterial(Color.LightGray.ToVector3(), 0, 1), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
-                new Plane(new EmissionMaterial(Vector3.One), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
+                new Plane(new PBRMaterial(Color.Pink.ToVector3(),  0, 1), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
                 new Plane(new PBRMaterial(Color.Green.ToVector3(), 0, 1), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
                 new Plane(new PBRMaterial(Color.Green.ToVector3(), 0, 1), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
                 new Plane(new PBRMaterial(Color.Pink.ToVector3(),  0, 1), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
@@ -184,6 +184,7 @@ namespace Raytracer.Core
 
             Vector3 FinalColor = Vector3.Zero;
             Vector3 Throughput = Vector3.One;
+            LobeType SampledLobe = LobeType.SpecularReflection;
 
             for (int Bounce = 0; Bounce < MaxBounces; Bounce++)
             {
@@ -227,14 +228,36 @@ namespace Raytracer.Core
                     //Area lights
                     if (Shape.Material.HasProperty("emission"))
                     {
-                        FinalColor += Throughput * Shape.Material.GetProperty("emission", UV).Color;
+                        if (SampledLobe == LobeType.SpecularReflection)
+                        {
+                            FinalColor += Throughput * Shape.Material.GetProperty("emission", UV).Color;
+                        }
                         break;
                     }
 
-                    Shape.Material.Evaluate(Vector3.Normalize(Ray.Origin - Hit), Normal, UV, out Vector3 SampleDirection, out LobeType SampledLobe, out Vector3 Attenuation);
+                    Vector3 ViewDirection = Vector3.Normalize(Ray.Origin - Hit);
+
+                    Shape.Material.Sample(ViewDirection, Normal, UV, out Vector3 SampleDirection, out SampledLobe);
+                    Shape.Material.PDF(ViewDirection, Normal, UV, SampleDirection, SampledLobe, out double PDF);
+                    Shape.Material.Evaluate(ViewDirection, Normal, UV, SampleDirection, SampledLobe, out Vector3 Attenuation);
+
+                    if (SampledLobe == LobeType.DiffuseReflection)
+                    {
+                        Vector3 LightSample = new Vector3(0, 4, 7) - Hit;
+                        double Distance = LightSample.Length();
+                        LightSample.Normalize();
+                        Shape.Material.Evaluate(ViewDirection, Normal, UV, LightSample, SampledLobe, out Vector3 LightAtt);
+                        Vector3 LightContrib = Vector3.One;
+                        Raycast(new Ray(Hit + LightSample * 0.001, LightSample), out Shape ShadowShape, out Vector3 ShadowHit, out Vector3 ShadowNormal, out Vector2 ShadowUV);
+
+                        if ((ShadowHit - Hit).Length() >= Distance)
+                        {
+                            FinalColor += Throughput * LightContrib * LightAtt;
+                        }
+                    }
 
                     //Accumulate BXDF attenuation
-                    Throughput *= Attenuation;
+                    Throughput *= Attenuation / PDF;
 
                     if (SampledLobe == LobeType.SpecularTransmission || SampledLobe == LobeType.DiffuseTransmission)
                     {

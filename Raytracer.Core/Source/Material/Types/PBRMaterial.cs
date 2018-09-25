@@ -28,15 +28,10 @@ namespace Raytracer.Core
             Properties.Add("normal", new MaterialNormalNode(new Texture("Assets/Materials/" + Name + "_normal.png")));
         }
 
-        public override void Evaluate(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, out Vector3 SampleDirection, out LobeType SampledLobe, out Vector3 Attenuation)
+        public override void Sample(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, out Vector3 SampleDirection, out LobeType SampledLobe)
         {
-            Vector3 Albedo = GetProperty("albedo", UV);
-            double Metalness = GetProperty("metalness", UV);
-            Vector3 F0 = Vector3.Lerp(new Vector3(0.04), Albedo, Metalness);
+            double DiffuseSpecularRatio = 0.5 + (0.5 * GetProperty("metalness", UV));
 
-            double DiffuseSpecularRatio = 0.5 + (0.5 * Metalness);
-
-            //Diffuse
             if (Util.Random.NextDouble() > DiffuseSpecularRatio)
             {
                 SampledLobe = LobeType.DiffuseReflection;
@@ -51,18 +46,6 @@ namespace Raytracer.Core
                     Sample.X * NB.Y + Sample.Y * Normal.Y + Sample.Z * NT.Y,
                     Sample.X * NB.Z + Sample.Y * Normal.Z + Sample.Z * NT.Z);
                 SampleDirection.Normalize();
-
-                double CosTheta = Math.Max(Vector3.Dot(Normal, SampleDirection), 0);
-                Vector3 Halfway = Vector3.Normalize(SampleDirection + ViewDirection);
-
-                Vector3 Ks = Util.FresnelSchlick(Math.Max(Vector3.Dot(Halfway, ViewDirection), 0.0), F0);
-                Vector3 Kd = Vector3.One - Ks;
-
-                Kd *= 1.0 - Metalness;
-                Vector3 Diffuse = Kd * Albedo;
-
-                //for uniform: return SampleRadiance * (2 * Diffuse * CosTheta) / (1 - DiffuseSpecularRatio);
-                Attenuation = (Diffuse * CosTheta) / Math.Sqrt(R1) / (1 - DiffuseSpecularRatio);
             }
 
             //Glossy
@@ -76,11 +59,47 @@ namespace Raytracer.Core
                 double R1 = Util.Random.NextDouble();
                 double R2 = Util.Random.NextDouble();
                 SampleDirection = Util.SampleGGX(R1, R2, ReflectionDirection, Roughness);
+            }
+        }
 
-                double CosTheta = Math.Max(Vector3.Dot(Normal, SampleDirection), 0);
+        public override void PDF(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, Vector3 SampleDirection, LobeType SampledLobe, out double PDF)
+        {
+            if (SampledLobe == LobeType.DiffuseReflection)
+            {
+                PDF = (Vector3.Dot(SampleDirection, Normal) / Math.PI);
+            }   
+            else
+            {
                 Vector3 Halfway = Vector3.Normalize(SampleDirection + ViewDirection);
+                double D = Util.GGXDistribution(Normal, Halfway, GetProperty("roughness", UV));
+                PDF = (D * Vector3.Dot(Normal, Halfway) / (4 * Vector3.Dot(Halfway, ViewDirection)) + 0.0001);
+            }
+        }
 
-                Vector3 Ks = Util.FresnelSchlick(Math.Max(Vector3.Dot(Halfway, ViewDirection), 0.0), F0);
+        public override void Evaluate(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, Vector3 SampleDirection, LobeType SampledLobe, out Vector3 Attenuation)
+        {
+            Vector3 Albedo = GetProperty("albedo", UV);
+            double Metalness = GetProperty("metalness", UV);
+            Vector3 F0 = Vector3.Lerp(new Vector3(0.04), Albedo, Metalness);
+
+            double DiffuseSpecularRatio = 0.5 + (0.5 * Metalness);
+
+            double CosTheta = Math.Max(Vector3.Dot(Normal, SampleDirection), 0);
+            Vector3 Halfway = Vector3.Normalize(SampleDirection + ViewDirection);
+            Vector3 Ks = Util.FresnelSchlick(Math.Max(Vector3.Dot(Halfway, ViewDirection), 0.0), F0);
+
+            if (SampledLobe == LobeType.DiffuseReflection)
+            {
+                Vector3 Kd = Vector3.One - Ks;
+
+                Kd *= 1.0 - Metalness;
+                Vector3 Diffuse = Kd * Albedo / Math.PI;
+
+                Attenuation = Diffuse * CosTheta / (1 - DiffuseSpecularRatio);
+            }
+            else
+            {
+                double Roughness = GetProperty("roughness", UV);
 
                 double D = Util.GGXDistribution(Normal, Halfway, Roughness);
                 double G = Util.GeometrySmith(Normal, ViewDirection, SampleDirection, Roughness);
@@ -88,8 +107,8 @@ namespace Raytracer.Core
                 double SpecularDenominator = 4.0 * Math.Max(Vector3.Dot(Normal, ViewDirection), 0.0) * CosTheta + 0.001;
                 Vector3 Specular = SpecularNumerator / SpecularDenominator;
 
-                Attenuation = Specular * CosTheta / (D * Vector3.Dot(Normal, Halfway) / (4 * Vector3.Dot(Halfway, ViewDirection)) + 0.0001) / DiffuseSpecularRatio;
+                Attenuation = Specular * CosTheta / DiffuseSpecularRatio;
             }
-        }       
+        }
     }
 }

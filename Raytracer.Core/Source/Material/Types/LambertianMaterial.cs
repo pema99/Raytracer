@@ -15,7 +15,17 @@ namespace Raytracer.Core
             Properties.Add("normal", Normal);
         }
 
-        public override void Evaluate(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, out Vector3 SampleDirection, out LobeType SampledLobe, out Vector3 Attenuation)
+        public override void Evaluate(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, Vector3 SampleDirection, LobeType SampledLobe, out Vector3 Attenuation)
+        {
+            Attenuation = GetProperty("albedo", UV).Color / Math.PI * Math.Max(Vector3.Dot(Normal, SampleDirection), 0);
+        }
+
+        public override void PDF(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, Vector3 SampleDirection, LobeType SampledLobe, out double PDF)
+        {
+            PDF = (Vector3.Dot(SampleDirection, Normal) / Math.PI);
+        }
+
+        public override void Sample(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, out Vector3 SampleDirection, out LobeType SampledLobe)
         {
             SampledLobe = LobeType.DiffuseReflection;
 
@@ -28,8 +38,6 @@ namespace Raytracer.Core
                 Sample.X * NB.Y + Sample.Y * Normal.Y + Sample.Z * NT.Y,
                 Sample.X * NB.Z + Sample.Y * Normal.Z + Sample.Z * NT.Z);
             SampleDirection.Normalize();
-
-            Attenuation = Math.Max(Vector3.Dot(Normal, SampleDirection), 0) * GetProperty("albedo", UV).Color / Math.Sqrt(R1);
         }
     }
 }

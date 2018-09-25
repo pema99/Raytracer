@@ -21,7 +21,22 @@ namespace Raytracer.Core
             Properties.Add("mixratio", Ratio);
         }
 
-        public override void Evaluate(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, out Vector3 SampleDirection, out LobeType SampledLobe, out Vector3 Attenuation)
+        public override void Sample(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, out Vector3 SampleDirection, out LobeType SampledLobe)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void PDF(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, Vector3 SampleDirection, LobeType SampledLobe, out double PDF)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Evaluate(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, Vector3 SampleDirection, LobeType SampledLobe, out Vector3 Attenuation)
+        {
+            throw new NotImplementedException();
+        }
+
+        /*public override void Evaluate(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, out Vector3 SampleDirection, out LobeType SampledLobe, out Vector3 Attenuation)
         {
             if (Util.Random.NextDouble() > MathHelper.Clamp(GetProperty("ratio", UV), 0, 1))
             {
@@ -31,6 +46,6 @@ namespace Raytracer.Core
             {
                 B.Evaluate(ViewDirection, Normal, UV, out SampleDirection, out SampledLobe, out Attenuation);
             }
-        }
+        }*/
     }
 }

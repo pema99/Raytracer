@@ -26,7 +26,24 @@ namespace Raytracer.Core
             this.Medium = Medium;
         }
 
-        public override void Evaluate(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, out Vector3 SampleDirection, out LobeType SampledLobe, out Vector3 Attenuation)
+        public override void Evaluate(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, Vector3 SampleDirection, LobeType SampledLobe, out Vector3 Attenuation)
+        {
+            if (SampledLobe == LobeType.SpecularReflection)
+            {
+                Attenuation = Vector3.One;
+            }
+            else
+            {
+                Attenuation = GetProperty("albedo", UV);
+            }
+        }
+
+        public override void PDF(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, Vector3 SampleDirection, LobeType SampledLobe, out double PDF)
+        {
+            PDF = 1;
+        }
+
+        public override void Sample(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, out Vector3 SampleDirection, out LobeType SampledLobe)
         {
             double RefractiveIndex = GetProperty("ior", UV);
             double Roughness = GetProperty("roughness", UV);
@@ -35,14 +52,12 @@ namespace Raytracer.Core
             if (Util.Random.NextDouble() <= Util.FresnelReal(MathHelper.Clamp(Vector3.Dot(-ViewDirection, Normal), -1, 1), RefractiveIndex))
             {
                 SampledLobe = LobeType.SpecularReflection;
-                SampleDirection = Vector3.Reflect(-ViewDirection, Normal);
-                Attenuation = Vector3.One;
+                SampleDirection = Vector3.Reflect(-ViewDirection, Normal);               
             }
             else
             {
                 SampledLobe = LobeType.SpecularTransmission;
-                SampleDirection = Vector3.Refract(-ViewDirection, Normal, RefractiveIndex);
-                Attenuation = GetProperty("albedo", UV);
+                SampleDirection = Vector3.Refract(-ViewDirection, Normal, RefractiveIndex);         
             }
 
             if (Roughness > 0)
