@@ -1,4 +1,6 @@
-﻿namespace Raytracer.Core
+﻿using System;
+
+namespace Raytracer.Core
 {
     public class Disc : Shape
     {
@@ -43,6 +45,18 @@
             }
 
             return false;
+        }
+
+        public Vector3 Sample()
+        {
+            Vector2 DiscSample = Util.UniformSampleDisc(Util.Random.NextDouble(), Util.Random.NextDouble());
+            Util.CreateCartesian(Normal, out Vector3 NT, out Vector3 NB);
+            return Origin + NT * DiscSample.X + NB * DiscSample.Y;
+        }
+
+        public double Area()
+        {
+            return Radius * Radius * Math.PI;
         }
     }
 }
