@@ -23,6 +23,9 @@ namespace Raytracer.Core
         public bool SmoothShading { get; set; }
         public bool BackFaceCulling { get; set; }
 
+        private double TotalArea { get; set; }
+        private double[] TriangleProbabilityTable { get; set; }
+
         public TriangleMesh(Material Material, Matrix TransformMatrix, string Path, double GridLambda = 3, bool SmoothShading = true, bool BackFaceCulling = true)
         {
             this.Material = Material;
@@ -91,6 +94,7 @@ namespace Raytracer.Core
             Grid = new SpatialGrid(this, GridLambda);
 
             CalculateFaceNormals();
+            CalculateTriangleProbabilities();
         }
 
         public override bool Intersect(Ray Ray, out Vector3 Hit, out Vector3 Normal, out Vector2 UV)
@@ -214,14 +218,55 @@ namespace Raytracer.Core
             }
         }
 
+        private void CalculateTriangleProbabilities()
+        {
+            TriangleProbabilityTable = new double[NumFaces];
+            TotalArea = 0;
+
+            double[] TriAreas = new double[NumFaces];
+            for (int i = 0; i < NumFaces; i++)
+            {
+                Vector3 V0 = Vertices[VertexIndices[i * 3]];
+                Vector3 V1 = Vertices[VertexIndices[i * 3 + 1]];
+                Vector3 V2 = Vertices[VertexIndices[i * 3 + 2]];
+
+                double TriArea = Util.HeronsFormula((V0 - V1).Length(), (V1 - V2).Length(), (V2 - V0).Length());
+                TotalArea += TriArea;
+                TriAreas[i] = TotalArea;
+            }
+            for (int i = 0; i < NumFaces; i++)
+            {
+                TriangleProbabilityTable[i] = TriAreas[i] / TotalArea;
+            }
+        }
+
         public override Vector3 Sample()
         {
-            throw new Exception("Emissive meshes not implemented");
+            double Prob = Util.Random.NextDouble();
+            int i = 0;
+            while (i < NumFaces)
+            {
+                if (Prob <= TriangleProbabilityTable[i])
+                {
+                    break;
+                }
+                i++;
+            }
+
+            Vector3 V0 = Vertices[VertexIndices[i * 3]];
+            Vector3 V1 = Vertices[VertexIndices[i * 3 + 1]];
+            Vector3 V2 = Vertices[VertexIndices[i * 3 + 2]];
+
+            double R1 = Util.Random.NextDouble();
+            double R2 = Util.Random.NextDouble();
+
+            //http://www.cs.princeton.edu/~funk/tog02.pdf
+            return (1 - Math.Sqrt(R1)) * V0 + (Math.Sqrt(R1) * (1 - R2)) * V1 + (Math.Sqrt(R1) * R2) * V2;
         }
 
         public override double Area()
         {
-            throw new Exception("Emissive meshes not implemented");
+            return TotalArea;
         }
 
         [Obsolete("This method requires recalculation of the grid, pass a matrix to the constructor instead.")]
@@ -235,6 +280,7 @@ namespace Raytracer.Core
 
             Grid = new SpatialGrid(this, GridLambda);
             CalculateFaceNormals();
+            CalculateTriangleProbabilities();
         }
     }
 }

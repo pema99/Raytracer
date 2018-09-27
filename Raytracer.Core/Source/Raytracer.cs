@@ -121,11 +121,13 @@ namespace Raytracer.Core
                 //new TriangleMesh(new GlassMaterial(Color.White.ToVector3(), 1.33, 0, new IsotropicMedium(Color.CornflowerBlue.ToVector3(), 2, 2)), Matrix.CreateScale(1.5) * Matrix.CreateTranslation(0, -2, 5), "Assets/Meshes/GlassTall/GlassTallLiquid.ply"),
 
                 //2 ball material scene
-                new Sphere(new PBRMaterial("wornpaintedcement"), new Vector3(-2.5, -0.5, 5), 1.5),
-                new Sphere(new PBRMaterial("rustediron2"), new Vector3(2.5, -0.5, 5), 1.5),
+                //new Sphere(new PBRMaterial("wornpaintedcement"), new Vector3(-2.5, -0.5, 5), 1.5),
+                //new Sphere(new PBRMaterial("rustediron2"), new Vector3(2.5, -0.5, 5), 1.5),
 
-                //new Quad(new EmissionMaterial(Vector3.One), new Vector3(0, 5, 8), new Vector3(0, -1, 0), new Vector2(2, 2)),
-                new Quad(new EmissionMaterial(Vector3.One), new Vector3(0, 5, 4.5), new Vector3(0, -1, 0), new Vector2(14, 11)),
+                new Sphere(new PBRMaterial("wornpaintedcement"), new Vector3(-2.5, -0.5, 5), 1.5),
+                new Sphere(new LambertianMaterial(Color.Blue.ToVector3()), new Vector3(2.5, -0.5, 5), 1.5),
+
+                new Quad(new EmissionMaterial(Vector3.One), new Vector3(0, 5, 8), new Vector3(0, -1, 0), new Vector2(2, 2)),
 
                 //Box Scene
                 new Plane(new LambertianMaterial(Color.LightGray.ToVector3()), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
@@ -151,6 +153,14 @@ namespace Raytracer.Core
         public void Render()
         {
             Framebuffer = new Vector3[Width, Height];
+
+            //Supersampling
+            Vector3 RayDir = new Vector3((2.0 * ((50 + Util.Random.NextDouble()) * InvWidth) - 1.0) * ViewAngle * AspectRatio, (1.0 - 2.0 * ((50 + Util.Random.NextDouble()) * InvHeight)) * ViewAngle, 1);
+            RayDir.Normalize();
+            RayDir = Vector3.Transform(RayDir, CameraRotationMatrix);
+
+            //Trace primary ray
+            Trace(new Ray(CameraPosition, RayDir));
 
             int Progress = 0;
             using (new Timer(_ => Console.WriteLine("Rendered {0} of {1} scanlines", Progress, Height), null, 1000, 1000))
@@ -224,6 +234,7 @@ namespace Raytracer.Core
                     break;
                 }
 
+                //Volumetrics, slightly borken
                 bool Scattered = false;
                 if (CurrentMedium != null)
                 {
@@ -242,12 +253,13 @@ namespace Raytracer.Core
                     }
                 }
 
+                //If no scattering event happened, do normal path tracing
                 if (!Scattered)
                 {
                     //Area lights
                     if (Shape.Material.HasProperty("emission"))
                     {
-                        //Don't add emission to diffuse term, we already sample it directly
+                        //Don't add emission to diffuse term if NEE is on, we already sample it directly
                         if (SampledLobe == LobeType.SpecularReflection || !NEE)
                         {
                             FinalColor += Throughput * Shape.Material.GetProperty("emission", UV).Color;
@@ -257,6 +269,7 @@ namespace Raytracer.Core
 
                     Vector3 ViewDirection = Vector3.Normalize(Ray.Origin - Hit);
 
+                    //Sample BSDF
                     Shape.Material.Sample(ViewDirection, Normal, UV, out Vector3 SampleDirection, out SampledLobe);
                     Shape.Material.PDF(ViewDirection, Normal, UV, SampleDirection, SampledLobe, out double PDF);
                     Shape.Material.Evaluate(ViewDirection, Normal, UV, SampleDirection, SampledLobe, out Vector3 Attenuation);
@@ -267,9 +280,10 @@ namespace Raytracer.Core
                         FinalColor += Throughput * SampleLight(Shape, Hit, ViewDirection, Normal, UV, SampleDirection, SampledLobe, Attenuation);
                     }
 
-                    //Accumulate BXDF attenuation
+                    //Accumulate BSDF attenuation
                     Throughput *= Attenuation / PDF;
 
+                    //If we entered a medium, update current medium
                     if (SampledLobe == LobeType.SpecularTransmission || SampledLobe == LobeType.DiffuseTransmission)
                     {
                         CurrentMedium = Shape.Material.Medium;
@@ -288,7 +302,7 @@ namespace Raytracer.Core
                     {
                         break;
                     }
-                    Throughput *= 1 / Prob;
+                    Throughput *= 1.0 / Prob;
                 }
             }
 

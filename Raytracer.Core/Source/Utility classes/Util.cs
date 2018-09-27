@@ -95,6 +95,12 @@ namespace Raytracer.Core
             return new Vector2(Math.Sqrt(R1) * Math.Cos(Theta), Math.Sqrt(R1) * Math.Sin(Theta));
         }
 
+        public static double HeronsFormula(double SideA, double SideB, double SideC)
+        {
+            double S = (SideA + SideB + SideC) * 0.5;
+            return Math.Sqrt(S * (S-SideA) * (S-SideB) * (S-SideC));
+        }
+
         public static bool IntersectAABB(Ray Ray, Vector3 AABBMin, Vector3 AABBMax, out Vector3 Hit, out double TMin, out double TMax)
         {
             Hit = Vector3.Zero;
