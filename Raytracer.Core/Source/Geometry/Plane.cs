@@ -1,4 +1,6 @@
-﻿namespace Raytracer.Core
+﻿using System;
+
+namespace Raytracer.Core
 {
     public class Plane : Shape
     {
@@ -34,6 +36,16 @@
             UV = Vector2.Zero;
 
             return false;
+        }
+
+        public override Vector3 Sample()
+        {
+            throw new Exception("Can't simple infinite planes.");
+        }
+
+        public override double Area()
+        {
+            throw new Exception("Can't simple infinite planes.");
         }
     }
 }

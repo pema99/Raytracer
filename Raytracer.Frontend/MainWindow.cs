@@ -22,6 +22,7 @@ namespace Raytracer.Frontend
         private int MaxBounces = 6;
         private int Samples = 1000;
         private int Threads = 11;
+        private bool NEE = true;
 
         private bool Progressive = true;
         private int Frames = 0;
@@ -66,7 +67,8 @@ namespace Raytracer.Frontend
                 MinBounces,
                 MaxBounces,
                 Samples,
-                Threads
+                Threads,
+                NEE
             );
 
             FrameBuffer = new Core.Vector3[RT.Width, RT.Height];
@@ -132,6 +134,11 @@ namespace Raytracer.Frontend
                 }
 
                 ImGui.Checkbox("Progressive", ref Progressive);
+                ImGui.SameLine();
+                if (ImGui.Checkbox("Direct Light Sampling", ref NEE))
+                {
+                    RT.NEE = NEE;
+                }
                 if (ImGui.SliderFloat("FOV", ref FOV, 0, 180, "%f", 1))
                 {
                     RT.FOV = FOV;

@@ -214,6 +214,16 @@ namespace Raytracer.Core
             }
         }
 
+        public override Vector3 Sample()
+        {
+            throw new Exception("Emissive meshes not implemented");
+        }
+
+        public override double Area()
+        {
+            throw new Exception("Emissive meshes not implemented");
+        }
+
         [Obsolete("This method requires recalculation of the grid, pass a matrix to the constructor instead.")]
         public void Transform(Matrix TransformMatrix, double GridLambda = 3)
         {

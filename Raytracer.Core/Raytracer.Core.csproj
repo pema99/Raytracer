@@ -46,6 +46,7 @@
     <Compile Include="Source\Acceleration\SpatialGridNode.cs" />
     <Compile Include="Source\Geometry\Disc.cs" />
     <Compile Include="Source\Geometry\Plane.cs" />
+    <Compile Include="Source\Geometry\Quad.cs" />
     <Compile Include="Source\Geometry\Ray.cs" />
     <Compile Include="Source\Geometry\Shape.cs" />
     <Compile Include="Source\Geometry\Sphere.cs" />

@@ -61,6 +61,7 @@ namespace Raytracer.Core
         public int MaxBounces { get; set; }
         public int Samples { get; set; }
         public int Threads { get; set; }
+        public bool NEE { get; set; }
 
         public Vector3[,] Framebuffer { get; private set; }
 
@@ -73,7 +74,7 @@ namespace Raytracer.Core
         private double ViewAngle { get; set; }
         private Matrix CameraRotationMatrix { get; set; }
 
-        public Raytracer(int Width, int Height, double FOV, Vector3 CameraPosition, Vector3 CameraRotation, Texture SkyBox, int MinBounces, int MaxBounces, int Samples, int Threads)
+        public Raytracer(int Width, int Height, double FOV, Vector3 CameraPosition, Vector3 CameraRotation, Texture SkyBox, int MinBounces, int MaxBounces, int Samples, int Threads, bool NEE)
         {
             this.Width = Width;
             this.Height = Height;
@@ -85,6 +86,7 @@ namespace Raytracer.Core
             this.MaxBounces = MaxBounces;
             this.Samples = Samples;
             this.Threads = Threads;
+            this.NEE = NEE;
 
             //Setup scene
             Shapes = new List<Shape>()
@@ -122,6 +124,8 @@ namespace Raytracer.Core
                 new Sphere(new LambertianMaterial(Color.Blue.ToVector3()), new Vector3(-2.5, -0.5, 5), 1.5),
                 //new Sphere(new PBRMaterial("rustediron2"), new Vector3(2.5, -0.5, 5), 1.5),
 
+                new Quad(new EmissionMaterial(Vector3.One), new Vector3(0, 5, 8), new Vector3(0, -1, 0), new Vector2(2, 2)),
+
                 //Box Scene
                 new Plane(new LambertianMaterial(Color.LightGray.ToVector3()), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
                 new Plane(new LambertianMaterial(Color.Pink.ToVector3()), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
@@ -130,8 +134,8 @@ namespace Raytracer.Core
                 new Plane(new LambertianMaterial(Color.Pink.ToVector3()), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
                 new Plane(new LambertianMaterial(Color.Black.ToVector3()), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
 
-                new Sphere(new EmissionMaterial(Vector3.One), new Vector3(2, 4, 7), 0.5),
-                new Sphere(new EmissionMaterial(Vector3.One), new Vector3(-2, 4, 7), 0.5)
+                //new Sphere(new EmissionMaterial(Vector3.One), new Vector3(2, 4, 7), 0.5),
+                //new Sphere(new EmissionMaterial(Vector3.One), new Vector3(-2, 4, 7), 0.5)
             };
             Lights = new List<Shape>();
             foreach (Shape S in Shapes)
@@ -243,7 +247,7 @@ namespace Raytracer.Core
                     if (Shape.Material.HasProperty("emission"))
                     {
                         //Don't add emission to diffuse term, we already sample it directly
-                        if (SampledLobe == LobeType.SpecularReflection)
+                        if (SampledLobe == LobeType.SpecularReflection || !NEE)
                         {
                             FinalColor += Throughput * Shape.Material.GetProperty("emission", UV).Color;
                         }
@@ -256,59 +260,10 @@ namespace Raytracer.Core
                     Shape.Material.PDF(ViewDirection, Normal, UV, SampleDirection, SampledLobe, out double PDF);
                     Shape.Material.Evaluate(ViewDirection, Normal, UV, SampleDirection, SampledLobe, out Vector3 Attenuation);
 
-                    if (SampledLobe == LobeType.DiffuseReflection)
+                    //Sample direct lighting
+                    if (NEE)
                     {
-                        Sphere Light = Lights[Util.Random.Next(Lights.Count)] as Sphere;
-                        Vector3 Emission = Light.Material.GetProperty("emission", UV).Color;
-
-                        Vector3 TotalDirectLighting = Vector3.Zero;
-                        Vector3 BSDFAttenuation = Vector3.Zero;
-                        double LightPDF, ScatterPDF;
-
-                        //Sample light directly
-                        Vector3 LightSample = Light.Sample() - Hit;
-                        double Distance = LightSample.Length();
-                        LightSample.Normalize();
-
-                        //Visibility check
-                        Raycast(new Ray(Hit + LightSample * 0.001, LightSample), out Shape LightShape, out Vector3 LightHit, out Vector3 LightNormal, out Vector2 LightUV);
-                        if (LightShape == Light)
-                        {
-                            //Calculate light pdf for light sample
-                            LightPDF = Math.Pow(Distance, 2) / (Vector3.Dot(LightNormal, -LightSample) * Light.Area());
-
-                            //Calculate bsdf pdf for light sample
-                            Shape.Material.Evaluate(ViewDirection, Normal, UV, LightSample, SampledLobe, out BSDFAttenuation);
-                            Shape.Material.PDF(ViewDirection, Normal, UV, LightSample, SampledLobe, out ScatterPDF);
-
-                            //Weighted sum of the 2 sampling strategies
-                            if (BSDFAttenuation != Vector3.Zero)
-                            {
-                                TotalDirectLighting += BSDFAttenuation * Emission * Util.BalanceHeuristic(LightPDF, ScatterPDF) / LightPDF;
-                            }
-                        }
-
-                        //Sample light using BSDF  -  TODO: Sample only diffuse
-                        Shape.Material.Sample(ViewDirection, Normal, UV, out Vector3 BSDFSample, out LobeType BSDFLobe);
-                        Shape.Material.Evaluate(ViewDirection, Normal, UV, BSDFSample, BSDFLobe, out BSDFAttenuation);
-                        if (BSDFAttenuation != Vector3.Zero)
-                        {
-                            //Visibility check
-                            Raycast(new Ray(Hit + BSDFSample * 0.001, BSDFSample), out Shape BSDFShape, out Vector3 BSDFHit, out Vector3 BSDFNormal, out Vector2 BSDFUV);
-                            if (BSDFShape == Light)
-                            {
-                                //Calculate light pdf for bsdf sample
-                                LightPDF = Math.Pow((BSDFHit - Hit).Length(), 2) / (Vector3.Dot(BSDFNormal, Vector3.Normalize(Hit - BSDFHit)) * Light.Area());
-
-                                //Calculate bsdf pdf for bsdf sample
-                                Shape.Material.PDF(ViewDirection, Normal, UV, BSDFSample, BSDFLobe, out ScatterPDF);
-
-                                //Weighted sum of the 2 sampling strategies
-                                TotalDirectLighting += BSDFAttenuation * Emission * Util.BalanceHeuristic(ScatterPDF, LightPDF) / ScatterPDF;
-                            }
-                        }
-
-                        FinalColor += Throughput * (TotalDirectLighting / (1.0 / Lights.Count));
+                        FinalColor += Throughput * SampleLight(Shape, Hit, ViewDirection, Normal, UV, SampleDirection, SampledLobe, Attenuation);
                     }
 
                     //Accumulate BXDF attenuation
@@ -337,6 +292,64 @@ namespace Raytracer.Core
             }
 
             return FinalColor;
+        }
+
+        private Vector3 SampleLight(Shape Shape, Vector3 Hit, Vector3 ViewDirection, Vector3 Normal, Vector2 UV, Vector3 SampleDirection, LobeType SampledLobe, Vector3 BSDFAttenuation)
+        {
+            //If this is not diffuse or there are no lights, no direct lighting calculation needs to be done
+            if (SampledLobe != LobeType.DiffuseReflection || Lights.Count == 0)
+            {
+                return Vector3.Zero;
+            }
+
+            //Pick a light with probability 1/numLights
+            Shape Light = Lights[Util.Random.Next(Lights.Count)];
+            Vector3 Emission = Light.Material.GetProperty("emission", UV).Color;
+
+            Vector3 TotalDirectLighting = Vector3.Zero;
+
+            //Sample BSDF
+            if (BSDFAttenuation != Vector3.Zero)
+            {
+                //Visibility check
+                Raycast(new Ray(Hit + SampleDirection * 0.001, SampleDirection), out Shape BSDFShape, out Vector3 BSDFHit, out Vector3 BSDFNormal, out Vector2 BSDFUV);
+                if (BSDFShape == Light)
+                {
+                    //Calculate light pdf for bsdf sample
+                    double LightPDF = Math.Pow((Hit - BSDFHit).Length(), 2) / (Vector3.Dot(BSDFNormal, Vector3.Normalize(Hit - BSDFHit)) * Light.Area());
+
+                    //Calculate bsdf pdf for bsdf sample
+                    Shape.Material.PDF(ViewDirection, Normal, UV, SampleDirection, SampledLobe, out double ScatterPDF);
+
+                    //Weighted sum of the 2 sampling strategies
+                    TotalDirectLighting += BSDFAttenuation * Emission * Util.BalanceHeuristic(ScatterPDF, LightPDF) / ScatterPDF;
+                }
+            }
+
+            //Sample light directly
+            Vector3 LightSample = Light.Sample() - Hit;
+            double Distance = LightSample.Length();
+            LightSample.Normalize();
+
+            //Visibility check
+            Raycast(new Ray(Hit + LightSample * 0.001, LightSample), out Shape LightShape, out Vector3 LightHit, out Vector3 LightNormal, out Vector2 LightUV);
+            if (LightShape == Light)
+            {
+                //Calculate light pdf for light sample, 
+                double LightPDF = Math.Pow(Distance, 2) / (Vector3.Dot(LightNormal, -LightSample) * Light.Area());
+
+                //Calculate bsdf pdf for light sample
+                Shape.Material.Evaluate(ViewDirection, Normal, UV, LightSample, SampledLobe, out BSDFAttenuation);
+                Shape.Material.PDF(ViewDirection, Normal, UV, LightSample, SampledLobe, out double ScatterPDF);
+
+                //Weighted sum of the 2 sampling strategies
+                if (BSDFAttenuation != Vector3.Zero)
+                {
+                    TotalDirectLighting += BSDFAttenuation * Emission * Util.BalanceHeuristic(LightPDF, ScatterPDF) / LightPDF;
+                }
+            }
+
+            return (TotalDirectLighting / (1.0 / Lights.Count));
         }
 
         private bool Raycast(Ray Ray, out Shape FirstShape, out Vector3 FirstShapeHit, out Vector3 FirstShapeNormal, out Vector2 FirstShapeUV)
