@@ -54,7 +54,7 @@ namespace Raytracer.Core
 
         public override Vector3 Sample()
         {
-            Vector2 RectSample = new Vector2(Util.Random.NextDouble()*2-1 * (Size.X*0.5), Util.Random.NextDouble()*2-1 * (Size.Y*0.5));
+            Vector2 RectSample = new Vector2((Util.Random.NextDouble()*2-1) * (Size.X*0.5), (Util.Random.NextDouble()*2-1) * (Size.Y*0.5));
             Util.CreateCartesian(Normal, out Vector3 NT, out Vector3 NB);
             return Origin + NT * RectSample.X + NB * RectSample.Y;
         }

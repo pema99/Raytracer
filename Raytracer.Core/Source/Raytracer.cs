@@ -121,10 +121,11 @@ namespace Raytracer.Core
                 //new TriangleMesh(new GlassMaterial(Color.White.ToVector3(), 1.33, 0, new IsotropicMedium(Color.CornflowerBlue.ToVector3(), 2, 2)), Matrix.CreateScale(1.5) * Matrix.CreateTranslation(0, -2, 5), "Assets/Meshes/GlassTall/GlassTallLiquid.ply"),
 
                 //2 ball material scene
-                new Sphere(new LambertianMaterial(Color.Blue.ToVector3()), new Vector3(-2.5, -0.5, 5), 1.5),
-                //new Sphere(new PBRMaterial("rustediron2"), new Vector3(2.5, -0.5, 5), 1.5),
+                new Sphere(new PBRMaterial("wornpaintedcement"), new Vector3(-2.5, -0.5, 5), 1.5),
+                new Sphere(new PBRMaterial("rustediron2"), new Vector3(2.5, -0.5, 5), 1.5),
 
-                new Quad(new EmissionMaterial(Vector3.One), new Vector3(0, 5, 8), new Vector3(0, -1, 0), new Vector2(2, 2)),
+                //new Quad(new EmissionMaterial(Vector3.One), new Vector3(0, 5, 8), new Vector3(0, -1, 0), new Vector2(2, 2)),
+                new Quad(new EmissionMaterial(Vector3.One), new Vector3(0, 5, 4.5), new Vector3(0, -1, 0), new Vector2(14, 11)),
 
                 //Box Scene
                 new Plane(new LambertianMaterial(Color.LightGray.ToVector3()), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
