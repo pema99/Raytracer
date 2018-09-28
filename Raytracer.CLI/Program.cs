@@ -7,6 +7,8 @@ namespace Raytracer.CLI
     {
         static void Main(string[] args)
         {
+            var a = new Core.Scene("Assets/Scenes/ClothBallScene.pscene");
+
             #if (!DEBUG)
             Core.Raytracer Raytracer = new Core.Raytracer(1280, 720, 75, Core.Vector3.Zero, Core.Vector3.Zero, new Core.Texture("Assets/EnvMaps/portland.png", true), 3, 7, 10, 12, true);
             #else

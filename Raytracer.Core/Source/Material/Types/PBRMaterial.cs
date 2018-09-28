@@ -16,7 +16,10 @@ namespace Raytracer.Core
             Properties.Add("albedo", Albedo);
             Properties.Add("metalness", Metalness);
             Properties.Add("roughness", Roughness);
-            Properties.Add("normal", Normal);
+            if (Normal != null)
+            {
+                Properties.Add("normal", Normal);
+            }
             Properties.Add("ambientocclusion", AmbientOcclusion);
         }
 

@@ -14,7 +14,10 @@ namespace Raytracer.Core
         {
             Properties.Add("albedo", Albedo);
             Properties.Add("sigma", Sigma);
-            Properties.Add("normal", Normal);
+            if (Normal != null)
+            {
+                Properties.Add("normal", Normal);
+            }
         }
 
         public override void Evaluate(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, Vector3 SampleDirection, LobeType SampledLobe, out Vector3 Attenuation)

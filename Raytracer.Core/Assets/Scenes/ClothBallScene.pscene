@@ -1,0 +1,47 @@
+{
+	"Header": {
+		"Resolution": [600, 400],
+		"FOV": 75,
+		"CameraPosition": [0, 0, 0],
+		"CameraRotation": [0, 0, 0],
+		"SkyBox": "Assets/EnvMaps/portland.png"
+	},
+	"Materials": {
+		"RustedIron": {
+			"Type": "PBR",
+			"Albedo": "Assets/Materials/rustediron2_basecolor.png",
+			"Metalness": "Assets/Materials/rustediron2_metallic.png",
+			"Roughness": "Assets/Materials/rustediron2_roughness.png",
+			"Normal": "Assets/Materials/rustediron2_normal.png"
+		},
+		"Cloth": {
+			"Type": "Velvet",
+			"Albedo": [1, 0, 0],
+			"Sigma": 0.5
+		},
+		"Lambert": {
+			"Type": "Lambertian",
+			"Albedo": [1, 1, 1]
+		}
+	},
+	"World": [{
+			"Type": "Sphere",
+			"Material": "RustedIron",
+			"Origin": [0, 0, 5],
+			"Radius": 1
+		},
+		{
+			"Type": "Plane",
+			"Material": "Lambert",
+			"Origin": [0, -1, 0],
+			"Normal": [0, 1, 0]
+		},
+		{
+			"Type": "Mesh",
+			"Material": "Cloth",
+      "Origin": [ 0, 0, 5 ],
+      "Rotation": [0, 2.74, 0],
+			"Path": "Assets/Meshes/ballcover.ply"
+		}
+	]
+}

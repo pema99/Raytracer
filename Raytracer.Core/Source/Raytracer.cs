@@ -64,19 +64,35 @@ namespace Raytracer.Core
         public bool NEE { get; set; }
 
         public Vector3[,] Framebuffer { get; private set; }
-
-        private List<Shape> Shapes { get; set; }
-        private List<Shape> Lights { get; set; }
+        public Scene World { get; private set; }
 
         private double InvWidth { get; set; }
         private double InvHeight { get; set; }
         private double AspectRatio { get; set; }
         private double ViewAngle { get; set; }
         private Matrix CameraRotationMatrix { get; set; }
-        private double[] LightProbabilityTable { get; set; }
 
-        public Raytracer(int Width, int Height, double FOV, Vector3 CameraPosition, Vector3 CameraRotation, Texture SkyBox, int MinBounces, int MaxBounces, int Samples, int Threads, bool NEE)
+        public Raytracer(int Width, int Height, double FOV, Vector3 CameraPosition, Vector3 CameraRotation, Texture SkyBox, int MinBounces, int MaxBounces, int Samples, int Threads, bool NEE, bool LoadSampleScene = true)
         {
+            //Load example scene
+            if (LoadSampleScene)
+            {
+                LoadScene(new Scene(new List<Shape>()
+                {
+                    new Plane(new LambertianMaterial(Color.LightGray.ToVector3()), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
+                    new Plane(new LambertianMaterial(Color.Pink.ToVector3()), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
+                    new Plane(new LambertianMaterial(Color.Green.ToVector3()), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
+                    new Plane(new LambertianMaterial(Color.Green.ToVector3()), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
+                    new Plane(new LambertianMaterial(Color.Pink.ToVector3()), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
+                    new Plane(new LambertianMaterial(Color.Black.ToVector3()), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
+
+                    new TriangleMesh(new EmissionMaterial(Vector3.One), Matrix.CreateTranslation(0, 0, 5), "Assets/Meshes/cone.ply", 3, false),
+
+                    new Sphere(new EmissionMaterial(Vector3.One), new Vector3(2, 4, 7), 0.5),
+                    new Sphere(new EmissionMaterial(Vector3.One), new Vector3(-2, 4, 7), 0.5)
+                }), false);
+            }
+
             this.Width = Width;
             this.Height = Height;
             this.FOV = FOV;
@@ -88,85 +104,6 @@ namespace Raytracer.Core
             this.Samples = Samples;
             this.Threads = Threads;
             this.NEE = NEE;
-
-            //Setup scene
-            Shapes = new List<Shape>()
-            {
-                //Cerberus gun scene
-                //new TriangleMesh(new Material("Cerberus"), Matrix.CreateScale(5) * Matrix.CreateRotationY(Math.PI/2) * Matrix.CreateTranslation(-2, 0.5, 5), "Assets/Meshes/Gun.ply", 3, true, false),
-
-                //Velvet Cloth scene
-                //new Sphere(new PBRMaterial("rustediron2"), new Vector3(0, 0, 4), 1),
-                //new TriangleMesh(new VelvetMaterial(0.65, Color.Red.ToVector3()), Matrix.CreateRotationY(Math.PI-0.4) * Matrix.CreateTranslation(0, 0, 4), "Assets/meshes/ballcover.ply", 3, true, true),
-                //new Plane(new PBRMaterial(Vector3.One, 1, 0.2), new Vector3(0, -0.98, 0), new Vector3(0, 1, 0)),
-
-                //Coffee Scene
-                //new TriangleMesh(new GlassMaterial(new Vector3(0.8, 1, 0.8), 1.1, 0), Matrix.CreateScale(0.8) * Matrix.CreateTranslation(0, -2, 6), "Assets/Meshes/Coffee/Cup.ply", 3, true, false),
-                //new TriangleMesh(new PBRMaterial(Vector3.One, 0, 0.1), Matrix.CreateScale(0.8) * Matrix.CreateTranslation(0, -2.01, 6), "Assets/Meshes/Coffee/Plate.ply", 3, true, true),
-                //new Plane(new PBRMaterial(Color.Brown.ToVector3(), 0, 1), new Vector3(0, -2, 0), new Vector3(0, 1, 0)),
-
-                //BlenderBall Scene
-                //new TriangleMesh(new VelvetMaterial(Color.Gold.ToVector3(), 0.8), Matrix.CreateScale(0.25) * Matrix.CreateRotationY(-Math.PI/4) * Matrix.CreateTranslation(0, -1.5, 5), "Assets/Meshes/BlenderBall/BlenderBallShell.ply"),
-                //new TriangleMesh(new PBRMaterial(Color.Black.ToVector3(), 0, 0.8), Matrix.CreateScale(0.25) * Matrix.CreateRotationY(-Math.PI/4) * Matrix.CreateTranslation(0, -1.5, 5), "Assets/Meshes/BlenderBall/BlenderBallCore.ply"),
-                //new TriangleMesh(new PBRMaterial(Color.Black.ToVector3(), 0, 0.8), Matrix.CreateScale(0.25) * Matrix.CreateRotationY(-Math.PI/4) * Matrix.CreateTranslation(0, -1.5, 5), "Assets/Meshes/BlenderBall/BlenderBallBase.ply"),
-                //new Plane(new LambertianMaterial(Color.Gray.ToVector3()), new Vector3(0, -1.5, 0), new Vector3(0, 1, 0))
-
-                //BlenderCup scene
-                //new TriangleMesh(new PBRMaterial(Color.White.ToVector3(), 0, 0.1), Matrix.CreateRotationY(-Math.PI/4) * Matrix.CreateTranslation(0, -1.5, 5), "Assets/Meshes/BlenderCup/Plate.ply"),
-                //new TriangleMesh(new GlassMaterial(new Vector3(0.8, 0.8, 1), 1.3, 0.3), Matrix.CreateRotationY(-Math.PI/4) * Matrix.CreateTranslation(0, -1.5, 5), "Assets/Meshes/BlenderCup/CupInner.ply"),
-                //new TriangleMesh(new PBRMaterial(Color.DarkGoldenrod.ToVector3(), 1, 0.3), Matrix.CreateRotationY(-Math.PI/4) * Matrix.CreateTranslation(0, -1.5, 5), "Assets/Meshes/BlenderCup/CupOuter.ply"),
-                //new Plane(new LambertianMaterial(Color.Brown.ToVector3()), new Vector3(0, -1.5, 0), new Vector3(0, 1, 0))
-
-                //GlassTall scene
-                //new TriangleMesh(new GlassMaterial(Color.White.ToVector3()*0.8, 1.45, 0), Matrix.CreateScale(1.5) * Matrix.CreateTranslation(0, -2, 5), "Assets/Meshes/GlassTall/GlassTall.ply"),
-                //new TriangleMesh(new GlassMaterial(Color.White.ToVector3(), 1.33, 0, new IsotropicMedium(Color.CornflowerBlue.ToVector3(), 2, 2)), Matrix.CreateScale(1.5) * Matrix.CreateTranslation(0, -2, 5), "Assets/Meshes/GlassTall/GlassTallLiquid.ply"),
-
-                //2 ball material scene
-                //new Sphere(new PBRMaterial("wornpaintedcement"), new Vector3(-2.5, -0.5, 5), 1.5),
-                //new Sphere(new PBRMaterial("rustediron2"), new Vector3(2.5, -0.5, 5), 1.5),
-
-                //new Sphere(new PBRMaterial("wornpaintedcement"), new Vector3(-2.5, -0.5, 5), 1.5),
-                //new Sphere(new LambertianMaterial(Color.Blue.ToVector3()), new Vector3(2.5, -0.5, 5), 1.5),
-
-                //new Quad(new EmissionMaterial(Vector3.One), new Vector3(0, 5, 8), new Vector3(0, -1, 0), new Vector2(2, 2)),
-
-                //Box Scene
-                new Plane(new LambertianMaterial(Color.LightGray.ToVector3()), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
-                new Plane(new LambertianMaterial(Color.Pink.ToVector3()), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
-                new Plane(new LambertianMaterial(Color.Green.ToVector3()), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
-                new Plane(new LambertianMaterial(Color.Green.ToVector3()), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
-                new Plane(new LambertianMaterial(Color.Pink.ToVector3()), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
-                new Plane(new LambertianMaterial(Color.Black.ToVector3()), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
-
-                new TriangleMesh(new EmissionMaterial(Vector3.One), Matrix.CreateTranslation(0, 0, 5), "Assets/Meshes/cone.ply", 3, false),
-
-                new Sphere(new EmissionMaterial(Vector3.One), new Vector3(2, 4, 7), 0.5),
-                new Sphere(new EmissionMaterial(Vector3.One), new Vector3(-2, 4, 7), 0.5)
-            };
-
-            //Setup lights for NEE
-            Lights = new List<Shape>();
-            foreach (Shape S in Shapes)
-            {
-                if (S.Material.HasProperty("emission"))
-                {
-                    Lights.Add(S);
-                }
-            }
-
-            //Setup light probabiltiies
-            double TotalLightWeight = 0;
-            LightProbabilityTable = new double[Lights.Count];
-            for (int i = 0; i < Lights.Count; i++)
-            {
-                double LightWeight = Lights[i].Material.GetProperty("emission", Vector2.Zero).Color.SumComponents() * Lights[i].Area();
-                TotalLightWeight += LightWeight;
-                LightProbabilityTable[i] = TotalLightWeight;
-            }
-            for (int i = 0; i < Lights.Count; i++)
-            {
-                LightProbabilityTable[i] /= TotalLightWeight;
-            }
         }
 
         public void Render()
@@ -206,25 +143,6 @@ namespace Raytracer.Core
             }
         }
 
-        public void ExportToFile(string Path)
-        {
-            Bitmap Render = new Bitmap(Width, Height);
-            Vector3 Mapped = Vector3.Zero;
-            for (int x = 0; x < Width; x++)
-            {
-                for (int y = 0; y < Height; y++)
-                {
-                    //Tone mapping
-                    Mapped = Framebuffer[x, y] / (Framebuffer[x, y] + Vector3.One);
-                    Mapped = new Vector3(Math.Pow(Mapped.X, 1.0 / 2.2), Math.Pow(Mapped.Y, 1.0 / 2.2), Math.Pow(Mapped.Z, 1.0 / 2.2));
-
-                    //Draw
-                    Render.SetPixel(x, y, Mapped.ToColor());
-                }
-            }
-            Render.Save(Path);
-        }
-
         private Vector3 Trace(Ray Ray)
         {
             Medium CurrentMedium = null;
@@ -237,7 +155,7 @@ namespace Raytracer.Core
             for (int Bounce = 0; Bounce < MaxBounces; Bounce++)
             {
                 //Raycast to nearest geometry, if any
-                Raycast(Ray, out Shape Shape, out Vector3 Hit, out Vector3 Normal, out Vector2 UV);
+                World.Raycast(Ray, out Shape Shape, out Vector3 Hit, out Vector3 Normal, out Vector2 UV);
 
                 //Return skybox color if nothing hit
                 if (Shape == null)
@@ -331,24 +249,13 @@ namespace Raytracer.Core
         private Vector3 SampleLight(Shape Shape, Vector3 Hit, Vector3 ViewDirection, Vector3 Normal, Vector2 UV, Vector3 SampleDirection, LobeType SampledLobe, Vector3 BSDFAttenuation)
         {
             //If this is not diffuse or there are no lights, no direct lighting calculation needs to be done
-            if (SampledLobe != LobeType.DiffuseReflection || Lights.Count == 0)
+            if (SampledLobe != LobeType.DiffuseReflection || World.Lights.Count == 0)
             {
                 return Vector3.Zero;
             }
 
             //Pick a light
-            double Prob = Util.Random.NextDouble();
-            int i = 0;
-            while (i < Lights.Count)
-            {
-                if (Prob <= LightProbabilityTable[i])
-                {
-                    break;
-                }
-                i++;
-            }
-            double LightPickPDF = LightProbabilityTable[i] - (i == 0 ? 0 : LightProbabilityTable[i - 1]); //PDF = CDFCurrent - CDFPrevious
-            Shape Light = Lights[i];
+            World.PickLight(out Shape Light, out double LightPickPDF);
             Vector3 Emission = Light.Material.GetProperty("emission", UV).Color;
 
             Vector3 TotalDirectLighting = Vector3.Zero;
@@ -357,7 +264,7 @@ namespace Raytracer.Core
             if (BSDFAttenuation != Vector3.Zero)
             {
                 //Visibility check
-                Raycast(new Ray(Hit + SampleDirection * 0.001, SampleDirection), out Shape BSDFShape, out Vector3 BSDFHit, out Vector3 BSDFNormal, out Vector2 BSDFUV);
+                World.Raycast(new Ray(Hit + SampleDirection * 0.001, SampleDirection), out Shape BSDFShape, out Vector3 BSDFHit, out Vector3 BSDFNormal, out Vector2 BSDFUV);
                 if (BSDFShape == Light)
                 {
                     //Calculate light pdf for bsdf sample
@@ -377,7 +284,7 @@ namespace Raytracer.Core
             LightSample.Normalize();
 
             //Visibility check
-            Raycast(new Ray(Hit + LightSample * 0.001, LightSample), out Shape LightShape, out Vector3 LightHit, out Vector3 LightNormal, out Vector2 LightUV);
+            World.Raycast(new Ray(Hit + LightSample * 0.001, LightSample), out Shape LightShape, out Vector3 LightHit, out Vector3 LightNormal, out Vector2 LightUV);
             if ((LightHit - Hit).Length() >= Distance - 0.001)
             {
                 //Calculate light pdf for light sample, 
@@ -394,32 +301,54 @@ namespace Raytracer.Core
                 }
             }
 
-            return (TotalDirectLighting / LightPickPDF);
+            return TotalDirectLighting / LightPickPDF;
         }
 
-        private bool Raycast(Ray Ray, out Shape FirstShape, out Vector3 FirstShapeHit, out Vector3 FirstShapeNormal, out Vector2 FirstShapeUV)
+        public void ExportToFile(string Path)
         {
-            double MinDistance = double.MaxValue;
-            FirstShape = null;
-            FirstShapeHit = Vector3.Zero;
-            FirstShapeNormal = Vector3.Zero;
-            FirstShapeUV = Vector2.Zero;
-            foreach (Shape Shape in Shapes)
+            Bitmap Render = new Bitmap(Width, Height);
+            Vector3 Mapped = Vector3.Zero;
+            for (int x = 0; x < Width; x++)
             {
-                if (Shape.Intersect(Ray, out Vector3 Hit, out Vector3 Normal, out Vector2 UV))
+                for (int y = 0; y < Height; y++)
                 {
-                    double Distance = (Hit - Ray.Origin).Length();
-                    if (Distance < MinDistance)
-                    {
-                        MinDistance = Distance;
-                        FirstShape = Shape;
-                        FirstShapeHit = Hit;
-                        FirstShapeNormal = Normal;
-                        FirstShapeUV = UV;
-                    }
+                    //Tone mapping
+                    Mapped = Framebuffer[x, y] / (Framebuffer[x, y] + Vector3.One);
+                    Mapped = new Vector3(Math.Pow(Mapped.X, 1.0 / 2.2), Math.Pow(Mapped.Y, 1.0 / 2.2), Math.Pow(Mapped.Z, 1.0 / 2.2));
+
+                    //Draw
+                    Render.SetPixel(x, y, Mapped.ToColor());
                 }
             }
-            return FirstShape != null;
+            Render.Save(Path);
+        }
+
+        public void LoadScene(string Path, bool LoadRenderSettings = true)
+        {
+            World = new Scene(Path);
+            if (LoadRenderSettings)
+            {
+                this.Width = World.PreferredWidth;
+                this.Height = World.PreferredHeight;
+                this.FOV = World.PreferredFOV;
+                this.CameraPosition = World.PreferredCameraPosition;
+                this.CameraRotation = World.PreferredCameraRotation;
+                this.SkyBox = World.PreferredSkyBox;
+            }
+        }
+
+        public void LoadScene(Scene World, bool LoadRenderSettings = true)
+        {
+            this.World = World;
+            if (LoadRenderSettings)
+            {
+                this.Width = World.PreferredWidth;
+                this.Height = World.PreferredHeight;
+                this.FOV = World.PreferredFOV;
+                this.CameraPosition = World.PreferredCameraPosition;
+                this.CameraRotation = World.PreferredCameraRotation;
+                this.SkyBox = World.PreferredSkyBox;
+            }
         }
     }
 }

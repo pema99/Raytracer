@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 
 namespace Raytracer.Core
 {
@@ -54,6 +56,38 @@ namespace Raytracer.Core
         }
         #endregion
 
+        #region Parsing utility
+        public static Vector3 ToVector3(this JToken T)
+        {
+            return new Vector3((double)T[0], (double)T[1], (double)T[2]);
+        }
+
+        public static Vector2 ToVector2(this JToken T)
+        {
+            return new Vector2((double)T[0], (double)T[1]);
+        }
+
+        public static MaterialNode ToMaterialNode(this JToken T)
+        {
+            if (T == null)
+            {
+                return null;
+            }
+            if (T is JArray)
+            {
+                return new MaterialConstantNode(T.ToVector3());
+            }
+            else
+            {
+                if (double.TryParse((string)T, NumberStyles.Any, CultureInfo.InvariantCulture, out double Result))
+                {
+                    return new MaterialConstantNode(Result);
+                }
+                return new MaterialTextureNode(new Texture((string)T));
+            }
+        }
+        #endregion
+
         #region Geometry utility
         public static void CreateCartesian(Vector3 Normal, out Vector3 NT, out Vector3 NB)
         {
@@ -103,7 +137,7 @@ namespace Raytracer.Core
         public static double HeronsFormula(double SideA, double SideB, double SideC)
         {
             double S = (SideA + SideB + SideC) * 0.5;
-            return Math.Sqrt(S * (S-SideA) * (S-SideB) * (S-SideC));
+            return Math.Sqrt(S * (S - SideA) * (S - SideB) * (S - SideC));
         }
 
         public static bool IntersectAABB(Ray Ray, Vector3 AABBMin, Vector3 AABBMax, out Vector3 Hit, out double TMin, out double TMax)

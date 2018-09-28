@@ -22,7 +22,10 @@ namespace Raytracer.Core
             Properties.Add("albedo", Albedo);
             Properties.Add("ior", RefractiveIndex);
             Properties.Add("roughness", Roughness);
-            Properties.Add("normal", Normal);
+            if (Normal != null)
+            {
+                Properties.Add("normal", Normal);
+            }
             this.Medium = Medium;
         }
 

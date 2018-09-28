@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -69,6 +72,7 @@
     <Compile Include="Source\Material\Types\TransparentMaterial.cs" />
     <Compile Include="Source\Material\Types\VelvetMaterial.cs" />
     <Compile Include="Source\Raytracer.cs" />
+    <Compile Include="Source\Scenes\Scene.cs" />
     <Compile Include="Source\Utility classes\LobeType.cs" />
     <Compile Include="Source\Utility classes\Math\MathHelper.cs" />
     <Compile Include="Source\Utility classes\Math\Matrix.cs" />
@@ -297,6 +301,13 @@
     <Content Include="Assets\Meshes\GlassTall\GlassTallLiquid.ply">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\Scenes\ClothBallScene.pscene">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="Assets\Scenes\CoffeeScene.pscene" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

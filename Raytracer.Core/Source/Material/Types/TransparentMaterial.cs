@@ -11,6 +11,13 @@ namespace Raytracer.Core
             this.Medium = Medium;
         }
 
+        public TransparentMaterial(MaterialNode Albedo, Medium Medium = null)
+        {
+            Properties.Add("albedo", Albedo);
+
+            this.Medium = Medium;
+        }
+
         public override void Evaluate(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, Vector3 SampleDirection, LobeType SampledLobe, out Vector3 Attenuation)
         {
             Attenuation = GetProperty("albedo", UV);

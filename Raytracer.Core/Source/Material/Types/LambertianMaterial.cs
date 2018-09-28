@@ -12,7 +12,10 @@ namespace Raytracer.Core
         public LambertianMaterial(MaterialNode Albedo, MaterialNode Normal)
         {
             Properties.Add("albedo", Albedo);
-            Properties.Add("normal", Normal);
+            if (Normal != null)
+            {
+                Properties.Add("normal", Normal);
+            }
         }
 
         public override void Evaluate(Vector3 ViewDirection, Vector3 Normal, Vector2 UV, Vector3 SampleDirection, LobeType SampledLobe, out Vector3 Attenuation)

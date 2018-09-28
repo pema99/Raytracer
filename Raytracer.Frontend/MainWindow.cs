@@ -3,6 +3,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -24,6 +26,9 @@ namespace Raytracer.Frontend
         private int Threads = 11;
         private bool NEE = true;
 
+        private string[] Scenes = new string[0];
+        private int SelectedScene = 0;
+        private bool SceneRenderSettings = true;
         private bool Progressive = true;
         private int Frames = 0;
         private Core.Vector3[,] FrameBuffer;
@@ -38,7 +43,7 @@ namespace Raytracer.Frontend
             graphics.PreferMultiSampling = true;
             IsMouseVisible = true;
             Window.AllowUserResizing = true;
-            Window.ClientSizeChanged += delegate 
+            Window.ClientSizeChanged += delegate
             {
                 if (graphics.PreferredBackBufferWidth != Window.ClientBounds.Width || graphics.PreferredBackBufferHeight != Window.ClientBounds.Height)
                 {
@@ -70,6 +75,7 @@ namespace Raytracer.Frontend
                 Threads,
                 NEE
             );
+            ScanSceneDirectory();
 
             FrameBuffer = new Core.Vector3[RT.Width, RT.Height];
             RenderTarget = new Texture2D(GraphicsDevice, RT.Width, RT.Height);
@@ -164,6 +170,28 @@ namespace Raytracer.Frontend
                 {
                     RT.Threads = Threads;
                 }
+                ImGui.Separator();
+                ImGui.Combo("Select scene", ref SelectedScene, Scenes);
+                if (ImGui.Button("Load Scene"))
+                {
+                    if (Scenes.Length > 0)
+                    {
+                        RT.LoadScene(Scenes[SelectedScene], SceneRenderSettings);
+
+                        FOV = (float)RT.FOV;
+                        CamPos = new System.Numerics.Vector3((float)RT.CameraPosition.X, (float)RT.CameraPosition.Y, (float)RT.CameraPosition.Z);
+                        CamRot = new System.Numerics.Vector3((float)RT.CameraRotation.X, (float)RT.CameraRotation.Y, (float)RT.CameraRotation.Z);
+                        graphics.PreferredBackBufferWidth = RT.Width;
+                        graphics.PreferredBackBufferHeight = RT.Height;
+                        graphics.ApplyChanges();
+                    }
+                }
+                ImGui.SameLine();
+                if (ImGui.Button("Scan scene directory"))
+                {
+                    ScanSceneDirectory();
+                }
+                ImGui.Checkbox("Load scene render settings", ref SceneRenderSettings);
             }
 
             ImGui.EndWindow();
@@ -230,6 +258,11 @@ namespace Raytracer.Frontend
             RenderTarget.SetData(Data);
 
             Window.AllowUserResizing = true;
+        }
+
+        private void ScanSceneDirectory()
+        {
+            Scenes = Directory.GetFiles("Assets/Scenes/");
         }
 
         private void SetStyle()
