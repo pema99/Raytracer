@@ -172,7 +172,7 @@ namespace Raytracer.Frontend
                 }
                 ImGui.Separator();
                 ImGui.Combo("Select scene", ref SelectedScene, Scenes);
-                if (ImGui.Button("Load Scene"))
+                if (ImGui.Button("Load scene"))
                 {
                     if (Scenes.Length > 0)
                     {

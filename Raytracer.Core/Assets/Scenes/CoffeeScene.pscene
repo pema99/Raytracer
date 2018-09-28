@@ -7,41 +7,46 @@
 		"SkyBox": "Assets/EnvMaps/portland.png"
 	},
 	"Materials": {
-		"RustedIron": {
+		"Glass": {
+			"Type": "Glass",
+			"Albedo": [0.8, 1, 0.8],
+			"Metalness": 0,
+			"IOR": 1.1,
+			"Roughness": 0
+		},
+		"Porcelain": {
 			"Type": "PBR",
-			"Albedo": "Assets/Materials/rustediron2_basecolor.png",
-			"Metalness": "Assets/Materials/rustediron2_metallic.png",
-			"Roughness": "Assets/Materials/rustediron2_roughness.png",
-			"Normal": "Assets/Materials/rustediron2_normal.png"
+			"Albedo": [1, 1, 1],
+			"Metalness": 0,
+			"Roughness": 0.1
 		},
-		"Cloth": {
-			"Type": "Velvet",
-			"Albedo": [1, 0, 0],
-			"Sigma": 0.5
-		},
-		"Lambert": {
-			"Type": "Lambertian",
-			"Albedo": [1, 1, 1]
+		"Ground": {
+			"Type": "PBR",
+			"Albedo": [1, 0.7, 0.3],
+			"Metalness": 0,
+			"Roughness": 1
 		}
 	},
 	"World": [{
-			"Type": "Sphere",
-			"Material": "RustedIron",
-			"Origin": [0, 0, 5],
-			"Radius": 1
+			"Type": "Mesh",
+			"Material": "Porcelain",
+			"Origin": [0, -2.01, 6],
+			"Scale": 0.8,
+			"Path": "Assets/Meshes/Coffee/Plate.ply"
 		},
 		{
 			"Type": "Plane",
-			"Material": "Lambert",
-			"Origin": [0, -1, 0],
+			"Material": "Ground",
+			"Origin": [0, -2, 0],
 			"Normal": [0, 1, 0]
 		},
 		{
 			"Type": "Mesh",
-			"Material": "Cloth",
-      "Origin": [ 0, 0, 5 ],
-      "Rotation": [0, 2.74, 0],
-			"Path": "Assets/Meshes/ballcover.ply"
+			"Material": "Glass",
+			"Origin": [ 0, -2, 6 ],
+			"Scale": 0.8,
+			"BackFaceCulling": "false",
+			"Path": "Assets/Meshes/Coffee/Cup.ply"
 		}
 	]
 }

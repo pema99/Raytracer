@@ -306,7 +306,9 @@
     <Content Include="Assets\Scenes\ClothBallScene.pscene">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Assets\Scenes\CoffeeScene.pscene" />
+    <Content Include="Assets\Scenes\CoffeeScene.pscene">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
