@@ -21,6 +21,11 @@ namespace Raytracer.Core
             return System.Drawing.Color.FromArgb((int)(Color.X * 255.0), (int)(Color.Y * 255.0), (int)(Color.Z * 255.0));
         }
 
+        public static double SumComponents(this Vector3 Vec)
+        {
+            return Vec.X + Vec.Y + Vec.Z;
+        }
+
         public static int BoolToInt(bool Boolean)
         {
             if (Boolean)

@@ -73,6 +73,7 @@ namespace Raytracer.Core
         private double AspectRatio { get; set; }
         private double ViewAngle { get; set; }
         private Matrix CameraRotationMatrix { get; set; }
+        private double[] LightProbabilityTable { get; set; }
 
         public Raytracer(int Width, int Height, double FOV, Vector3 CameraPosition, Vector3 CameraRotation, Texture SkyBox, int MinBounces, int MaxBounces, int Samples, int Threads, bool NEE)
         {
@@ -137,11 +138,13 @@ namespace Raytracer.Core
                 new Plane(new LambertianMaterial(Color.Pink.ToVector3()), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
                 new Plane(new LambertianMaterial(Color.Black.ToVector3()), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
 
-                new TriangleMesh(new EmissionMaterial(Vector3.One), Matrix.CreateTranslation(0, 0, 5), "Assets/Meshes/cone.ply", 3, false)
+                new TriangleMesh(new EmissionMaterial(Vector3.One), Matrix.CreateTranslation(0, 0, 5), "Assets/Meshes/cone.ply", 3, false),
 
-                //new Sphere(new EmissionMaterial(Vector3.One), new Vector3(2, 4, 7), 0.5),
-                //new Sphere(new EmissionMaterial(Vector3.One), new Vector3(-2, 4, 7), 0.5)
+                new Sphere(new EmissionMaterial(Vector3.One), new Vector3(2, 4, 7), 0.5),
+                new Sphere(new EmissionMaterial(Vector3.One), new Vector3(-2, 4, 7), 0.5)
             };
+
+            //Setup lights for NEE
             Lights = new List<Shape>();
             foreach (Shape S in Shapes)
             {
@@ -149,6 +152,20 @@ namespace Raytracer.Core
                 {
                     Lights.Add(S);
                 }
+            }
+
+            //Setup light probabiltiies
+            double TotalLightWeight = 0;
+            LightProbabilityTable = new double[Lights.Count];
+            for (int i = 0; i < Lights.Count; i++)
+            {
+                double LightWeight = Lights[i].Material.GetProperty("emission", Vector2.Zero).Color.SumComponents() * Lights[i].Area();
+                TotalLightWeight += LightWeight;
+                LightProbabilityTable[i] = TotalLightWeight;
+            }
+            for (int i = 0; i < Lights.Count; i++)
+            {
+                LightProbabilityTable[i] /= TotalLightWeight;
             }
         }
 
@@ -319,8 +336,19 @@ namespace Raytracer.Core
                 return Vector3.Zero;
             }
 
-            //Pick a light with probability 1/numLights
-            Shape Light = Lights[Util.Random.Next(Lights.Count)];
+            //Pick a light
+            double Prob = Util.Random.NextDouble();
+            int i = 0;
+            while (i < Lights.Count)
+            {
+                if (Prob <= LightProbabilityTable[i])
+                {
+                    break;
+                }
+                i++;
+            }
+            double LightPickPDF = LightProbabilityTable[i] - (i == 0 ? 0 : LightProbabilityTable[i - 1]); //PDF = CDFCurrent - CDFPrevious
+            Shape Light = Lights[i];
             Vector3 Emission = Light.Material.GetProperty("emission", UV).Color;
 
             Vector3 TotalDirectLighting = Vector3.Zero;
@@ -338,7 +366,7 @@ namespace Raytracer.Core
                     //Calculate bsdf pdf for bsdf sample
                     Shape.Material.PDF(ViewDirection, Normal, UV, SampleDirection, SampledLobe, out double ScatterPDF);
 
-                    //Weighted sum of the 2 sampling strategies
+                    //Weighted sum of the 2 sampling strategies for this sample
                     TotalDirectLighting += BSDFAttenuation * Emission * Util.BalanceHeuristic(ScatterPDF, LightPDF) / ScatterPDF;
                 }
             }
@@ -350,7 +378,7 @@ namespace Raytracer.Core
 
             //Visibility check
             Raycast(new Ray(Hit + LightSample * 0.001, LightSample), out Shape LightShape, out Vector3 LightHit, out Vector3 LightNormal, out Vector2 LightUV);
-            if ((LightHit - Hit).Length() >= Distance - 0.001) //LightShape == Light)
+            if ((LightHit - Hit).Length() >= Distance - 0.001)
             {
                 //Calculate light pdf for light sample, 
                 double LightPDF = Math.Pow(Distance, 2) / (Vector3.Dot(LightNormal, -LightSample) * Light.Area());
@@ -359,14 +387,14 @@ namespace Raytracer.Core
                 Shape.Material.Evaluate(ViewDirection, Normal, UV, LightSample, SampledLobe, out BSDFAttenuation);
                 Shape.Material.PDF(ViewDirection, Normal, UV, LightSample, SampledLobe, out double ScatterPDF);
 
-                //Weighted sum of the 2 sampling strategies
+                //Weighted sum of the 2 sampling strategies for this sample
                 if (BSDFAttenuation != Vector3.Zero)
                 {
                     TotalDirectLighting += BSDFAttenuation * Emission * Util.BalanceHeuristic(LightPDF, ScatterPDF) / LightPDF;
                 }
             }
 
-            return (TotalDirectLighting / (1.0 / Lights.Count));
+            return (TotalDirectLighting / LightPickPDF);
         }
 
         private bool Raycast(Ray Ray, out Shape FirstShape, out Vector3 FirstShapeHit, out Vector3 FirstShapeNormal, out Vector2 FirstShapeUV)

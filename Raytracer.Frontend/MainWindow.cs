@@ -151,12 +151,9 @@ namespace Raytracer.Frontend
                 {
                     RT.CameraRotation = new Core.Vector3(CamRot.X, CamRot.Y, CamRot.Z);
                 }
-                if (ImGui.DragInt("Min Bounces", ref MinBounces, 1, 1, int.MaxValue, "%g"))
+                if (ImGui.DragIntRange2("Min/Max Bounces", ref MinBounces, ref MaxBounces, 1, 1, int.MaxValue))
                 {
                     RT.MinBounces = MinBounces;
-                }
-                if (ImGui.DragInt("Max Bounces", ref MaxBounces, 1, 1, int.MaxValue, "%g"))
-                {
                     RT.MaxBounces = MaxBounces;
                 }
                 if (ImGui.DragInt("Samples per pixel", ref Samples, 1, 1, int.MaxValue, "%g"))
