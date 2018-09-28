@@ -124,10 +124,10 @@ namespace Raytracer.Core
                 //new Sphere(new PBRMaterial("wornpaintedcement"), new Vector3(-2.5, -0.5, 5), 1.5),
                 //new Sphere(new PBRMaterial("rustediron2"), new Vector3(2.5, -0.5, 5), 1.5),
 
-                new Sphere(new PBRMaterial("wornpaintedcement"), new Vector3(-2.5, -0.5, 5), 1.5),
-                new Sphere(new LambertianMaterial(Color.Blue.ToVector3()), new Vector3(2.5, -0.5, 5), 1.5),
+                //new Sphere(new PBRMaterial("wornpaintedcement"), new Vector3(-2.5, -0.5, 5), 1.5),
+                //new Sphere(new LambertianMaterial(Color.Blue.ToVector3()), new Vector3(2.5, -0.5, 5), 1.5),
 
-                new Quad(new EmissionMaterial(Vector3.One), new Vector3(0, 5, 8), new Vector3(0, -1, 0), new Vector2(2, 2)),
+                //new Quad(new EmissionMaterial(Vector3.One), new Vector3(0, 5, 8), new Vector3(0, -1, 0), new Vector2(2, 2)),
 
                 //Box Scene
                 new Plane(new LambertianMaterial(Color.LightGray.ToVector3()), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
@@ -136,6 +136,8 @@ namespace Raytracer.Core
                 new Plane(new LambertianMaterial(Color.Green.ToVector3()), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
                 new Plane(new LambertianMaterial(Color.Pink.ToVector3()), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
                 new Plane(new LambertianMaterial(Color.Black.ToVector3()), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
+
+                new TriangleMesh(new EmissionMaterial(Vector3.One), Matrix.CreateTranslation(0, 0, 5), "Assets/Meshes/cone.ply", 3, false)
 
                 //new Sphere(new EmissionMaterial(Vector3.One), new Vector3(2, 4, 7), 0.5),
                 //new Sphere(new EmissionMaterial(Vector3.One), new Vector3(-2, 4, 7), 0.5)
@@ -348,7 +350,7 @@ namespace Raytracer.Core
 
             //Visibility check
             Raycast(new Ray(Hit + LightSample * 0.001, LightSample), out Shape LightShape, out Vector3 LightHit, out Vector3 LightNormal, out Vector2 LightUV);
-            if (LightShape == Light)
+            if ((LightHit - Hit).Length() >= Distance - 0.001) //LightShape == Light)
             {
                 //Calculate light pdf for light sample, 
                 double LightPDF = Math.Pow(Distance, 2) / (Vector3.Dot(LightNormal, -LightSample) * Light.Area());
