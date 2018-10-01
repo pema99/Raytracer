@@ -77,19 +77,27 @@ namespace Raytracer.Core
             //Load example scene
             if (LoadSampleScene)
             {
+                Vector3 Pos = new Vector3(0.1, -2, 4);
+                double Scale = 1.75;
+                double Rot = Math.PI;
                 LoadScene(new Scene(new List<Shape>()
                 {
-                    new Plane(new LambertianMaterial(Color.LightGray.ToVector3()), new Vector3(0, -2, 5), new Vector3(0, 1, 0)),
-                    new Plane(new LambertianMaterial(Color.Pink.ToVector3()), new Vector3(0, 5, 5), new Vector3(0, -1, 0)),
-                    new Plane(new LambertianMaterial(Color.Green.ToVector3()), new Vector3(7, 0, 0), new Vector3(-1, 0, 0)),
-                    new Plane(new LambertianMaterial(Color.Green.ToVector3()), new Vector3(-7, 0, 0), new Vector3(1, 0, 0)),
-                    new Plane(new LambertianMaterial(Color.Pink.ToVector3()), new Vector3(0, 0, 10), new Vector3(0, 0, -1)),
-                    new Plane(new LambertianMaterial(Color.Black.ToVector3()), new Vector3(0, 0, -1), new Vector3(0, 0, 1)),
+                    new Plane(new PBRMaterial(new Vector3(0.75), 0, 0.4), new Vector3(0, -1, 0), new Vector3(0, 1, 0)),
+                    new Plane(new EmissionMaterial(Vector3.One), new Vector3(0, 2, 0), new Vector3(0, -1, 0)),
+                    new Plane(new PBRMaterial(new Vector3(0), 0, 0.9), new Vector3(2, 0, 0), new Vector3(-1, 0, 0)),
+                    new Plane(new PBRMaterial(new Vector3(0), 0, 0.9), new Vector3(-2, 0, 0), new Vector3(1, 0, 0)),
+                    new Plane(new PBRMaterial(new Vector3(0), 0, 0.9), new Vector3(0, 0, 5), new Vector3(0, 0, -1)),
+                    new Plane(new PBRMaterial(new Vector3(0), 0, 0.9), new Vector3(0, 0, -2), new Vector3(0, 0, 1)),
 
-                    new TriangleMesh(new EmissionMaterial(Vector3.One), Matrix.CreateTranslation(0, 0, 5), "Assets/Meshes/cone.ply", 3, false),
+                    new TriangleMesh(new PBRMaterial(new Vector3(1, 1, 0.1), 1, 0.15), Matrix.CreateScale(1) * Matrix.CreateTranslation(0, -0.3, 2.9), "Assets/Meshes/dragon2.ply", 3, false, true),
 
-                    new Sphere(new EmissionMaterial(Vector3.One), new Vector3(2, 4, 7), 0.5),
-                    new Sphere(new EmissionMaterial(Vector3.One), new Vector3(-2, 4, 7), 0.5)
+                    //new Quad(new EmissionMaterial(Vector3.One), new Vector3(-1.3, 3.9999, 3.25), new Vector3(0, -1, 0), new Vector2(1, 4)),
+                    //new Quad(new EmissionMaterial(Vector3.One), new Vector3(1.3, 3.9999, 3.25), new Vector3(0, -1, 0), new Vector2(1, 4)),
+                    //new Quad(new EmissionMaterial(Vector3.One), new Vector3(0, 0, -0.9999), new Vector3(0, 0, 1), new Vector2(2, 2)),
+
+
+                    //new TriangleMesh(new PBRMaterial("MeiGun"), Matrix.CreateScale(Scale) * Matrix.CreateRotationY(Rot) * Matrix.CreateTranslation(Pos), "Assets/Meshes/MeiGun.ply", 3, true, false),
+                    //new Plane(new PBRMaterial(Color.CornflowerBlue.ToVector3(), 0, 1), new Vector3(0, -1.5, 0), new Vector3(0, 1, 0)),
                 }), false);
             }
 
@@ -108,15 +116,12 @@ namespace Raytracer.Core
 
         public void Render()
         {
-            Framebuffer = new Vector3[Width, Height];
-
-            //Supersampling
-            Vector3 RayDir = new Vector3((2.0 * ((50 + Util.Random.NextDouble()) * InvWidth) - 1.0) * ViewAngle * AspectRatio, (1.0 - 2.0 * ((50 + Util.Random.NextDouble()) * InvHeight)) * ViewAngle, 1);
+            Vector3 RayDir = new Vector3((2.0 * ((149 + Util.Random.NextDouble()) * InvWidth) - 1.0) * ViewAngle * AspectRatio, (1.0 - 2.0 * ((355 + Util.Random.NextDouble()) * InvHeight)) * ViewAngle, 1);
             RayDir.Normalize();
             RayDir = Vector3.Transform(RayDir, CameraRotationMatrix);
-
-            //Trace primary ray
             Trace(new Ray(CameraPosition, RayDir));
+
+            Framebuffer = new Vector3[Width, Height];
 
             int Progress = 0;
             using (new Timer(_ => Console.WriteLine("Rendered {0} of {1} scanlines", Progress, Height), null, 1000, 1000))
@@ -137,7 +142,13 @@ namespace Raytracer.Core
                     RayDir = Vector3.Transform(RayDir, CameraRotationMatrix);
 
                     //Trace primary ray
-                    Framebuffer[x, y] += Trace(new Ray(CameraPosition, RayDir));
+                    Vector3 Radiance;
+                    do
+                    {
+                        Radiance = Trace(new Ray(CameraPosition, RayDir));
+                    }
+                    while (double.IsNaN(Radiance.X) || double.IsNaN(Radiance.Y) || double.IsNaN(Radiance.Z));
+                    Framebuffer[x, y] += Radiance;
                 }
                 Framebuffer[x, y] /= Samples;
             }

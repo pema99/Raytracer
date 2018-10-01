@@ -1,0 +1,215 @@
+﻿{
+	"Header": {
+		"Resolution": [800, 600],
+		"FOV": 75,
+		"CameraPosition": [-0.1, 0, 0],
+		"CameraRotation": [0.5, 0, 0],
+		"SkyBox": "Assets/EnvMaps/black.png"
+	},
+	"Materials": {
+		"Ground": {
+			"Type": "PBR",
+			"Albedo": [0.65, 0.35, 0.1],
+			"Metalness": 0,
+			"Roughness": 1
+		},
+		"Porcelain": {
+			"Type": "PBR",
+			"Albedo": [1, 1, 1],
+			"Metalness": 0,
+			"Roughness": 0.02
+		},
+		"Metal": {
+			"Type": "PBR",
+			"Albedo": [0.2, 0.2, 0.2],
+			"Metalness": 1,
+			"Roughness": 0.01
+		},
+		"Glass": {
+			"Type": "Glass",
+			"Albedo": [0.8, 0.8, 0.8],
+			"IOR": 1.1,
+			"Roughness": 0
+		},
+		"TeaBag1": {
+			"Type": "Lambertian",
+			"Albedo": "Assets/Materials/TeaBag1.png"
+		},
+		"TeaBag2": {
+			"Type": "Lambertian",
+			"Albedo": "Assets/Materials/TeaBag2.png"
+		},
+		"Sugar": {
+			"Type": "Lambertian",
+			"Albedo": "Assets/Materials/Sugar.png"
+		},
+		"Light": {
+			"Type": "Light",
+			"Emission": [1.5, 1.5, 1.5]
+		}
+	},
+	"World": [
+		{
+				"Type": "Plane",
+				"Material": "Ground",
+				"Origin": [0, -1, 0],
+				"Normal": [0, 1, 0]
+		},
+		{
+				"Type": "Disc",
+				"Material": "Light",
+				"Origin": [0, 2, -1],
+				"Normal": [0, 0, 1],
+				"Radius": 2
+		},
+		{
+				"Type": "Disc",
+				"Material": "Light",
+				"Origin": [0, 3, 3],
+				"Normal": [0, -0.7071, -0.7071],
+				"Radius": 2
+		},
+		{
+				"Type": "Mesh",
+				"Material": "Porcelain",
+				"Origin": [0, -1, 1],
+				"Scale": 1,
+				"Path": "Assets/Meshes/BreakTime/PotBase.ply"
+		},
+		{
+				"Type": "Mesh",
+				"Material": "Porcelain",
+				"Origin": [0, -1, 1],
+				"Scale": 1,
+				"Path": "Assets/Meshes/BreakTime/PotLid.ply"
+		},
+		{
+				"Type": "Mesh",
+				"Material": "Porcelain",
+				"Origin": [0, -1, 1],
+				"Scale": 1,
+				"Path": "Assets/Meshes/BreakTime/Cup.ply"
+		},
+		{
+				"Type": "Mesh",
+				"Material": "Porcelain",
+				"Origin": [0, -1, 1],
+				"Scale": 1,
+				"Path": "Assets/Meshes/BreakTime/Plate.ply"
+		},
+		{
+				"Type": "Mesh",
+				"Material": "TeaBag1",
+				"Origin": [0, -1, 1],
+				"Scale": 1,
+				"Path": "Assets/Meshes/BreakTime/TeaBag1.ply"
+		},
+		{
+				"Type": "Mesh",
+				"Material": "TeaBag2",
+				"Origin": [0, -1, 1],
+				"Scale": 1,
+				"Path": "Assets/Meshes/BreakTime/TeaBag2.ply"
+		},
+		{
+				"Type": "Mesh",
+				"Material": "Porcelain",
+				"Origin": [0, -1, 1],
+				"Scale": 1,
+				"Path": "Assets/Meshes/BreakTime/SugarPot.ply"
+		},
+		{
+				"Type": "Mesh",
+				"Material": "Sugar",
+				"Origin": [0, -1, 1],
+				"Scale": 1,
+				"Path": "Assets/Meshes/BreakTime/Sugar.ply"
+		},
+		{
+				"Type": "Mesh",
+				"Material": "Porcelain",
+				"Origin": [0, -1, 1],
+				"Scale": 1,
+				"Path": "Assets/Meshes/BreakTime/MilkJug.ply"
+		},
+		{
+				"Type": "Mesh",
+				"Material": "Porcelain",
+				"Origin": [0, -1, 1],
+				"Scale": 1,
+				"Path": "Assets/Meshes/BreakTime/Milk.ply"
+		},
+		{
+				"Type": "Mesh",
+				"Material": "Porcelain",
+				"Origin": [0, -1, 1],
+				"Scale": 1,
+				"Path": "Assets/Meshes/BreakTime/Mug.ply"
+		},
+		{
+				"Type": "Mesh",
+				"Material": "Metal",
+				"Origin": [0, -1, 1],
+				"Scale": 1,
+				"Path": "Assets/Meshes/BreakTime/CafeBase.ply",
+				"BackFaceCulling": "false"
+		},
+		{
+				"Type": "Mesh",
+				"Material": "Glass",
+				"Origin": [0, -1, 1],
+				"Scale": 1,
+				"Path": "Assets/Meshes/BreakTime/CafeJug.ply",
+				"BackFaceCulling": "false"
+		},
+		{
+				"Type": "Mesh",
+				"Material": "Metal",
+				"Origin": [0, -1, 1],
+				"Scale": 1,
+				"Path": "Assets/Meshes/BreakTime/CafeLid.ply",
+		},
+		{
+				"Type": "Mesh",
+				"Material": "Metal",
+				"Origin": [0, -1, 1],
+				"Scale": 1,
+				"Path": "Assets/Meshes/BreakTime/CafeLidShaft.ply",
+		},
+		{
+				"Type": "Mesh",
+				"Material": "Metal",
+				"Origin": [0, -1, 1],
+				"Scale": 1,
+				"Path": "Assets/Meshes/BreakTime/CafeHandle.ply",
+		},
+		{
+				"Type": "Mesh",
+				"Material": "Metal",
+				"Origin": [0, -1, 1],
+				"Scale": 1,
+				"Path": "Assets/Meshes/BreakTime/CafeRivets.ply",
+		},
+		{
+				"Type": "Mesh",
+				"Material": "Metal",
+				"Origin": [0, -1, 1],
+				"Scale": 1,
+				"Path": "Assets/Meshes/BreakTime/CafeNut.ply",
+		},
+		{
+				"Type": "Mesh",
+				"Material": "Metal",
+				"Origin": [0, -1, 1],
+				"Scale": 1,
+				"Path": "Assets/Meshes/BreakTime/CafeInnerBase.ply",
+		},
+		{
+				"Type": "Mesh",
+				"Material": "Metal",
+				"Origin": [0, -1, 1],
+				"Scale": 1,
+				"Path": "Assets/Meshes/BreakTime/CafeInnerTop.ply",
+		},
+	]
+}

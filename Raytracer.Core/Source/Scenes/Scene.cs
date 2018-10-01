@@ -216,7 +216,7 @@ namespace Raytracer.Core
             this.Lights = new List<Shape>();
             foreach (Shape S in Shapes)
             {
-                if (S.Material.HasProperty("emission"))
+                if (S.Material.HasProperty("emission") && !(S is Plane)) //Infinite planes not included
                 {
                     Lights.Add(S);
                 }

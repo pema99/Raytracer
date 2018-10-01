@@ -83,43 +83,48 @@ namespace Raytracer.Core
             Normal = Vector3.Zero;
             UV = Vector2.Zero;
 
+            //AABB check
             if (!Util.IntersectAABB(Ray, AABBMin, AABBMax, out Vector3 AABBHit, out double TMin, out double TMax))
             {
                 return false;
             }
-                                                                                                                                                                           
-            Vector3 Exit = Vector3.Zero;
-            Vector3 Step = Vector3.Zero;
-            Vector3 CurrentCell = Vector3.Zero;
+
+            //Setup starting cell, either inside or on AABB
+            Vector3 Start = Ray.Origin - AABBMin;
+            Vector3 Cell = new Vector3((int)(Start.X / CellSize.X - 0.000000001), (int)(Start.Y / CellSize.Y - 0.000000001), (int)(Start.Z / CellSize.Z - 0.000000001));
+            if (Cell.X < 0 || Cell.Y < 0 || Cell.Z < 0 ||
+                Cell.X >= GridResolution.X || Cell.Y >= GridResolution.Y || Cell.Z >= GridResolution.Z) {
+                Start = AABBHit - AABBMin;
+                Cell = new Vector3((int)(Start.X / CellSize.X - 0.000000001), (int)(Start.Y / CellSize.Y - 0.000000001), (int)(Start.Z / CellSize.Z - 0.000000001));
+            }
+
+            //Setup values for DDA
+            Vector3 Step = new Vector3(Math.Sign(Ray.Direction.X), Math.Sign(Ray.Direction.Y), Math.Sign(Ray.Direction.Z));
             Vector3 StepDelta = Vector3.Zero;
             Vector3 NextIntersection = Vector3.Zero;
-
-            //Ray start to cell coords
+            Vector3 Exit = Vector3.Zero;
             for (int i = 0; i < 3; i++)
-            {                                                                                                                                              
-                double RayOriginCell = (AABBHit[i] - AABBMin[i]);
-                CurrentCell[i] = MathHelper.Clamp(Math.Floor(RayOriginCell / CellSize[i]), 0, GridResolution[i] - 1);
+            {
                 if (Ray.Direction[i] < 0)
                 {
-                    StepDelta[i] = -CellSize[i] * (1 / Ray.Direction[i]);
-                    NextIntersection[i] = TMin + (CurrentCell[i] * CellSize[i] - RayOriginCell) * (1 / Ray.Direction[i]);
+                    StepDelta[i] = -CellSize[i] / Ray.Direction[i];
+                    NextIntersection[i] = (Cell[i] * CellSize[i] - Start[i]) / Ray.Direction[i];
                     Exit[i] = -1;
-                    Step[i] = -1;
                 }
                 else
                 {
-                    StepDelta[i] = CellSize[i] * (1 / Ray.Direction[i]);
-                    NextIntersection[i] = TMin + ((CurrentCell[i] + 1) * CellSize[i] - RayOriginCell) * (1 / Ray.Direction[i]);
+                    StepDelta[i] = CellSize[i] / Ray.Direction[i];
+                    NextIntersection[i] = ((Cell[i] + 1) * CellSize[i] - Start[i]) / Ray.Direction[i];
                     Exit[i] = GridResolution[i];
-                    Step[i] = 1;
                 }
             }
 
-            //Keep going until we hit something or are out of bounds, DDA Algorithm                                                                                                                                                            
+            //DDA algorithm
             while (true)
             {
+                //Ray triangle checks
                 double MinDistance = double.MaxValue;
-                foreach (int Tri in Grid[(int)CurrentCell.X, (int)CurrentCell.Y, (int)CurrentCell.Z].TriangleIndices)
+                foreach (int Tri in Grid[(int)Cell.X, (int)Cell.Y, (int)Cell.Z].TriangleIndices)
                 {
                     if (Owner.IntersectTriangle(Ray, Tri, out Vector3 TriHit, out Vector3 TriNormal, out Vector2 TriUV))
                     {
@@ -138,25 +143,21 @@ namespace Raytracer.Core
                     return true;
                 }
 
-                //Bit shifting technique from scratchapixel, optimization. B0 = Y < Z, B1 = X < Z, B2 = X < Y
-                int AxisIndex = (Util.BoolToInt(NextIntersection[0] < NextIntersection[1]) << 2) + (Util.BoolToInt(NextIntersection[0] < NextIntersection[2]) << 1) + (Util.BoolToInt(NextIntersection[1] < NextIntersection[2]));
-                int Axis = AxisMap[AxisIndex];
+                //Check current axis
+                int Axis = AxisMap[(Util.BoolToInt(NextIntersection.X < NextIntersection.Y) << 2) +
+                                   (Util.BoolToInt(NextIntersection.X < NextIntersection.Z) << 1) +
+                                   (Util.BoolToInt(NextIntersection.Y < NextIntersection.Z))];
 
-                if (TMax < NextIntersection[Axis])
+                //Do step
+                Cell[Axis] += Step[Axis];
+
+                //Check out of bounds
+                if (Cell[Axis] == Exit[Axis])
                 {
                     return false;
                 }
 
-                //Step in on current axis
-                CurrentCell[Axis] += Step[Axis];
-
-                //If we are out bounds return
-                if (CurrentCell[Axis] == Exit[Axis])
-                {
-                    return false;
-                }
-
-                //Update next intersection axis
+                //Set next intersection
                 NextIntersection[Axis] += StepDelta[Axis];
             }
         }

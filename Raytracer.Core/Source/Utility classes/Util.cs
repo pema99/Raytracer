@@ -34,10 +34,7 @@ namespace Raytracer.Core
             {
                 return 1;
             }
-            else
-            {
-                return 0;
-            }
+            return 0;  
         }
 
         public static bool IntToBool(int Integer)
@@ -142,57 +139,28 @@ namespace Raytracer.Core
 
         public static bool IntersectAABB(Ray Ray, Vector3 AABBMin, Vector3 AABBMax, out Vector3 Hit, out double TMin, out double TMax)
         {
-            Hit = Vector3.Zero;
-            TMin = (AABBMin.X - Ray.Origin.X) / Ray.Direction.X;
-            TMax = (AABBMax.X - Ray.Origin.X) / Ray.Direction.X;
+            Vector3 InverseRayDirection = new Vector3(1.0 / Ray.Direction.X, 1.0 / Ray.Direction.Y, 1.0 / Ray.Direction.Z);
+            double T1 = (AABBMin.X - Ray.Origin.X) * InverseRayDirection[0];
+            double T2 = (AABBMax.X - Ray.Origin.X) * InverseRayDirection[0];
 
-            if (TMin > TMax)
-            {
-                double Temp = TMin;
-                TMin = TMax;
-                TMax = Temp;
+            TMin = Math.Min(T1, T2);
+            TMax = Math.Max(T1, T2);
+
+            for (int i = 0; i < 3; i++) {
+                T1 = (AABBMin[i] - Ray.Origin[i]) * InverseRayDirection[i];
+                T2 = (AABBMax[i] - Ray.Origin[i]) * InverseRayDirection[i];
+
+                TMin = Math.Max(TMin, Math.Min(T1, T2));
+                TMax = Math.Min(TMax, Math.Max(T1, T2));
             }
 
-            double TYMax = (AABBMax.Y - Ray.Origin.Y) / Ray.Direction.Y;
-            double TYMin = (AABBMin.Y - Ray.Origin.Y) / Ray.Direction.Y;
-
-            if (TYMin > TYMax)
+            if (!(TMax > Math.Max(TMin, 0.0)))
             {
-                double Temp = TYMin;
-                TYMin = TYMax;
-                TYMax = Temp;
-            }
-
-            if ((TMin > TYMax) || (TYMin > TMax))
+                Hit = Vector3.Zero;   
                 return false;
-
-            if (TYMin > TMin)
-                TMin = TYMin;
-
-            if (TYMax < TMax)
-                TMax = TYMax;
-
-            double TZMin = (AABBMin.Z - Ray.Origin.Z) / Ray.Direction.Z;
-            double TZMax = (AABBMax.Z - Ray.Origin.Z) / Ray.Direction.Z;
-
-            if (TZMin > TZMax)
-            {
-                double Temp = TZMin;
-                TZMin = TZMax;
-                TZMax = Temp;
             }
-
-            if ((TMin > TZMax) || (TZMin > TMax))
-                return false;
-
-            if (TZMin > TMin)
-                TMin = TZMin;
-
-            if (TZMax < TMax)
-                TMax = TZMax;
 
             Hit = Ray.Origin + Ray.Direction * TMin;
-
             return true;
         }
 
