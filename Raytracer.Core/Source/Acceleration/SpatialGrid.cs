@@ -11,7 +11,7 @@ namespace Raytracer.Core
     {
         public Vector3 AABBMin { get; set; }
         public Vector3 AABBMax { get; set; }
-        public SpatialGridNode[,,] Grid { get; set; }
+        public List<int>[,,] Grid { get; set; }
         public Vector3 GridResolution { get; set; }
         public Vector3 CellSize { get; set; }
         public TriangleMesh Owner { get; set; }
@@ -27,7 +27,7 @@ namespace Raytracer.Core
             double GridResolutionTerm = Math.Pow((GridLambda * Owner.NumFaces) / ((AABBMax.X - AABBMin.X) * (AABBMax.Y - AABBMin.Y) * (AABBMax.Z - AABBMin.Z)), (1.0 / 3.0));
             this.GridResolution = new Vector3(Math.Floor((AABBMax.X - AABBMin.X) * GridResolutionTerm), Math.Floor((AABBMax.Y - AABBMin.Y) * GridResolutionTerm), Math.Floor((AABBMax.Z - AABBMin.Z) * GridResolutionTerm));
 
-            this.Grid = new SpatialGridNode[(int)GridResolution.X, (int)GridResolution.Y, (int)GridResolution.Z];
+            this.Grid = new List<int>[(int)GridResolution.X, (int)GridResolution.Y, (int)GridResolution.Z];
             this.CellSize = new Vector3((AABBMax.X - AABBMin.X) / GridResolution.X, (AABBMax.Y - AABBMin.Y) / GridResolution.Y, (AABBMax.Z - AABBMin.Z) / GridResolution.Z);
 
             //Initialize grid
@@ -37,7 +37,7 @@ namespace Raytracer.Core
                 {
                     for (int z = 0; z < GridResolution.Z; z++)
                     {
-                        Grid[x, y, z] = new SpatialGridNode();
+                        Grid[x, y, z] = new List<int>();
                     }
                 }
             }
@@ -70,7 +70,7 @@ namespace Raytracer.Core
                     {
                         for (int z = (int)CellMin.Z; z <= CellMax.Z; z++)
                         {
-                            Grid[x, y, z].TriangleIndices.Add(i);
+                            Grid[x, y, z].Add(i);
                         }
                     }
                 }
@@ -124,7 +124,7 @@ namespace Raytracer.Core
             {
                 //Ray triangle checks
                 double MinDistance = double.MaxValue;
-                foreach (int Tri in Grid[(int)Cell.X, (int)Cell.Y, (int)Cell.Z].TriangleIndices)
+                foreach (int Tri in Grid[(int)Cell.X, (int)Cell.Y, (int)Cell.Z])
                 {
                     if (Owner.IntersectTriangle(Ray, Tri, out Vector3 TriHit, out Vector3 TriNormal, out Vector2 TriUV))
                     {
