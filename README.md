@@ -21,6 +21,10 @@ Because I am bored.
 
 ### Cool, show some pictures.
 [<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/Main.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/Main.png)
+[<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/TeaSet.PNG" />](https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/TeaSet.PNG)
+[<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/Gun2.PNG" />](https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/Gun2.PNG)
+[<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/GlassIBL.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/GlassIBL.png)
+[<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/Main.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/Main.png)
 [<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/Volume.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/Volume.png)
 [<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/Velvet.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/Velvet.png)
 [<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/Glass.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/Glass.png)
