@@ -77,9 +77,6 @@ namespace Raytracer.Core
             //Load example scene
             if (LoadSampleScene)
             {
-                Vector3 Pos = new Vector3(0.1, -2, 4);
-                double Scale = 1.75;
-                double Rot = Math.PI;
                 LoadScene(new Scene(new List<Shape>()
                 {
                     new Plane(new PBRMaterial(new Vector3(0.75), 0, 0.4), new Vector3(0, -1, 0), new Vector3(0, 1, 0)),
@@ -91,13 +88,6 @@ namespace Raytracer.Core
 
                     new TriangleMesh(new PBRMaterial(new Vector3(1, 1, 0.1), 1, 0.15), Matrix.CreateScale(1) * Matrix.CreateTranslation(0, -0.3, 2.9), "Assets/Meshes/dragon2.ply", 3, false, true),
 
-                    //new Quad(new EmissionMaterial(Vector3.One), new Vector3(-1.3, 3.9999, 3.25), new Vector3(0, -1, 0), new Vector2(1, 4)),
-                    //new Quad(new EmissionMaterial(Vector3.One), new Vector3(1.3, 3.9999, 3.25), new Vector3(0, -1, 0), new Vector2(1, 4)),
-                    //new Quad(new EmissionMaterial(Vector3.One), new Vector3(0, 0, -0.9999), new Vector3(0, 0, 1), new Vector2(2, 2)),
-
-
-                    //new TriangleMesh(new PBRMaterial("MeiGun"), Matrix.CreateScale(Scale) * Matrix.CreateRotationY(Rot) * Matrix.CreateTranslation(Pos), "Assets/Meshes/MeiGun.ply", 3, true, false),
-                    //new Plane(new PBRMaterial(Color.CornflowerBlue.ToVector3(), 0, 1), new Vector3(0, -1.5, 0), new Vector3(0, 1, 0)),
                 }), false);
             }
 
@@ -116,11 +106,6 @@ namespace Raytracer.Core
 
         public void Render()
         {
-            Vector3 RayDir = new Vector3((2.0 * ((149 + Util.Random.NextDouble()) * InvWidth) - 1.0) * ViewAngle * AspectRatio, (1.0 - 2.0 * ((355 + Util.Random.NextDouble()) * InvHeight)) * ViewAngle, 1);
-            RayDir.Normalize();
-            RayDir = Vector3.Transform(RayDir, CameraRotationMatrix);
-            Trace(new Ray(CameraPosition, RayDir));
-
             Framebuffer = new Vector3[Width, Height];
 
             int Progress = 0;
