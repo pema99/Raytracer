@@ -31,7 +31,7 @@ Because I am bored.
 
 ### How do I use it?
 You shouldn't, this is a toy/learning project.
-If you really want to, build with VS2017 and run either Raytracer.Core or Raytracer.Frontend. 
+If you really want to, build with VS2017 or later and run either Raytracer.Core or Raytracer.Frontend. 
 
 ### (Insert other software) is faster and/or better.
 Yes.
