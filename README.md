@@ -1,23 +1,16 @@
 ### What is it?
-A path tracer using monte carlo simulation and physically based rendering.
+A stochastic path tracer using monte carlo estimation to render realistic images with global illumination. Supports a PBR (physically based rendering) workflow.
 
 ### What can it do?
-Render scenes with global illumination.
-
-Texture mapping.
-
-Multiple material types including a physically based material with roughness / metalness.
-
-Meshes, spheres, planes.
-
-Acceleration structure so I don't have infinitely long render times.
-
-Image based lighting.
-
-Cool.
+- Load and render scenes comprised of primitives and 3D models
+- Support different material types for each object.
+- Support for texture mapping.
+- Next event estimation for direct light sampling.
+- Acceleration structure so I don't have infinite render times.
+- Image based lighting.
 
 ### Why?
-Because I am bored.
+Because I was bored.
 
 ### Cool, show some pictures.
 [<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/Main.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/Main.png)
@@ -30,11 +23,8 @@ Because I am bored.
 [<img src="https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/IBL.png" />](https://raw.github.com/pema99/Raytracer/master/Raytracer.Core/Assets/IBL.png)
 
 ### How do I use it?
-You shouldn't, this is a toy/learning project.
+You probably shouldn't, this is a toy/learning project.
 If you really want to, build with VS2017 or later and run either Raytracer.Core or Raytracer.Frontend. 
 
 ### (Insert other software) is faster and/or better.
-Yes.
-
-### This repo is so hidden nobody will notice I'm a weeb
-OCEAN MAN 🌊 😍 Take me by the hand ✋ lead me to the land that you understand 🙌 🌊 OCEAN MAN 🌊 😍 The voyage 🚲 to the corner of the 🌎 globe is a real trip 👌 🌊 OCEAN MAN 🌊 😍 The crust of a tan man 👳 imbibed by the sand 👍 Soaking up the 💦 thirst of the land 💯
+Probably.
