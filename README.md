@@ -2,7 +2,7 @@
 A stochastic path tracer using monte carlo estimation to render realistic images with global illumination. Supports a PBR (physically based rendering) workflow.
 
 ### What can it do?
-- Load and render scenes comprised of primitives and 3D models
+- Load and render scenes comprised of primitives and 3D models.
 - Support different material types for each object.
 - Support for texture mapping.
 - Next event estimation for direct light sampling.
