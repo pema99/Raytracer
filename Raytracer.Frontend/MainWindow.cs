@@ -51,8 +51,11 @@ namespace Raytracer.Frontend
                     graphics.PreferredBackBufferHeight = Window.ClientBounds.Height;
                     graphics.ApplyChanges();
                 }
-                RT.Width = graphics.PreferredBackBufferWidth;
-                RT.Height = graphics.PreferredBackBufferHeight;
+                if (RT != null)
+                {
+                    RT.Width = graphics.PreferredBackBufferWidth;
+                    RT.Height = graphics.PreferredBackBufferHeight;
+                }
             };
         }
 
